@@ -11,10 +11,10 @@ export class FlybySequenceGenerator {
     public totalFeasible: number = 0;
 
     constructor(public readonly system: SolarSystem, public readonly config: Config) {
-        this._workerPool = new WorkerPool("dedicated-workers/sequence-evaluator.js", this.config);
+        this._workerPool = new WorkerPool("dist/dedicated-workers/sequence-evaluator.js", this.config);
         this._workerPool.initialize({system: this.system.data, config: this.config});
 
-        this._sequenceWorker = new ComputeWorker("dedicated-workers/sequence-generator.js");
+        this._sequenceWorker = new ComputeWorker("dist/dedicated-workers/sequence-generator.js");
         this._sequenceWorker.initialize(this.config);
     }
 

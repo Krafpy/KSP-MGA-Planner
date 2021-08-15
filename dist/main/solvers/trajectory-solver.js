@@ -14,7 +14,7 @@ export class TrajectorySolver {
         this._chunkIndices = [];
         this.bestTrajectorySteps = [];
         this.bestDeltaV = 0;
-        this._workerPool = new WorkerPool("dedicated-workers/trajectory-optimizer.js", this.config);
+        this._workerPool = new WorkerPool("dist/dedicated-workers/trajectory-optimizer.js", this.config);
         this._workerPool.initialize({ system: this.system.data, config: this.config });
     }
     _initPlot() {

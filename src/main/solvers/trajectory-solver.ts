@@ -20,7 +20,7 @@ export class TrajectorySolver {
     public bestDeltaV: number = 0;
 
     constructor(public readonly system: SolarSystem, public readonly config: Config, public readonly plot: EvolutionPlot) {
-        this._workerPool = new WorkerPool("dedicated-workers/trajectory-optimizer.js", this.config);
+        this._workerPool = new WorkerPool("dist/dedicated-workers/trajectory-optimizer.js", this.config);
         this._workerPool.initialize({system: this.system.data, config: this.config});
     }
     

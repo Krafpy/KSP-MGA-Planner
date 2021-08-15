@@ -3,7 +3,7 @@
     "target": "ES2019",
     "module": "ES6",
     "lib": ["ES2019", "DOM", "DOM.Iterable", "webworker"],
-    "outDir": "../public",
+    "outDir": "../dist",
     "rootDir": ".",
     "removeComments": true,
     "strict": true,
