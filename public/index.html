@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>KSP MGA Planner</title>
+</head>
+<body>
+    <div id="container">
+        <header>
+            <h1>Multiple Gravity Assist Trajectory Planner for KSP</h1>
+            <h6>By Krafpy</h6>
+            <p>
+                Gravity assists are an efficient method to save fuel in interplanetary missions.
+                Instead of making a direct transfer from the departure planet to the destination one, 
+                we can perform <em>fly-by</em>'s of intermediate planets to let their gravitational pull deviate 
+                our inital trajectory, without the need to burn fuel.
+            </p>
+            <p>
+                This method is successfully used in real world missions, like the famous 
+                <a href="https://en.wikipedia.org/wiki/Timeline_of_Cassini%E2%80%93Huygens">Cassini–Huygens</a> mission.
+            <p>
+                Gravity assist maneuvers can be achieved manually in KSP
+                (see <a href="https://www.youtube.com/watch?v=16jr7WWGSxo">Scott Manley's tutorial</a>).
+                However, unlike direct transfers, <em>multiple gravity assist</em> trajectories (MGA) are 
+                <em>non trivial</em> to calculate.
+            </p>
+            <p>
+                This tool allows planning MGA trajectories with the details of each maneuver needed,
+                with consideration of orbits' inclinations and eccentricities.
+                Check the <a href="#how-to-use" class="ref-to-paragraph">How to use</a> section below for instructions. <br>
+                It <strong>does not guarantee fully feasible or reasonable trajectories</strong>. The reasons and details
+                are explained in the <a href="#issues" class="ref-to-paragraph">Current issues</a> section.
+            </p>
+        </header>
+
+        <section id="main-content">
+            <section id="calculator-panel">
+                <h2 class="calculation-panel-title">Calculator</h2>
+                <h5 class="calculation-subtitle">Flyby sequence configuration</h5>
+                <!-- Start of flyby sequence configuration panel -->
+                <div>
+                    <div class="control-group">
+                        <label class="control-label" for="origin">Origin:</label>
+                        <div class="controls">
+                            <select id="origin-selector" name="origin" class="planet-selector">
+                                <!-- filled by js -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="destination">Destination:</label>
+                        <div class="controls">
+                            <select id="destination-selector" name="destination" class="planet-selector">
+                                <!-- filled by js -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="max-swingbys">Max swing-bys:</label>
+                        <div class="controls">
+                            <input class="number-input" name="max-swingbys" id="max-swingbys" type="number" value="2" min="0" max="10">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="max-resonant-swingbys">Max resonances:</label>
+                        <div class="controls">
+                            <input class="number-input" name="max-resonant-swingbys" id="max-resonant-swingbys" type="number" value="1" min="0" max="10">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="max-back-legs">Max back legs:</label>
+                        <div class="controls">
+                            <input class="number-input" name="max-back-legs" id="max-back-legs" type="number" value="1" min="0" max="10">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="max-back-spacing">Max back spacing:</label>
+                        <div class="controls">
+                            <input class="number-input" name="max-back-spacing" id="max-back-spacing" type="number" value="1" min="0" max="10">
+                        </div>
+                    </div>
+                    <!-- Sequence generation buttons and messages -->
+
+                    <div class="form-actions" id="sequence-generator">
+                        <button class="submit-btn" id="sequence-btn">Generate sequences</button>
+                        <button class="stop-btn" id="sequence-stop-btn">Stop</button>
+                    </div>
+                    <p class="progress-msg" id="sequence-progress" hidden></p>
+                    <p class="error-msg" id="sequence-params-error" hidden><strong>Error:</strong> <span></span></p>
+                    
+                    <div class="control-group">
+                        <label class="control-label" for="sequence">Flyby sequence:</label>
+                        <div class="controls">
+                            <select name="sequence" id="sequence-selector" disabled>
+                                <!-- filled by js -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!-- End of flyby sequence configuration panel -->
+
+                <h5 class="calculation-subtitle" id="dep-params-subtitle">Departure parameters</h5>
+                <!-- Start of trajectory optimization configuration panel -->
+                <div>
+                    <div class="control-group time-selector-group">
+                        <label class="control-label" for="start-date">Earliest departure:</label>
+                        <div class="controls" name="start-date">
+                            <div class="time-selector" id="start-time">
+                                <div class="time-input">
+                                    <label for="start-year">Year</label>
+                                    <input type="number" value="1" name="start-year" id="start-year">
+                                </div>
+                                <div class="time-input">
+                                    <label for="start-day">Day</label>
+                                    <input type="number" value="1" name="start-day" id="start-day">
+                                </div>
+                                <div class="time-input last-time-input">
+                                    <label for="start-hour">Hour</label>
+                                    <input type="number" value="0" name="start-hour" id="start-hour">
+                                </div>
+                            </div>
+                            <!-- End of start date input -->
+                        </div>
+                    </div>
+                    <div class="control-group time-selector-group">
+                        <label class="control-label" for="end-date">Latest departure:</label>
+                        <div class="controls" name="end-date">
+                            <div class="time-selector" id="end-time">
+                                <div class="time-input">
+                                    <label for="end-year">Year</label>
+                                    <input type="number" value="1" name="end-year" id="end-year">
+                                </div>
+                                <div class="time-input">
+                                    <label for="end-day">Day</label>
+                                    <input type="number" value="1" name="end-day" id="end-day">
+                                </div>
+                                <div class="time-input last-time-input">
+                                    <label for="end-hour">Hour</label>
+                                    <input type="number" value="0" name="end-hour" id="end-hour">
+                                </div>
+                            </div>
+                            <!-- End of end date input -->
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="start-altitude">Departure altitude:</label>
+                        <div class="controls">
+                            <input class="number-input" name="start-altitude" id="start-altitude" type="number" value="0">
+                            km (above surface level)
+                        </div>
+                    </div>
+                    <!-- Sequence optimization buttons and messages -->
+                    <div class="form-actions">
+                        <button class="submit-btn" id="search-btn">Search trajectory</button>
+                        <button class="stop-btn" id="search-stop-btn">Stop</button>
+                    </div>
+                    <p class="progress-msg" id="search-progress" hidden></p>
+                    <p class="error-msg" id="search-params-error" hidden><strong>Error:</strong> <span></span></p>
+                    
+                    <!-- Chart container -->
+                    <div id="evolution-plot-container">
+                        <canvas id="evolution-plot"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="main-panel">
+                <!-- System rendering controls -->
+                <div id="system-display">
+                    <div id="canvas-top-bar">
+                        <div class="time-selector" id="system-time">
+                            <div class="time-input">
+                                <label for="system-year">Year</label>
+                                <input type="number" value="1" name="system-year" id="system-year">
+                            </div>
+                            <div class="time-input">
+                                <label for="system-day">Day</label>
+                                <input type="number" value="1" name="system-day" id="system-day">
+                            </div>
+                            <div class="time-input last-time-input">
+                                <label for="system-hour">Hour</label>
+                                <input type="number" value="0" name="system-hour" id="system-hour">
+                            </div>
+                        </div>
+                        <p id="data-update">
+                            Uses data displayed on <a href="https://wiki.kerbalspaceprogram.com/wiki/Main_Page">KSP's wiki</a> on summer 2021
+                        </p>
+                    </div>
+
+                    <canvas id="three-canvas" width="750" height="550"></canvas>
+
+                    <div id="system-control-infos">
+                        <p>
+                            <strong>Mouse drag:</strong> rotate - 
+                            <strong>Double click:</strong> focus on body -
+                            <strong>Mouse wheel:</strong> zoom
+                        </p>
+                    </div>
+                </div>
+                <!-- End of the 3D display panel -->
+
+                <div id="result-panel">
+                    <h2 class="calculation-panel-title">Calculated trajectory</h2>
+                    <div id="result-sub-panels">
+                        <div id="result-controls">
+                            
+                            <div class="control-group">
+                                <label class="control-label">Departure date:</label>
+                                <p><strong><span id="result-departure-date">--</span> UT</strong></p>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label class="control-label">Total ΔV:</label>
+                                <p><strong><span id="result-total-delta-v">--</span> m/s</strong></p>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label class="control-label" for="displayed-steps-slider">Displayed steps:</label>
+                                <div class="controls">
+                                    <input name="displayed-steps-slider" id="displayed-steps-slider" type="range" min="0", max="1" value="1" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label class="control-label" for="maneuvre-selector">Maneuvres:</label>
+                                <div class="controls">
+                                    <select id="maneuvre-selector" name="maneuvre-selector" disabled>
+                                        <!-- filled by js -->
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- End of result controls -->
+
+                        <div id="maneuvre-details">
+                            <h3>Maneuver <span id="maneuvre-number"></span> details:</h3>
+                            <ul>
+                                <li><strong>Date:</strong> <span id="maneuvre-date">--</span> MET</li>
+                                <li><strong>Prograde ΔV:</strong> <span id="prograde-delta-v">--</span> m/s</li>
+                                <li><strong>Normal ΔV:</strong> <span id="normal-delta-v">--</span> m/s</li>
+                                <li><strong>Radial ΔV:</strong> <span id="radial-delta-v">--</span> m/s</li>
+                            </ul>
+                        </div>
+                        <!-- End of maneuvre details -->
+                    </div>
+                </div>
+                <!-- End of result panel -->
+
+                <article id="how-to-use">
+                    <h1>How to use</h1>
+                    <p>
+                        Use the calculator on the left hand side to configure the settings of the trajectory you
+                        are looking for.
+                        The trajectory determination is done through the two following steps:
+                        <ol>
+                            <li>Determining the planetary sequence that the trajectory must follow.</li>
+                            <li>Calculating the optimal trajectory using that sequence.</li>
+                        </ol>
+                        The nomenclature and the configuration of the calculator is further described in the following paragraphs.
+                    </p>
+                    
+                    <h2>Planetary sequence</h2>
+                    <p>
+                        The flyby sequence is the sequence of bodies encountered during the mission's
+                        flight time. It starts with the departure body and ends with the arrival body.
+                        All intermediate bodies of the sequence are used for gravity assist. <br>
+                        Sequences are represented using the first two characters of each body's name. For example, a mission
+                        going from Kerbin to Jool, with a first flyby of Eve followed by a flyby of Duna would be written:
+                        Ke-Ev-Du-Jo.
+                    </p>
+
+                    <h2>Interplanetary legs</h2>
+                    <p>
+                        Each planet-to-planet transfer is called a <em>leg</em>, and consists of 3 steps:
+                        <ol>
+                            <li>An unpowered flight from the exit of the last encountered body's sphere of influence.</li>
+                            <li>A deep space maneuver (DSM) used to correct the path to aim at the next body in the sequence.</li>
+                            <li>An unpowered flight until entering the next body's sphere of influence.</li>
+                        </ol>
+                    </p>
+
+                    <h2>Sequence generation</h2>
+                    <p>
+                        The first step of the trajectory planning consists of generating a <em>possible</em> planetary sequence.
+                        It will list a bunch of <em>possible</em> sequences considering a very simplified model of the solar system
+                        and swing-bys, without any phasing.
+                        Therefore there is <strong>no guarantee</strong> to have the most optimal sequence generated. But it tries to
+                        provide feasible sequences. <br>
+                        The following settings must be defined:
+                        <ul>
+                            <li>The <strong>origin</strong> and <strong>destination</strong> body of the trajectory.</li>
+                            <li>
+                                <strong>Max swing-bys:</strong> the maximum number of swing bys allowed. Setting this value to 0
+                                will only provide direct transfer sequences (e.g. Ke-Du).</li>
+                            <li>
+                                <strong>Max resonances:</strong> the maximum number of legs starting from and targeting the same body.
+                                For example the sequence Ke-Ev-Ev-Mo contains one resonance (Ev-Ev).
+                            </li>
+                            <li>
+                                <strong>Max back legs:</strong> the maximum number of legs moving away from the destination body.
+                                More precisely: if the destination body
+                                has a higher radius than the origin body, then a leg going from a higher orbit to a lower orbit is considered
+                                a back leg.
+                                In the same way, if the destination body has a lower radius than the origin body, then a leg going from a lower orbit
+                                to a higher one is considered a back leg. <br>
+                                For example, in the sequence Ke-Ev-Ke-Mo, Ev-Ke is a back leg as it gets the spaceship on an orbit farther
+                                from Moho than previously.
+                            </li>
+                            <li>
+                                <strong>Max back spacing:</strong> the maximum <em>gap</em> between the exited and targeted body
+                                of a back leg. For example, setting this value to 0 would make the sequence Ke-Ev-Du-Mo forbidden, because
+                                Ev-Du is a back leg, and a planet with an orbit radius in between the ones of Eve and Duna exists (Kerbin), 
+                                this back leg has a spacing of 1.
+                            </li>
+                        </ul>
+                    </p>
+                    
+                    <h2>Trajectory calculation</h2>
+                    <p>
+                        Once the planetary sequence is selected, we must specify the departure conditions:
+                        <ul>
+                            <li>
+                                <strong>Earliest and latest departure date:</strong> the time range in which the departure date must stay.
+                            </li>
+                            <li>
+                                <strong>Departure altitude</strong>: the altitude of the parking orbit around the departure body.
+                            </li>
+                        </ul>
+                        The trajectory search step will then try to find <em>an</em> optimal trajectory given the sequence and the
+                        departure conditions.
+                    </p>
+                    <p>
+                        The resulting trajectory will be displayed in the interactive 3D window, alongside with
+                        the details of each maneuver (ejection from the departure body and DSMs).
+                        The total ΔV displayed doesn't take in account the circularization around the arrival body, it is however
+                        considered in the search of the trajectory.
+                    </p>
+
+                    <figure id="example-image-container">
+                        <img src="imgs/example_trajectory.png" alt="Ke-Ev-Ev-Mo example trajectory">
+                        <figcaption>
+                            An example of a Ke-Ev-Ev-Mo trajectory requiring 3106m/s of ΔV (without Moho circularization)
+                        </figcaption>
+                    </figure>
+
+                </article>
+                <!-- End of How to use section -->
+
+                <article id="issues">
+                    <h1>Current issues</h1>
+                    <p>
+                        As mentioned in the introduction, solving MGA trajectories is <em>non trivial</em>, and requires the use
+                        of iterative optimization methods which <em>approximate</em> the optimal solution.
+                        Thus this tool has no guarantee of giving the best trajectory, and therefore can propose
+                        different trajectories for the same input settings. It is recommended to search for several trajectories
+                        and then choose the best one.
+                    </p>
+                    <p>
+                        Currently, although the tool allows it, searching trajectories between moons (e.g. in Jool's system)
+                        may give absurd trajectories due to implementation details.
+                    </p>
+                    <p>
+                        The computed trajectory itself may not be feasible in game because
+                        it follows the current implementation of the application and may not consider some in game particularities.
+                        Therefore the maneuvers' details are more indicative and fine tunings are necessary.
+                    </p>
+                </article>
+                <!-- End of Issues section -->
+
+            </section>
+            <!-- End of main panel -->
+
+        </section>
+
+        <footer>
+            <p>
+                Created by <a href="https://github.com/Krafpy">Krafpy</a>. This project is open source and hosted on 
+                <a href="https://github.com/">Github</a>.
+            </p>
+            <p>
+                Uses <a href="https://threejs.org/">THREE.js</a>, <a href="https://www.chartjs.org/">Chartjs</a> and
+                <a href="https://github.com/nodeca/js-yaml">js-yaml</a>.
+            </p>
+            <p>
+                The design of this website was inspired from Olex's 
+                <a href="https://ksp.olex.biz/">Interactive illustrated interplanetary guide and calculator for KSP</a>.
+            </p>
+            <p>
+                KSP, Kerbal Space Program and all the planet/moon names are property of Squad.
+            </p>
+        </footer>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="includes/LineSegmentGeometry.js"></script>
+    <script src="includes/LineSegments2.js"></script>
+    <script src="includes/LineGeometry.js"></script>
+    <script src="includes/LineMaterial.js"></script>
+    <script src="includes/Line2.js"></script>
+    <script src="includes/OrbitControls.js"></script>
+    <script src="main/main.js" type="module"></script>
+</body>
+</html>

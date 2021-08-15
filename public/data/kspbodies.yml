@@ -1,0 +1,350 @@
+# KSP bodies physical and orbital data
+# from KSP wiki : https://wiki.kerbalspaceprogram.com/wiki/Main_Page
+# visited on June 2021
+
+#             Units
+# radius:             m
+# mass:               kg
+# stdGravParam:       m^3/s^2
+# soi:                m
+# apoapsis:           m
+# periapsis:          m
+# eccentricity:       None
+# inclination:        ° (degrees)
+# argOfPeriapsis:     °
+# ascNodeLongitude:   °
+# meanAnomaly:        rad, at 0s UT
+# sideralPeriod:      s
+
+
+---
+- !!map
+  id:                 0
+  name:               Sun
+  radius:             261_600_000
+  mass:               1.7565459e+28
+  stdGravParam:       1.1723328e+18
+  soi:                .inf
+  color:              0xffff00
+
+- !!map
+  id:                 1
+  name:               Moho
+  radius:             250_000
+  mass:               2.5263314e+21
+  stdGravParam:       1.6860938e+11
+  soi:                9_646_663
+  orbit:
+    semiMajorAxis:    5_263_138_304
+    apoapsis:         6_315_765_981
+    periapsis:        4_210_510_628
+    eccentricity:     0.2
+    inclination:      7
+    argOfPeriapsis:		15
+    ascNodeLongitude:	70
+    sideralPeriod:    2_215_754
+  meanAnomaly0:       3.14
+  orbiting:           0
+  color:              0xa88161
+
+- !!map
+  id:                 2
+  name:               Eve
+  radius:             700_000
+  mass:               1.2243980e+23
+  stdGravParam:       8.1717302e+12
+  soi:                85_109_365
+  orbit:
+    semiMajorAxis:    9_832_684_544
+    apoapsis:         9_931_011_387
+    periapsis:        9_734_357_701
+    eccentricity:     0.01
+    inclination:      2.1
+    argOfPeriapsis:		0
+    ascNodeLongitude: 15
+    sideralPeriod:    5_657_995
+  meanAnomaly0:       3.14
+  orbiting:           0
+  color:              0x6c20e4
+  
+- !!map
+  id:                 3
+  name:               Gilly
+  radius:             13_000
+  mass:               1.2420363e+17
+  stdGravParam:       8_289_449.8
+  soi:                126_123.27
+  orbit:
+    semiMajorAxis:    31_500_000
+    apoapsis:         48_825_000
+    periapsis:        14_175_000
+    eccentricity:     0.55
+    inclination:      12
+    argOfPeriapsis:   10
+    ascNodeLongitude: 80
+    sideralPeriod:    388_587
+  meanAnomaly0:       0.9
+  orbiting:           2
+  color:              0x6f5248
+
+- !!map
+  id:                 4
+  name:               Kerbin
+  radius:             600_000
+  mass:               5.2915158e+22
+  stdGravParam:       3.5316000e+12
+  soi:                84_159_286
+  orbit:
+    semiMajorAxis:    13_599_840_256
+    apoapsis:         13_599_840_256
+    periapsis:        13_599_840_256
+    eccentricity:     0
+    inclination:      0
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+    sideralPeriod:    9_203_545
+  meanAnomaly0:       3.14
+  orbiting:           0
+  color:              0x8acac2
+  
+- !!map
+  id:                 5
+  name:               Mun
+  radius:             200_000
+  mass:               9.7599066e+20
+  stdGravParam:       6.5138398e+10
+  soi:                2_429_559.1
+  orbit:
+    semiMajorAxis:    12_000_000
+    apoapsis:         12_000_000
+    periapsis:        12_000_000
+    eccentricity:     0
+    inclination:      0
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+    sideralPeriod:    138_984
+  meanAnomaly0:       1.7
+  orbiting:           4
+  color:              0x6b6a76
+  
+- !!map
+  id:                 6
+  name:               Minmus
+  radius:             60_000
+  mass:               2.6457580e+19
+  stdGravParam:       1.7658000e+9
+  soi:                2_247_428.4
+  orbit:
+    semiMajorAxis:    47_000_000
+    apoapsis:         47_000_000
+    periapsis:        47_000_000
+    eccentricity:     0
+    inclination:      6
+    argOfPeriapsis:   38
+    ascNodeLongitude: 78
+    sideralPeriod:    1_077_311
+  meanAnomaly0:       0.9
+  orbiting:           4
+  color:              0x5b4c68
+
+- !!map
+  id:                 7
+  name:               Duna
+  radius:             320_000
+  mass:               4.5154270e+21
+  stdGravParam:       3.0136321e+11
+  soi:                47_921_949
+  orbit:
+    semiMajorAxis:    20_726_155_264
+    apoapsis:         21_783_189_163
+    periapsis:        19_669_121_365
+    eccentricity:     0.051
+    inclination:      0.06
+    argOfPeriapsis:   0
+    ascNodeLongitude: 135.5
+    sideralPeriod:    17_315_400
+  meanAnomaly0:       3.14
+  orbiting:           0
+  color:              0xa23e28
+  
+- !!map
+  id:                 8
+  name:               Ike
+  radius:             130_000
+  mass:               2.7821615e+20
+  stdGravParam:       1.8568369e+10
+  soi:                1_049_598.9
+  orbit:
+    semiMajorAxis:    3_200_000
+    apoapsis:         3_296_000
+    periapsis:        3_104_000
+    eccentricity:     0.03
+    inclination:      0.2
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+    sideralPeriod:    65_518
+  meanAnomaly0:       1.7
+  orbiting:           7
+  color:              0x5d5d5f
+  
+- !!map
+  id:                 9
+  name:               Dres
+  radius:             138_000
+  mass:               3.2190937e+20
+  stdGravParam:       2.1484489e+10
+  soi:                32_832_840
+  orbit:
+    semiMajorAxis:    40_839_348_203
+    apoapsis:         46_761_053_692
+    periapsis:        34_917_642_714
+    eccentricity:     0.145
+    inclination:      5
+    argOfPeriapsis:   90
+    ascNodeLongitude: 280
+    sideralPeriod:    47_893_063
+  meanAnomaly0:       3.14
+  orbiting:           0
+  color:              0x5a4432
+  
+- !!map
+  id:                 10
+  name:               Jool
+  radius:             6_000_000
+  mass:               4.2332127e+24
+  stdGravParam:       2.8252800e+14
+  soi:                2.4559852e+9
+  orbit:
+    semiMajorAxis:    68_773_560_320
+    apoapsis:         72_212_238_387
+    periapsis:        65_334_882_253
+    eccentricity:     0.05
+    inclination:      1.304
+    argOfPeriapsis:   0
+    ascNodeLongitude:	52
+    sideralPeriod:    104_661_432
+  meanAnomaly0:       0.1
+  orbiting:           0
+  color:              0x548412
+  
+- !!map
+  id:                 11
+  name:               Laythe
+  radius:             500_000
+  mass:               2.9397311e+22
+  stdGravParam:       1.9620000e+12
+  soi:                3_723_645.8
+  orbit:
+    semiMajorAxis:    27_184_000
+    apoapsis:         27_184_000
+    periapsis:        27_184_000
+    eccentricity:     0
+    inclination:      0
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+    sideralPeriod:    52_981
+  meanAnomaly0:       3.14
+  orbiting:           10
+  color:              0x2c306a
+  
+- !!map
+  id:                 12
+  name:               Vall
+  radius:             300_000
+  mass:               3.1087655e+21
+  stdGravParam:       2.0748150e+11
+  soi:                2_406_401.4
+  orbit:
+    semiMajorAxis:    43_152_000
+    apoapsis:         43_152_000
+    periapsis:        43_152_000
+    eccentricity:     0
+    inclination:      0
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+    sideralPeriod:    105_962
+  meanAnomaly0:       0.9
+  orbiting:           10
+  color:              0x476c7c
+  
+- !!map
+  id:                 13
+  name:               Tylo
+  radius:             600_000
+  mass:               4.2332127e+22
+  stdGravParam:       2.8252800e+12
+  soi:                10_856_518
+  orbit:
+    semiMajorAxis:    68_500_000
+    apoapsis:         68_500_000
+    periapsis:        68_500_000
+    eccentricity:     0
+    inclination:      0.025
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+    sideralPeriod:    211_926
+  meanAnomaly0:       3.14
+  orbiting:           10
+  color:              0x937575
+  
+- !!map
+  id:                 14
+  name:               Bop
+  radius:             65_000
+  mass:               3.7261090e+19
+  stdGravParam:       2.4868349e+9
+  soi:                1_221_060.9
+  orbit:
+    semiMajorAxis:    128_500_000
+    apoapsis:         158_697_500
+    periapsis:        98_302_500
+    eccentricity:     0.235
+    inclination:      15
+    argOfPeriapsis:   25
+    ascNodeLongitude: 10
+    meanAnomaly:      0.9
+    sideralPeriod:    544_507
+  meanAnomaly0:       0.9
+  orbiting:           10
+  color:              0x7f6d51
+  
+- !!map
+  id:                 15
+  name:               Pol
+  radius:             44_000
+  mass:               1.0813507e+19
+  stdGravParam:       7.2170208e+8
+  soi:                1_042_138.9
+  orbit:
+    semiMajorAxis:    179_890_000
+    apoapsis:         210_624_207
+    periapsis:        149_155_794
+    eccentricity:     0.171
+    inclination:      4.25
+    argOfPeriapsis:   15
+    ascNodeLongitude: 2
+    sideralPeriod:    901_903
+  meanAnomaly0:       0.9
+  orbiting:           10
+  color:              0x9ba078
+  
+- !!map
+  id:                 16
+  name:               Eeloo
+  radius:             210_000
+  mass:               1.1149224e+21
+  stdGravParam:       7.4410815e+10
+  soi:                1.1908294e+8
+  orbit:
+    semiMajorAxis:    90_118_820_000
+    apoapsis:         113_549_713_200
+    periapsis:        66_687_926_800
+    eccentricity:     0.26
+    inclination:      6.15
+    argOfPeriapsis:   260
+    ascNodeLongitude: 50
+    sideralPeriod:    156_992_048
+  meanAnomaly0:       3.14
+  orbiting:           0
+  color:              0x686a6a
+...
