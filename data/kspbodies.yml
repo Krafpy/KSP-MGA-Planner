@@ -17,7 +17,6 @@
 # sideralPeriod:      s
 
 
----
 - !!map
   id:                 0
   name:               Sun
@@ -347,4 +346,3 @@
   meanAnomaly0:       3.14
   orbiting:           0
   color:              0x686a6a
-...
