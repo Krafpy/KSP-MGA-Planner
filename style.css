@@ -15,6 +15,12 @@ h1, .calculation-panel-title
     margin-bottom: 0px;
 }
 
+#github-link
+{
+    float: right;
+    padding-top: 3px;
+}
+
 .calculation-subtitle
 {
     margin-top: 5px;
