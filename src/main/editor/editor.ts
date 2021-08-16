@@ -10,8 +10,8 @@ import { EvolutionPlot } from "./plot.js";
 import { ProgressMessage } from "./progress-msg.js";
 import { SequenceSelector } from "./sequence-selector.js";
 import { SubmitButton, StopButton } from "./buttons.js";
-import { FlybySequence } from "../objects/sequence.js";
-import { Trajectory } from "../objects/trajectory.js";
+import { FlybySequence } from "../solvers/sequence.js";
+import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
 

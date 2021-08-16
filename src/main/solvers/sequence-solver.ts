@@ -2,7 +2,7 @@ import { OrbitingBody } from "../objects/body.js";
 import { SolarSystem } from "../objects/system.js";
 import { ComputeWorker, WorkerPool } from "../utilities/worker.js";
 import { shuffleArray } from "../utilities/array.js";
-import { FlybySequence } from "../objects/sequence.js";
+import { FlybySequence } from "./sequence.js";
 
 export class FlybySequenceGenerator {
     private readonly _workerPool!:      WorkerPool;

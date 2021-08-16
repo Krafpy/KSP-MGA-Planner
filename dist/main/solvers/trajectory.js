@@ -1,151 +1,159 @@
-import { mergeArrayChunks } from "../utilities/array.js";
-import { WorkerPool } from "../utilities/worker.js";
-export class TrajectorySolver {
-    constructor(system, config, plot) {
+import { createOrbitPoints, createLine, createSprite } from "../utilities/geometry.js";
+import { Orbit } from "../objects/orbit.js";
+import { TimeAndDate } from "../utilities/time.js";
+export class Trajectory {
+    constructor(steps, system, config) {
+        this.steps = steps;
         this.system = system;
         this.config = config;
-        this.plot = plot;
-        this.popSize = 0;
-        this.dim = 0;
-        this._cancelled = false;
-        this._running = false;
-        this._population = [];
-        this._deltaVs = [];
-        this._numChunks = 0;
-        this._chunkIndices = [];
-        this._workerPool = new WorkerPool("dedicated-workers/trajectory-optimizer.js", this.config);
-        this._workerPool.initialize({ system: this.system.data, config: this.config });
-    }
-    _initPlot() {
-        this.plot.clearPlot();
-    }
-    _updatePlot(iteration) {
-        const { best, mean } = this._getBestMeanDeltaV;
-        this.plot.addIterationData(iteration, mean, best);
-    }
-    cancel() {
-        if (this._running)
-            this._cancelled = true;
-    }
-    _checkCancellation() {
-        if (this._cancelled) {
-            this._cancelled = false;
-            this._running = false;
-            throw "TRAJECTORY FINDER CANCELLED";
+        this.orbits = [];
+        this._objects = [];
+        this._maneuvres = [];
+        for (const { orbitElts, attractorId } of this.steps) {
+            const attractor = this.system.bodyFromId(attractorId);
+            const orbit = Orbit.fromOrbitalElements(orbitElts, attractor, config.orbit);
+            this.orbits.push(orbit);
         }
     }
-    async searchOptimalTrajectory(sequence, startDateMin, startDateMax) {
-        this._running = true;
-        this._initPlot();
-        this._calculatePopulationSizes(sequence);
-        this._calculatePopulationChunks();
-        await this._createStartPopulation(sequence, startDateMin, startDateMax);
-        return;
-        this._updatePlot(0);
-        this._checkCancellation();
-        for (let i = 0; i < 50; i++) {
-            await this._generateNextPopulation();
-            this._updatePlot(1 + i);
-            this._checkCancellation();
-        }
-        this._running = false;
-    }
-    async _createStartPopulation(sequence, startDateMin, startDateMax) {
-        const agentSettings = {
-            startDateMin: startDateMin,
-            startDateMax: startDateMax,
-            dim: this.dim
-        };
-        const inputs = this._firstGenerationInputs(sequence, agentSettings);
-        const results = await this._workerPool.runPool(inputs);
-        console.log(results);
-        return;
-        const { population, deltaVs } = this._mergeResultsChunks(results);
-        this._population = population;
-        this._deltaVs = deltaVs;
-    }
-    _calculatePopulationChunks() {
-        const { splitLimit } = this.config.trajectorySearch;
-        const numChunks = this._workerPool.optimizeUsedWorkersCount(this.popSize, splitLimit);
-        const chunkSize = Math.floor(this.popSize / numChunks);
-        const chunkIndices = [0, chunkSize - 1];
-        for (let i = 2; i < numChunks * 2; i += 2) {
-            const start = chunkIndices[i - 1] + 1;
-            const end = start + chunkSize;
-            chunkIndices.push(start, end);
-        }
-        chunkIndices[numChunks * 2 - 1] = this.popSize - 1;
-        this._numChunks = numChunks;
-        this._chunkIndices = chunkIndices;
-    }
-    _calculatePopulationSizes(sequence) {
-        const swingBys = sequence.length - 2;
-        this.dim = 4 * swingBys + 6;
-        this.popSize = 10 * this.dim;
-    }
-    async _generateNextPopulation() {
-        const inputs = this._nextGenerationInputs();
-        const results = await this._workerPool.runPool(inputs);
-        const { population, deltaVs } = this._mergeResultsChunks(results);
-        this._population = population;
-        this._deltaVs = deltaVs;
-    }
-    _mergeResultsChunks(results) {
-        const popChunks = [];
-        const dVChunks = [];
-        for (let i = 0; i < this._numChunks; i++) {
-            popChunks.push(results[i].popChunk);
-            dVChunks.push(results[i].fitChunk);
-        }
-        return {
-            population: mergeArrayChunks(popChunks),
-            deltaVs: mergeArrayChunks(dVChunks)
-        };
-    }
-    _firstGenerationInputs(sequence, agentSettings) {
-        const inputs = [];
-        for (let i = 0; i < this._numChunks; i++) {
-            const { start, end } = this._chunkStartEnd(i);
-            inputs.push({
-                start: true,
-                chunkStart: start,
-                chunkEnd: end,
-                sequence: sequence.ids,
-                agentSettings: agentSettings
+    static preloadArrowMaterial() {
+        const textureLoader = new THREE.TextureLoader();
+        const loaded = (texture) => {
+            this.arrowMaterial = new THREE.SpriteMaterial({
+                map: texture
             });
-        }
-        return inputs;
+        };
+        textureLoader.load("sprites/arrow-512.png", loaded);
     }
-    _nextGenerationInputs() {
-        const inputs = [];
-        for (let i = 0; i < this._numChunks; i++) {
-            const { start, end } = this._chunkStartEnd(i);
-            inputs[i] = {
-                population: this._population,
-                deltaVs: this._deltaVs,
-                chunkStart: start,
-                chunkEnd: end
+    draw(resolution) {
+        this._createTrajectoryArcs(resolution);
+        this._createManeuvreSprites();
+        this._calculateManeuvresDetails();
+    }
+    _createTrajectoryArcs(resolution) {
+        const { lineWidth } = this.config.orbit;
+        const { samplePoints } = this.config.trajectoryDraw;
+        const { scale } = this.config.rendering;
+        for (let i = 0; i < this.orbits.length; i++) {
+            const orbit = this.orbits[i];
+            const { beginAngle, endAngle } = this.steps[i];
+            const orbitPoints = createOrbitPoints(orbit, samplePoints, scale, beginAngle, endAngle);
+            const color = new THREE.Color(`hsl(${i * 35 % 360}, 100%, 85%)`);
+            const orbitLine = createLine(orbitPoints, resolution, {
+                color: color.getHex(),
+                linewidth: lineWidth,
+            });
+            const group = this.system.objectsOfBody(orbit.attractor.id);
+            group.add(orbitLine);
+            this._objects.push(orbitLine);
+        }
+    }
+    _createManeuvreSprites() {
+        const { maneuvreArrowSize } = this.config.trajectoryDraw;
+        const { scale } = this.config.rendering;
+        for (const step of this.steps) {
+            if (step.maneuvre) {
+                const group = this.system.objectsOfBody(step.attractorId);
+                const sprite = createSprite(Trajectory.arrowMaterial, 0xFFFFFF, false, maneuvreArrowSize);
+                const { x, y, z } = step.maneuvre.manoeuvrePosition;
+                sprite.position.set(x, y, z);
+                sprite.position.multiplyScalar(scale);
+                group.add(sprite);
+                this._objects.push(sprite);
+            }
+        }
+    }
+    _calculateManeuvresDetails() {
+        for (let i = 0; i < this.steps.length; i++) {
+            const step = this.steps[i];
+            const { maneuvre } = step;
+            if (maneuvre) {
+                const orbit = this.orbits[i];
+                const progradeDir = new THREE.Vector3(maneuvre.progradeDir.x, maneuvre.progradeDir.y, maneuvre.progradeDir.z);
+                const normalDir = orbit.normal.clone();
+                const radialDir = progradeDir.clone();
+                radialDir.cross(normalDir);
+                const deltaV = new THREE.Vector3(maneuvre.deltaVToPrevStep.x, maneuvre.deltaVToPrevStep.y, maneuvre.deltaVToPrevStep.z);
+                const details = {
+                    stepIndex: i,
+                    dateMET: step.dateOfStart - this.steps[0].dateOfStart,
+                    progradeDV: progradeDir.dot(deltaV),
+                    normalDV: normalDir.dot(deltaV),
+                    radialDV: radialDir.dot(deltaV)
+                };
+                this._maneuvres.push(details);
+            }
+        }
+    }
+    fillResultControls(maneuvreSelector, resultSpans, stepSlider, systemTime) {
+        const depDate = new TimeAndDate(this.steps[0].dateOfStart, this.config.time);
+        resultSpans.totalDVSpan.innerHTML = this._totalDeltaV.toFixed(1);
+        resultSpans.depDateSpan.innerHTML = depDate.stringYDHMS("hms", "date");
+        resultSpans.depDateSpan.onclick = () => {
+            systemTime.time.dateSeconds = depDate.dateSeconds;
+            systemTime.update();
+            systemTime.onChange();
+        };
+        stepSlider.setMinMax(0, this.steps.length - 1);
+        stepSlider.input((index) => this._displayStepsUpTo(index));
+        stepSlider.value = this.steps.length - 1;
+        const selectorOptions = [];
+        for (let i = 0; i < this._maneuvres.length; i++) {
+            const details = this._maneuvres[i];
+            const step = this.steps[details.stepIndex];
+            const context = step.maneuvre.context;
+            if (context.type == "ejection") {
+                const startBodyName = this.system.bodyFromId(step.attractorId).name;
+                const optionName = `${i + 1}: ${startBodyName} escape`;
+                selectorOptions.push(optionName);
+            }
+            else {
+                const originName = this.system.bodyFromId(context.originId).name;
+                const targetName = this.system.bodyFromId(context.targetId).name;
+                const optionName = `${i + 1}: ${originName}-${targetName} DSM`;
+                selectorOptions.push(optionName);
+            }
+        }
+        maneuvreSelector.fill(selectorOptions);
+        maneuvreSelector.change((_, index) => {
+            const details = this._maneuvres[index];
+            const dateEMT = new TimeAndDate(details.dateMET, this.config.time);
+            resultSpans.dateSpan.innerHTML = dateEMT.stringYDHMS("hm", "elapsed");
+            resultSpans.progradeDVSpan.innerHTML = details.progradeDV.toFixed(1);
+            resultSpans.normalDVSpan.innerHTML = details.normalDV.toFixed(1);
+            resultSpans.radialDVSpan.innerHTML = details.radialDV.toFixed(1);
+            resultSpans.maneuvreNumber.innerHTML = (index + 1).toString();
+            resultSpans.dateSpan.onclick = () => {
+                systemTime.time.dateSeconds = depDate.dateSeconds + dateEMT.dateSeconds;
+                systemTime.update();
+                systemTime.onChange();
             };
-        }
-        return inputs;
+        });
     }
-    _chunkStartEnd(index) {
-        return {
-            start: this._chunkIndices[index * 2],
-            end: this._chunkIndices[index * 2 + 1]
-        };
-    }
-    get _getBestMeanDeltaV() {
-        let mean = 0;
-        let best = Infinity;
-        for (const dv of this._deltaVs) {
-            mean += dv;
-            best = Math.min(best, dv);
+    _displayStepsUpTo(index) {
+        for (let i = 0; i < this.steps.length; i++) {
+            const orbitLine = this._objects[i];
+            orbitLine.visible = i <= index;
         }
-        mean /= this.popSize;
-        return {
-            mean: mean,
-            best: best
-        };
+        const spritesStart = this.steps.length;
+        for (let i = 0; i < this._maneuvres.length; i++) {
+            const visible = this._objects[this._maneuvres[i].stepIndex].visible;
+            this._objects[spritesStart + i].visible = visible;
+        }
+    }
+    get _totalDeltaV() {
+        let total = 0;
+        for (const details of this._maneuvres) {
+            const x = details.progradeDV;
+            const y = details.normalDV;
+            const z = details.radialDV;
+            total += new THREE.Vector3(x, y, z).length();
+        }
+        return total;
+    }
+    remove() {
+        for (const object of this._objects) {
+            if (object.parent)
+                object.parent.remove(object);
+        }
     }
 }

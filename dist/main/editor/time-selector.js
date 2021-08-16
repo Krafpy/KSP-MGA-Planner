@@ -1,4 +1,4 @@
-import { TimeAndDate } from "../objects/time.js";
+import { TimeAndDate } from "../utilities/time.js";
 export class TimeSelector {
     constructor(namePrefix, config, autoValidate = false) {
         this.config = config;

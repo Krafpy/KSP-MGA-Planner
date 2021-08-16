@@ -8,7 +8,7 @@ import { EvolutionPlot } from "./plot.js";
 import { ProgressMessage } from "./progress-msg.js";
 import { SequenceSelector } from "./sequence-selector.js";
 import { SubmitButton, StopButton } from "./buttons.js";
-import { Trajectory } from "../objects/trajectory.js";
+import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
 export function initEditor(controls, system, config, canvas) {

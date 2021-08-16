@@ -1,6 +1,6 @@
 import { ComputeWorker, WorkerPool } from "../utilities/worker.js";
 import { shuffleArray } from "../utilities/array.js";
-import { FlybySequence } from "../objects/sequence.js";
+import { FlybySequence } from "./sequence.js";
 export class FlybySequenceGenerator {
     constructor(system, config) {
         this.system = system;

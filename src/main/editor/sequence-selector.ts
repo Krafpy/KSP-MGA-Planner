@@ -1,4 +1,4 @@
-import { FlybySequence } from "../objects/sequence.js";
+import { FlybySequence } from "../solvers/sequence.js";
 import { Selector } from "./selector.js";
 
 export class SequenceSelector extends Selector {

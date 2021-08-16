@@ -2,7 +2,7 @@ import { initEditor } from "./editor/editor.js";
 import { SolarSystem } from "./objects/system.js";
 import { CameraController } from "./objects/camera.js";
 import { loadConfig, loadBodiesData } from "./utilities/data.js";
-import { Trajectory } from "./objects/trajectory.js";
+import { Trajectory } from "./solvers/trajectory.js";
 window.onload = main;
 async function main() {
     const canvas = document.getElementById("three-canvas");

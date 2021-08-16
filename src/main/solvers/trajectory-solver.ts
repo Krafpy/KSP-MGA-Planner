@@ -2,7 +2,7 @@ import { EvolutionPlot } from "../editor/plot.js";
 import { SolarSystem } from "../objects/system.js";
 import { mergeArrayChunks } from "../utilities/array.js";
 import { WorkerPool } from "../utilities/worker.js";
-import { FlybySequence } from "../objects/sequence.js";
+import { FlybySequence } from "./sequence.js";
 
 export class TrajectorySolver {
     private readonly _workerPool!: WorkerPool;

@@ -1,5 +1,5 @@
-import { OrbitingBody } from "./body";
-import { SolarSystem } from "./system";
+import { OrbitingBody } from "../objects/body";
+import { SolarSystem } from "../objects/system";
 
 export class FlybySequence {
     public readonly bodies!:    OrbitingBody[];
