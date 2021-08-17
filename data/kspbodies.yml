@@ -39,8 +39,8 @@
     periapsis:        4_210_510_628
     eccentricity:     0.2
     inclination:      7
-    argOfPeriapsis:		15
-    ascNodeLongitude:	70
+    argOfPeriapsis:   15
+    ascNodeLongitude: 70
     sideralPeriod:    2_215_754
   meanAnomaly0:       3.14
   orbiting:           0
@@ -59,7 +59,7 @@
     periapsis:        9_734_357_701
     eccentricity:     0.01
     inclination:      2.1
-    argOfPeriapsis:		0
+    argOfPeriapsis:   0
     ascNodeLongitude: 15
     sideralPeriod:    5_657_995
   meanAnomaly0:       3.14
