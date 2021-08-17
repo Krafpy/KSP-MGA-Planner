@@ -403,12 +403,12 @@ em
     font-style: italic;
 }
 
-article h1
+article h2
 {
     font-size: 1.9em;
 }
 
-article h2
+article h3
 {
     font-size: 1.3em;
     margin-top: 20px;

@@ -47,17 +47,17 @@
                 <!-- Start of flyby sequence configuration panel -->
                 <div>
                     <div class="control-group">
-                        <label class="control-label" for="origin">Origin:</label>
+                        <label class="control-label" for="origin-selector">Origin:</label>
                         <div class="controls">
-                            <select id="origin-selector" name="origin" class="planet-selector">
+                            <select id="origin-selector" name="origin-selector" class="planet-selector">
                                 <!-- filled by js -->
                             </select>
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label" for="destination">Destination:</label>
+                        <label class="control-label" for="destination-selector">Destination:</label>
                         <div class="controls">
-                            <select id="destination-selector" name="destination" class="planet-selector">
+                            <select id="destination-selector" name="destination-selecto" class="planet-selector">
                                 <!-- filled by js -->
                             </select>
                         </div>
@@ -97,9 +97,9 @@
                     <p class="error-msg" id="sequence-params-error" hidden><strong>Error:</strong> <span></span></p>
                     
                     <div class="control-group">
-                        <label class="control-label" for="sequence">Flyby sequence:</label>
+                        <label class="control-label" for="sequence-selector">Flyby sequence:</label>
                         <div class="controls">
-                            <select name="sequence" id="sequence-selector" disabled>
+                            <select name="sequence-selector" id="sequence-selector" disabled>
                                 <!-- filled by js -->
                             </select>
                         </div>
@@ -111,8 +111,8 @@
                 <!-- Start of trajectory optimization configuration panel -->
                 <div>
                     <div class="control-group time-selector-group">
-                        <label class="control-label" for="start-date">Earliest departure:</label>
-                        <div class="controls" name="start-date">
+                        <label class="control-label">Earliest departure:</label>
+                        <div class="controls" id="start-date">
                             <div class="time-selector" id="start-time">
                                 <div class="time-input">
                                     <label for="start-year">Year</label>
@@ -131,8 +131,8 @@
                         </div>
                     </div>
                     <div class="control-group time-selector-group">
-                        <label class="control-label" for="end-date">Latest departure:</label>
-                        <div class="controls" name="end-date">
+                        <label class="control-label">Latest departure:</label>
+                        <div class="controls" id="end-date">
                             <div class="time-selector" id="end-time">
                                 <div class="time-input">
                                     <label for="end-year">Year</label>
@@ -225,7 +225,7 @@
                             <div class="control-group">
                                 <label class="control-label" for="displayed-steps-slider">Displayed steps:</label>
                                 <div class="controls">
-                                    <input name="displayed-steps-slider" id="displayed-steps-slider" type="range" min="0", max="1" value="1" disabled>
+                                    <input name="displayed-steps-slider" id="displayed-steps-slider" type="range" min="0" max="1" value="1" disabled>
                                 </div>
                             </div>
                             
@@ -256,19 +256,21 @@
                 <!-- End of result panel -->
 
                 <article id="how-to-use">
-                    <h1>How to use</h1>
+                    <h2>How to use</h2>
                     <p>
                         Use the calculator on the left hand side to configure the settings of the trajectory you
                         are looking for.
                         The trajectory determination is done through the two following steps:
-                        <ol>
-                            <li>Determining the planetary sequence that the trajectory must follow.</li>
-                            <li>Calculating the optimal trajectory using that sequence.</li>
-                        </ol>
+                    </p>
+                    <ol>
+                        <li>Determining the planetary sequence that the trajectory must follow.</li>
+                        <li>Calculating the optimal trajectory using that sequence.</li>
+                    </ol>
+                    <p>
                         The nomenclature and the configuration of the calculator is further described in the following paragraphs.
                     </p>
                     
-                    <h2>Planetary sequence</h2>
+                    <h3>Planetary sequence</h3>
                     <p>
                         The flyby sequence is the sequence of bodies encountered during the mission's
                         flight time. It starts with the departure body and ends with the arrival body.
@@ -278,17 +280,17 @@
                         Ke-Ev-Du-Jo.
                     </p>
 
-                    <h2>Interplanetary legs</h2>
+                    <h3>Interplanetary legs</h3>
                     <p>
                         Each planet-to-planet transfer is called a <em>leg</em>, and consists of 3 steps:
-                        <ol>
-                            <li>An unpowered flight from the exit of the last encountered body's sphere of influence.</li>
-                            <li>A deep space maneuver (DSM) used to correct the path to aim at the next body in the sequence.</li>
-                            <li>An unpowered flight until entering the next body's sphere of influence.</li>
-                        </ol>
                     </p>
+                    <ol>
+                        <li>An unpowered flight from the exit of the last encountered body's sphere of influence.</li>
+                        <li>A deep space maneuver (DSM) used to correct the path to aim at the next body in the sequence.</li>
+                        <li>An unpowered flight until entering the next body's sphere of influence.</li>
+                    </ol>
 
-                    <h2>Sequence generation</h2>
+                    <h3>Sequence generation</h3>
                     <p>
                         The first step of the trajectory planning consists of generating a <em>possible</em> planetary sequence.
                         It will list a bunch of <em>possible</em> sequences considering a very simplified model of the solar system
@@ -296,45 +298,47 @@
                         Therefore there is <strong>no guarantee</strong> to have the most optimal sequence generated. But it tries to
                         provide feasible sequences. <br>
                         The following settings must be defined:
-                        <ul>
-                            <li>The <strong>origin</strong> and <strong>destination</strong> body of the trajectory.</li>
-                            <li>
-                                <strong>Max swing-bys:</strong> the maximum number of swing bys allowed. Setting this value to 0
-                                will only provide direct transfer sequences (e.g. Ke-Du).</li>
-                            <li>
-                                <strong>Max resonances:</strong> the maximum number of legs starting from and targeting the same body.
-                                For example the sequence Ke-Ev-Ev-Mo contains one resonance (Ev-Ev).
-                            </li>
-                            <li>
-                                <strong>Max back legs:</strong> the maximum number of legs moving away from the destination body.
-                                More precisely: if the destination body
-                                has a higher radius than the origin body, then a leg going from a higher orbit to a lower orbit is considered
-                                a back leg.
-                                In the same way, if the destination body has a lower radius than the origin body, then a leg going from a lower orbit
-                                to a higher one is considered a back leg. <br>
-                                For example, in the sequence Ke-Ev-Ke-Mo, Ev-Ke is a back leg as it gets the spaceship on an orbit farther
-                                from Moho than previously.
-                            </li>
-                            <li>
-                                <strong>Max back spacing:</strong> the maximum <em>gap</em> between the exited and targeted body
-                                of a back leg. For example, setting this value to 0 would make the sequence Ke-Ev-Du-Mo forbidden, because
-                                Ev-Du is a back leg, and a planet with an orbit radius in between the ones of Eve and Duna exists (Kerbin), 
-                                this back leg has a spacing of 1.
-                            </li>
-                        </ul>
                     </p>
+                    <ul>
+                        <li>The <strong>origin</strong> and <strong>destination</strong> body of the trajectory.</li>
+                        <li>
+                            <strong>Max swing-bys:</strong> the maximum number of swing bys allowed. Setting this value to 0
+                            will only provide direct transfer sequences (e.g. Ke-Du).</li>
+                        <li>
+                            <strong>Max resonances:</strong> the maximum number of legs starting from and targeting the same body.
+                            For example the sequence Ke-Ev-Ev-Mo contains one resonance (Ev-Ev).
+                        </li>
+                        <li>
+                            <strong>Max back legs:</strong> the maximum number of legs moving away from the destination body.
+                            More precisely: if the destination body
+                            has a higher radius than the origin body, then a leg going from a higher orbit to a lower orbit is considered
+                            a back leg.
+                            In the same way, if the destination body has a lower radius than the origin body, then a leg going from a lower orbit
+                            to a higher one is considered a back leg. <br>
+                            For example, in the sequence Ke-Ev-Ke-Mo, Ev-Ke is a back leg as it gets the spaceship on an orbit farther
+                            from Moho than previously.
+                        </li>
+                        <li>
+                            <strong>Max back spacing:</strong> the maximum <em>gap</em> between the exited and targeted body
+                            of a back leg. For example, setting this value to 0 would make the sequence Ke-Ev-Du-Mo forbidden, because
+                            Ev-Du is a back leg, and a planet with an orbit radius in between the ones of Eve and Duna exists (Kerbin), 
+                            this back leg has a spacing of 1.
+                        </li>
+                    </ul>
                     
-                    <h2>Trajectory calculation</h2>
+                    <h3>Trajectory calculation</h3>
                     <p>
                         Once the planetary sequence is selected, we must specify the departure conditions:
-                        <ul>
-                            <li>
-                                <strong>Earliest and latest departure date:</strong> the time range in which the departure date must stay.
-                            </li>
-                            <li>
-                                <strong>Departure altitude</strong>: the altitude of the parking orbit around the departure body.
-                            </li>
-                        </ul>
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Earliest and latest departure date:</strong> the time range in which the departure date must stay.
+                        </li>
+                        <li>
+                            <strong>Departure altitude</strong>: the altitude of the parking orbit around the departure body.
+                        </li>
+                    </ul>
+                    <p>
                         The trajectory search step will then try to find <em>an</em> optimal trajectory given the sequence and the
                         departure conditions.
                     </p>
@@ -356,7 +360,7 @@
                 <!-- End of How to use section -->
 
                 <article id="issues">
-                    <h1>Current issues</h1>
+                    <h2>Current issues</h2>
                     <p>
                         As mentioned in the introduction, solving MGA trajectories is <em>non trivial</em>, and requires the use
                         of iterative optimization methods which <em>approximate</em> the optimal solution.
