@@ -1,4 +1,4 @@
-import { TimeAndDate } from "../utilities/time.js";
+import { KSPTime } from "../utilities/time.js";
 export class TimeSelector {
     constructor(namePrefix, config, autoValidate = false) {
         this.config = config;
@@ -9,7 +9,7 @@ export class TimeSelector {
         if (autoValidate) {
             this.selector.oninput = () => this.validate();
         }
-        this.time = new TimeAndDate(0, this.config.time);
+        this.time = new KSPTime(0, this.config.time);
         this.validate();
     }
     get dateSeconds() {

@@ -1,7 +1,7 @@
-import { TimeAndDate } from "../utilities/time.js";
+import { KSPTime } from "../utilities/time.js";
 
 export class TimeSelector {
-    readonly time!:      TimeAndDate;
+    readonly time!:      KSPTime;
     onChange!: () => void;
 
     readonly yearInput!: HTMLInputElement;
@@ -19,7 +19,7 @@ export class TimeSelector {
         if(autoValidate) {
             this.selector.oninput = () => this.validate();
         }
-        this.time = new TimeAndDate(0, this.config.time);
+        this.time = new KSPTime(0, this.config.time);
         this.validate();
     }
 

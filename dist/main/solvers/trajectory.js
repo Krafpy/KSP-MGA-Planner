@@ -1,6 +1,6 @@
 import { createOrbitPoints, createLine, createSprite } from "../utilities/geometry.js";
 import { Orbit } from "../objects/orbit.js";
-import { TimeAndDate } from "../utilities/time.js";
+import { KSPTime } from "../utilities/time.js";
 export class Trajectory {
     constructor(steps, system, config) {
         this.steps = steps;
@@ -85,9 +85,9 @@ export class Trajectory {
         }
     }
     fillResultControls(maneuvreSelector, resultSpans, stepSlider, systemTime) {
-        const depDate = new TimeAndDate(this.steps[0].dateOfStart, this.config.time);
+        const depDate = new KSPTime(this.steps[0].dateOfStart, this.config.time);
         resultSpans.totalDVSpan.innerHTML = this._totalDeltaV.toFixed(1);
-        resultSpans.depDateSpan.innerHTML = depDate.stringYDHMS("hms", "date");
+        resultSpans.depDateSpan.innerHTML = depDate.stringYDHMS("hms", "ut");
         resultSpans.depDateSpan.onclick = () => {
             systemTime.time.dateSeconds = depDate.dateSeconds;
             systemTime.update();
@@ -116,8 +116,8 @@ export class Trajectory {
         maneuvreSelector.fill(selectorOptions);
         maneuvreSelector.change((_, index) => {
             const details = this._maneuvres[index];
-            const dateEMT = new TimeAndDate(details.dateMET, this.config.time);
-            resultSpans.dateSpan.innerHTML = dateEMT.stringYDHMS("hm", "elapsed");
+            const dateEMT = new KSPTime(details.dateMET, this.config.time);
+            resultSpans.dateSpan.innerHTML = dateEMT.stringYDHMS("hm", "emt");
             resultSpans.progradeDVSpan.innerHTML = details.progradeDV.toFixed(1);
             resultSpans.normalDVSpan.innerHTML = details.normalDV.toFixed(1);
             resultSpans.radialDVSpan.innerHTML = details.radialDV.toFixed(1);

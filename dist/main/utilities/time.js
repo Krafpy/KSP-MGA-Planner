@@ -1,4 +1,4 @@
-export class TimeAndDate {
+export class KSPTime {
     constructor(date, config) {
         this.config = config;
         this._exactDate = 0;
@@ -11,20 +11,23 @@ export class TimeAndDate {
     }
     stringYDHMS(precision, display) {
         let { years, days, hours, minutes, seconds } = this.elapsedYDHMS;
-        if (display == "date") {
-            years++;
-            days++;
-        }
-        if (precision == "h") {
-            return `Year ${years} - Day ${days} - Hour ${hours}`;
-        }
         let hmsStr = "";
         switch (precision) {
             case "hms": hmsStr = `:${(seconds >= 10 ? "" : "0")}${seconds.toFixed(0)}${hmsStr}`;
             case "hm": hmsStr = `:${(minutes >= 10 ? "" : "0")}${minutes}${hmsStr}`;
         }
         hmsStr = `${(hours >= 10 ? "" : "0")}${hours}${hmsStr}`;
-        return `Year ${years} - Day ${days} - ${hmsStr}`;
+        if (precision == "h") {
+            hmsStr += "h";
+        }
+        if (display == "ut") {
+            years++;
+            days++;
+            return `Year ${years} - Day ${days} - ${hmsStr}`;
+        }
+        else {
+            return `T+ ${years}y - ${days}d - ${hmsStr}`;
+        }
     }
     get dateSeconds() {
         return this._exactDate;
