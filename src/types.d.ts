@@ -196,6 +196,7 @@ type ManeuvreInfo = {
 type ManeuvreContext = 
     | {type: "ejection"}
     | {type: "dsm", originId: number, targetId: number}
+    | {type: "circularization"}
 ;
 
 type LegInfo = {

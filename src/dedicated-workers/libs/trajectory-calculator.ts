@@ -73,6 +73,10 @@ class TrajectoryCalculator {
                 return;
             }*/
             this._missionTime += this._lastStep.duration;
+
+            if(i == this.sequence.length - 1){
+                this._calculateArrivalCircularization();
+            }
         }
 
         this.noError = true;
@@ -148,6 +152,48 @@ class TrajectoryCalculator {
     }
 
     /**
+     * Calculates the circularization orbit and maneuver at the arrival body
+     */
+    private _calculateArrivalCircularization(){
+        const body = this._destinationBody;
+        const flybyOrbit = this._lastStep.orbitElts;
+
+        const periapsisState = stateFromOrbitElements(flybyOrbit, body.stdGravParam, 0);
+        const progradeDir = normalize3(periapsisState.vel);
+        const circularVel = circularVelocity(body, mag3(periapsisState.pos));
+        
+        const deltaVMag = Math.abs(circularVel - mag3(periapsisState.vel));
+        const deltaV = mult3(progradeDir, -deltaVMag);
+
+        this.totalDeltaV += deltaVMag;
+
+        const circularState = {
+            pos: periapsisState.pos, 
+            vel: mult3(progradeDir, circularVel)
+        }
+        const circularOrbit = stateToOrbitElements(circularState, body);
+
+        const maneuvre: ManeuvreInfo = {
+            deltaVToPrevStep:   deltaV,
+            progradeDir:        progradeDir,
+            manoeuvrePosition:  periapsisState.pos,
+            context: {
+                type:           "circularization",
+            }
+        };
+
+        this.steps.push({
+            orbitElts:      circularOrbit,
+            attractorId:    body.id,
+            beginAngle:     0,
+            endAngle:       TWO_PI,
+            duration:       0,
+            dateOfStart:    this._lastStep.dateOfStart + this._lastStep.duration,
+            maneuvre:       maneuvre
+        });
+    }
+
+    /**
      * Calculates the swing-by orbit from the external incoming state.
      * If the body is the destination body of the sequence, a deltaV is calculated as the difference 
      * in velocity needed to circularize around the body at the arrival radius.
@@ -162,16 +208,10 @@ class TrajectoryCalculator {
 
         const flybyOrbit = stateToOrbitElements(localIncomingState, body);
 
-        if(body.id == this._destinationBody.id){
-            // Calculate velocity at periapsis
-            const periRadius = periapsisRadius(flybyOrbit);
-            const periapsisVel = velocityAtRadius(flybyOrbit, body, periRadius);
-            const circularVel = circularVelocity(body, periRadius);
-            this.totalDeltaV += periapsisVel - circularVel;
-        }
+        const isDestinationBody = body.id == this._destinationBody.id;
 
         let nu1 = trueAnomalyFromOrbitalState(flybyOrbit, localIncomingState);
-        let nu2 = -nu1;
+        let nu2 = isDestinationBody ? 0 : -nu1;
 
         const tof = tofBetweenAnomalies(flybyOrbit, body, nu1, nu2);
         

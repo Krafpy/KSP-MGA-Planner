@@ -106,10 +106,15 @@ export class Trajectory {
                 const optionName = `${i + 1}: ${startBodyName} escape`;
                 selectorOptions.push(optionName);
             }
-            else {
+            else if (context.type == "dsm") {
                 const originName = this.system.bodyFromId(context.originId).name;
                 const targetName = this.system.bodyFromId(context.targetId).name;
                 const optionName = `${i + 1}: ${originName}-${targetName} DSM`;
+                selectorOptions.push(optionName);
+            }
+            else {
+                const arrivalBodyName = this.system.bodyFromId(step.attractorId).name;
+                const optionName = `${i + 1}: ${arrivalBodyName} circularization`;
                 selectorOptions.push(optionName);
             }
         }
