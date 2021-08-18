@@ -64,20 +64,6 @@ export class Orbit implements IOrbit {
     }
 
     public static fromOrbitalElements(elements: OrbitalElements, attractor: ICelestialBody, config: OrbitSettings){
-        /*const e = elements.eccentricity;
-        const i = elements.inclination;
-        let ascNodeLongitude = elements.ascNodeLongitude;
-        let argOfPeriapsis = elements.argOfPeriapsis;
-        if(i == 0 && e != 0) {
-            ascNodeLongitude = 0;
-            argOfPeriapsis = elements.perigeeLongitude;
-        } else if(i != 0 && e == 0) {
-            argOfPeriapsis = 0;
-        } else if(i == 0 && e == 0) {
-            ascNodeLongitude = 0;
-            argOfPeriapsis = 0;
-        }*/
-
         const data = {
             eccentricity:     elements.eccentricity,
             semiMajorAxis:    elements.semiMajorAxis,
@@ -99,16 +85,14 @@ export class Orbit implements IOrbit {
         const deltaTime = this.sideralPeriod ? (date % this.sideralPeriod) : date;
         const M = meanAnomaly0 + this.meanMotion * deltaTime;
 
-        const newtonRootSolve = (
+        const newton = (
             f: (x: number) => number,
             df: (x: number) => number,
-            x0: number,
-            maxIters: number = 1000
         ) => {
             let n = 0;
-            let prevX = x0;
-            let x = x0 - f(x0) / df(x0);
-            while(Math.abs(x - prevX) > 1e-15 && n < maxIters){
+            let prevX = M;
+            let x = M - f(M) / df(M);
+            while(Math.abs(x - prevX) > 1e-15 && n < 1000){
                 prevX = x;
                 x -= f(x) / df(x);
                 n++;
@@ -118,17 +102,15 @@ export class Orbit implements IOrbit {
 
         // Solving Kepler's equation for eccentric anomaly with Newton's method.
         if(this.eccentricity < 1) {
-            const E = newtonRootSolve(
+            const E = newton(
                 x => x - e * Math.sin(x) - M,
                 x => 1 - e * Math.cos(x),
-                M
             );
             return 2 * Math.atan(Math.sqrt((1 + e)/(1 - e)) * Math.tan(E * 0.5));
         } else {
-            const H = newtonRootSolve(
+            const H = newton(
                 x => e * Math.sinh(x) - x - M,
                 x => e * Math.cosh(x) - 1,
-                M
             );
             return 2 * Math.atan(Math.sqrt((e + 1)/(e - 1)) * Math.tanh(H * 0.5));
         }

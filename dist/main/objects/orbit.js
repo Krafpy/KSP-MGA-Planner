@@ -56,11 +56,11 @@ export class Orbit {
         const e = this.eccentricity;
         const deltaTime = this.sideralPeriod ? (date % this.sideralPeriod) : date;
         const M = meanAnomaly0 + this.meanMotion * deltaTime;
-        const newtonRootSolve = (f, df, x0, maxIters = 1000) => {
+        const newton = (f, df) => {
             let n = 0;
-            let prevX = x0;
-            let x = x0 - f(x0) / df(x0);
-            while (Math.abs(x - prevX) > 1e-15 && n < maxIters) {
+            let prevX = M;
+            let x = M - f(M) / df(M);
+            while (Math.abs(x - prevX) > 1e-15 && n < 1000) {
                 prevX = x;
                 x -= f(x) / df(x);
                 n++;
@@ -68,11 +68,11 @@ export class Orbit {
             return x;
         };
         if (this.eccentricity < 1) {
-            const E = newtonRootSolve(x => x - e * Math.sin(x) - M, x => 1 - e * Math.cos(x), M);
+            const E = newton(x => x - e * Math.sin(x) - M, x => 1 - e * Math.cos(x));
             return 2 * Math.atan(Math.sqrt((1 + e) / (1 - e)) * Math.tan(E * 0.5));
         }
         else {
-            const H = newtonRootSolve(x => e * Math.sinh(x) - x - M, x => e * Math.cosh(x) - 1, M);
+            const H = newton(x => e * Math.sinh(x) - x - M, x => e * Math.cosh(x) - 1);
             return 2 * Math.atan(Math.sqrt((e + 1) / (e - 1)) * Math.tanh(H * 0.5));
         }
     }
