@@ -5,13 +5,28 @@ An online tool providing automatic design of trajectories with multiple gravity 
 
 ## Dependencies
 
-This project requires type definitions for [THREE.js](https://github.com/mrdoob/three.js/), [Chart.js](https://github.com/chartjs)
+This project was developed on [Visual Studio Code](https://code.visualstudio.com/).  
+It requires type definitions for [THREE.js](https://github.com/mrdoob/three.js/), [Chart.js](https://github.com/chartjs)
 and [js-yaml](https://github.com/nodeca/js-yaml). They can be obtained with the following commands:
 
 ```
 npm install --save-dev @types/three
 npm install --save-dev @types/js-yaml
 npm install --save-dev @types/chart.js
+```
+
+This project also includes [THREE.js example classes](https://github.com/mrdoob/three.js/tree/dev/examples/js) for line rendering and camera control.
+In order to have the TypeScript compiler recognize them, the following lines must be addded to
+`node_modules/@types/three/src/Three.d.ts`:
+
+```js
+/* Examples imports */
+/* Example lines */
+export * from '../examples/jsm/lines/Line2';
+export * from '../examples/jsm/lines/LineGeometry';
+export * from '../examples/jsm/lines/LineMaterial';
+/* OrbitControls */
+export * from '../examples/jsm/controls/OrbitControls';
 ```
 
 ## Used resources
