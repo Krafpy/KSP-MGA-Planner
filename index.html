@@ -97,11 +97,18 @@
                     <p class="error-msg" id="sequence-params-error" hidden><strong>Error:</strong> <span></span></p>
                     
                     <div class="control-group">
-                        <label class="control-label" for="sequence-selector">Flyby sequence:</label>
+                        <label class="control-label" for="sequence-selector">Generated sequence:</label>
                         <div class="controls">
                             <select name="sequence-selector" id="sequence-selector" disabled>
                                 <!-- filled by js -->
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="control-group" id="custom-sequence-group">
+                        <label class="control-label" for="custom-sequence">Custom sequence:</label>
+                        <div class="controls">
+                            <input type="text" id="custom-sequence" name="custom-sequence" placeholder="Leave empty to ignore">
                         </div>
                     </div>
                 </div>
@@ -325,6 +332,11 @@
                             this back leg has a spacing of 1.
                         </li>
                     </ul>
+                    <p>
+                        Alternatively, it is possible to set a custom sequence if no interesting sequences is proposed by the generator, 
+                        or to define custom routes. The input text must be a valid sequence representation.
+                        The trajectory calculation step will choose the custom sequence first if defined.
+                    </p>
                     
                     <h3>Trajectory calculation</h3>
                     <p>

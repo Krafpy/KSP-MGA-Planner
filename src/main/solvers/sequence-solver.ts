@@ -37,7 +37,7 @@ export class FlybySequenceGenerator {
         const sequences: FlybySequence[] = [];
         for(let i = 0; i < Math.min(maxPropositions, evaluations.length); i++){
             const result = evaluations[i];
-            const sequence = new FlybySequence(this.system, feasibleSet[result.seq], result.cost);
+            const sequence = new FlybySequence(this.system, feasibleSet[result.seq]);
             sequences.push(sequence);
         }
     

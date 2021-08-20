@@ -8,6 +8,7 @@ import { EvolutionPlot } from "./plot.js";
 import { ProgressMessage } from "./progress-msg.js";
 import { SequenceSelector } from "./sequence-selector.js";
 import { SubmitButton, StopButton } from "./buttons.js";
+import { FlybySequence } from "../solvers/sequence.js";
 import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
@@ -92,6 +93,7 @@ export function initEditor(controls, system, config, canvas) {
             depAltitude.setMinMax(0, max);
         };
         depAltitude.value = config.editor.defaultAltitude;
+        const customSequence = document.getElementById("custom-sequence");
         const deltaVPlot = new EvolutionPlot("evolution-plot");
         deltaVPlot.hide();
         const solver = new TrajectorySolver(system, config, deltaVPlot);
@@ -131,7 +133,13 @@ export function initEditor(controls, system, config, canvas) {
         const findTrajectory = async () => {
             paramsErr.hide();
             try {
-                const sequence = sequenceSelector.sequence;
+                let sequence;
+                if (customSequence.value == "") {
+                    sequence = sequenceSelector.sequence;
+                }
+                else {
+                    sequence = FlybySequence.fromString(customSequence.value, system);
+                }
                 updateAltitudeRange(sequence);
                 const startDate = timeRangeStart.dateSeconds;
                 const endDate = timeRangeEnd.dateSeconds;

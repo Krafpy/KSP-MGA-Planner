@@ -108,7 +108,7 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
         new StopButton("sequence-stop-btn").click(() => generator.cancel());
     }
     
-    {
+    {   
         // Time inputs
         const timeRangeStart = new TimeSelector("start", config, true);
         const timeRangeEnd   = new TimeSelector("end", config, true);
@@ -121,6 +121,9 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
             depAltitude.setMinMax(0, max);
         };
         depAltitude.value = config.editor.defaultAltitude;
+
+        // Custom sequence input
+        const customSequence = document.getElementById("custom-sequence") as HTMLInputElement;
     
         // Trajectory solver
         const deltaVPlot = new EvolutionPlot("evolution-plot");
@@ -172,7 +175,12 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
         const findTrajectory = async () => {
             paramsErr.hide();
             try {
-                const sequence = sequenceSelector.sequence;
+                let sequence: FlybySequence;
+                if(customSequence.value == ""){
+                    sequence = sequenceSelector.sequence;
+                } else {
+                    sequence = FlybySequence.fromString(customSequence.value, system);
+                }
 
                 updateAltitudeRange(sequence);
 
