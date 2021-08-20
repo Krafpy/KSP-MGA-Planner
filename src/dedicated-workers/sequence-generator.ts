@@ -1,48 +1,53 @@
-{
-    importScripts("libs/common.js");
-    
-    let config: Config;
+importScripts("libs/common.js");
 
-    onWorkerInitialize = data => config = data;
+class SequenceGenerator extends WorkerEnvironment {
+    private _config!: Config;
+    private _bodies!: number[];
+    private _params!: SequenceParameters;
+    private _relativePos!: number[];
 
-    onWorkerRun = input => {
+    override onWorkerInitialize(data: any){
+        this._config = data;
+    }
+
+    override onWorkerRun(input: any){
         const {bodies, params} = input;
-        const feasible = generateFeasibleSet(bodies, params);
+        this._bodies = bodies;
+        this._params = params;
+        this._getRelativePositions();
+        const feasible = this._generateFeasibleSet();
         sendResult(feasible);
     }
 
     /**
      * Returns the feasible set of body sequences, i.e a list of body ids sequences that respect
      * the constraints of the user settings.
-     * @param allowedBodies Bodies reachable according to the user settings
-     * @param params Parameters of the sequences to gener
      * @returns The feasible set
      */
-    function generateFeasibleSet(allowedBodies: number[], params: SequenceParameters){
+    private _generateFeasibleSet(){
         let incFeasibleSet: GeneratingSequence[] = [{
-            sequence: [params.departureId],
+            sequence: [this._params.departureId],
             resonant: 0,
-            backLegs: 0
+            backLegs: 0,
+            backSpacingExceeded: false
         }];
         let tempSet: GeneratingSequence[] = [];
         const feasibleSet: number[][] = [];
 
-        const relativePos = getRelativePositions(allowedBodies);
-        const feasible = (seq: GeneratingSequence) => checkSequenceFeasibility(seq, relativePos, params);
-
-        const {maxEvalSequences} = config.flybySequence;
+        const {maxEvalSequences} = this._config.flybySequence;
         outerloop:
         while(incFeasibleSet.length > 0){
             for(const incSeq of incFeasibleSet){
-                for(const bodyId of allowedBodies){
+                for(const bodyId of this._bodies){
                     const tempSeq = {
                         sequence: [...incSeq.sequence, bodyId],
                         resonant: incSeq.resonant, 
-                        backLegs: incSeq.backLegs
+                        backLegs: incSeq.backLegs,
+                        backSpacingExceeded: false
                     };
-
-                    if(feasible(tempSeq)) {
-                        if(bodyId == params.destinationId) {
+                    this._updateSequenceInfo(tempSeq);
+                    if(this._isSequenceFeasible(tempSeq)) {
+                        if(bodyId == this._params.destinationId) {
                             feasibleSet.push(tempSeq.sequence);
                             if(feasibleSet.length >= maxEvalSequences)
                                 break outerloop;
@@ -60,57 +65,56 @@
     }
 
     /**
-     * Returns a mapping to the relative position/order of bodies from the attractator.
-     * @param allowedBodies Bodies allowed to be reached in the sequence, ordered according to their radiuses to the attractor
-     * @returns The mapping to relative positions.
+     * Calculates a mapping to the relative position/order of bodies from the attractator.
      */
-    function getRelativePositions(allowedBodies: number[]){
+    private _getRelativePositions(){
         // We suppose that the bodies are sorted according to their semimajor axis radius
-        const relativePos: Map<number, number> = new Map();
-        for(let i = 0; i < allowedBodies.length; ++i){
-            relativePos.set(allowedBodies[i], i);
+        const maxId = Math.max(...this._bodies);
+        const relativePos = Array<number>(maxId + 1).fill(0);
+        for(let i = 0; i < this._bodies.length; ++i){
+            relativePos[this._bodies[i]] = i;
         }
-        return relativePos;
+        this._relativePos = relativePos;
     }
 
     /**
-     * Checks if a (non fully) generated sequence respects the user contraints and updates the sequence informations.
-     * @param seq A (non fully) generated sequence to check
-     * @param relativePos The mapping of bodies' relative positions to the attractor
-     * @param params The parameters constraining the generated sequences
+     * Checks if a (non fully) generated sequence respects the user contraints.
+     * @param info A (non fully) generated sequence to check
      * @returns Whether the sequence respects the constraints or not.
      */
-    function checkSequenceFeasibility(seq: GeneratingSequence, relativePos: Map<number, number>, params: SequenceParameters) {
-        const numSwingBys = seq.sequence.length - 2;
+    private _isSequenceFeasible(info: GeneratingSequence) {
+        const params = this._params;
+
+        const numSwingBys = info.sequence.length - 2;
         if(numSwingBys > params.maxSwingBys)
             return false;
-        
-        const posCurr = <number>relativePos.get(seq.sequence[seq.sequence.length - 1]);
-        const posPrev = <number>relativePos.get(seq.sequence[seq.sequence.length - 2]);
-        
-        const toHigherOrbit = params.destinationId > params.departureId;
-        
-        if(isBackLeg(posCurr, posPrev, toHigherOrbit)) {
-            const jumpSpacing = Math.abs(posPrev - posCurr);
-            if(jumpSpacing > params.maxBackSpacing)
-                return false;
-            seq.backLegs++;
-        }
 
-        if(posCurr == posPrev)
-            seq.resonant++;
-        
-        return seq.resonant <= params.maxResonant && seq.backLegs <= params.maxBackLegs;
+        const resonancesOk = info.resonant <= this._params.maxResonant;
+        const backLegsOk   = info.backLegs <= this._params.maxBackLegs;
+
+        return resonancesOk && backLegsOk && !info.backSpacingExceeded;
     }
 
     /**
-     * Returns if a given leg is a back leg according to departure and destination bodies.
-     * @param posCurr The relative position of the body reached at the end of the leg
-     * @param posPrev The relative position of the starting body of the leg
-     * @param toHigherOrbit Whether the destination body has a higher orbit than the departure body
-     * @returns Whether this leg is a back leg or not.
+     * Updates the informations about a generating sequence which received another step.
+     * @param info The (non fully) generated sequence to update
      */
-    function isBackLeg(posCurr: number, posPrev: number, toHigherOrbit: boolean){
-        return (toHigherOrbit && posCurr < posPrev) || (!toHigherOrbit && posCurr > posPrev);
+    private _updateSequenceInfo(info: GeneratingSequence) {
+        const params = this._params;
+
+        const {sequence} = info;
+        const posCurr = this._relativePos[sequence[sequence.length - 1]];
+        const posPrev = this._relativePos[sequence[sequence.length - 2]];
+        
+        const toHigherOrbit = params.destinationId > params.departureId;
+        const isBackLeg = (toHigherOrbit && posCurr < posPrev) || (!toHigherOrbit && posCurr > posPrev);
+
+        const spacing = Math.abs(posCurr - posPrev);
+        info.backSpacingExceeded = isBackLeg && spacing > params.maxBackSpacing;
+        
+        if(isBackLeg) info.backLegs++;
+        if(posCurr == posPrev) info.resonant++;
     }
 }
+
+initWorker(SequenceGenerator);

@@ -1,5 +1,5 @@
 /**
- * @param popChunk The populatio chunk
+ * @param popChunk The population chunk
  * @param fitness The fitness function
  * @returns The fitness value for each agent in the chunk.
  */

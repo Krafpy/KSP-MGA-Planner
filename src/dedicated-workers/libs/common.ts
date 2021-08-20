@@ -1,8 +1,10 @@
-let onWorkerInitialize: (data: any) => void   = () => {};
-let onWorkerRun:        (input?: any) => void = () => {};
-let onWorkerContinue:   (input?: any) => void = () => {};
-let onWorkerStop:       () => void            = () => {};
-let onWorkerDataPass:   (data: any) => void   = () => {};
+class WorkerEnvironment {
+    public onWorkerInitialize(data: any) {}
+    public onWorkerRun(input?: any) {}
+    public onWorkerContinue(input?: any) {}
+    public onWorkerStop() {}
+    public onWorkerDataPass(data: any) {}
+}
 
 function postMessageSafe(msg: MessageFromWorker) {
     postMessage(msg);
@@ -20,25 +22,28 @@ function sendResult(result: any) {
     postMessageSafe({label: "complete", result: result});
 }
 
-onmessage = ({data}: MessageEvent<MessageToWorker>) => {
-    switch(data.label) {
-        case "initialize":
-            onWorkerInitialize(data.config);
-            postMessageSafe({label: "initialized"});
-            break;
-        case "run":
-            onWorkerRun(data.input);
-            break;
-        case "continue":
-            onWorkerContinue();
-            break;
-        case "stop":
-            onWorkerStop();
-            postMessageSafe({label: "stopped"});
-            break;
-        case "pass":
-            onWorkerDataPass(data.data);
-            postMessageSafe({label: "received"});
-            break;
+function initWorker(Env: typeof WorkerEnvironment){
+    const env = new Env();
+    onmessage = ({data}: MessageEvent<MessageToWorker>) => {
+        switch(data.label) {
+            case "initialize":
+                env.onWorkerInitialize(data.config);
+                postMessageSafe({label: "initialized"});
+                break;
+            case "run":
+                env.onWorkerRun(data.input);
+                break;
+            case "continue":
+                env.onWorkerContinue();
+                break;
+            case "stop":
+                env.onWorkerStop();
+                postMessageSafe({label: "stopped"});
+                break;
+            case "pass":
+                env.onWorkerDataPass(data.data);
+                postMessageSafe({label: "received"});
+                break;
+        }
     }
-};
+}
