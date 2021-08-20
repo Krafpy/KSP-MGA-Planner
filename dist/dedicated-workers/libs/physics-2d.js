@@ -13,7 +13,7 @@ function getRelativeVelocity2D(globalVel, bodyVel) {
 function getGlobalVelocity2D(relativeVel, bodyVel) {
     return add2(relativeVel, bodyVel);
 }
-function calculateNextIntersection(pos0, vel0, body, attractor, config) {
+function calculateNextIntersection(pos0, vel0, body, attractor) {
     const mu = attractor.stdGravParam;
     const v0 = mag2(vel0);
     const r0 = mag2(pos0);

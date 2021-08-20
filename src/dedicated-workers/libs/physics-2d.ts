@@ -22,7 +22,7 @@ function getGlobalVelocity2D(relativeVel: Vector2, bodyVel: Vector2) {
  * @param config The configuration data
  * @returns The velocity and positon when intersecting the body's orbit, or undefined if no intersection
  */
-function calculateNextIntersection(pos0: Vector2, vel0: Vector2, body: IOrbitingBody, attractor: ICelestialBody, config: Config) 
+function calculateNextIntersection(pos0: Vector2, vel0: Vector2, body: IOrbitingBody, attractor: ICelestialBody) 
 : {pos: Vector2, vel: Vector2} | undefined {
     const mu = attractor.stdGravParam;
 

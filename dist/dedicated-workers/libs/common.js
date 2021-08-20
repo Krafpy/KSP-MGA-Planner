@@ -1,9 +1,11 @@
 "use strict";
-let onWorkerInitialize = () => { };
-let onWorkerRun = () => { };
-let onWorkerContinue = () => { };
-let onWorkerStop = () => { };
-let onWorkerDataPass = () => { };
+class WorkerEnvironment {
+    onWorkerInitialize(data) { }
+    onWorkerRun(input) { }
+    onWorkerContinue(input) { }
+    onWorkerStop() { }
+    onWorkerDataPass(data) { }
+}
 function postMessageSafe(msg) {
     postMessage(msg);
 }
@@ -16,25 +18,28 @@ function debug(...data) {
 function sendResult(result) {
     postMessageSafe({ label: "complete", result: result });
 }
-onmessage = ({ data }) => {
-    switch (data.label) {
-        case "initialize":
-            onWorkerInitialize(data.config);
-            postMessageSafe({ label: "initialized" });
-            break;
-        case "run":
-            onWorkerRun(data.input);
-            break;
-        case "continue":
-            onWorkerContinue();
-            break;
-        case "stop":
-            onWorkerStop();
-            postMessageSafe({ label: "stopped" });
-            break;
-        case "pass":
-            onWorkerDataPass(data.data);
-            postMessageSafe({ label: "received" });
-            break;
-    }
-};
+function initWorker(Env) {
+    const env = new Env();
+    onmessage = ({ data }) => {
+        switch (data.label) {
+            case "initialize":
+                env.onWorkerInitialize(data.config);
+                postMessageSafe({ label: "initialized" });
+                break;
+            case "run":
+                env.onWorkerRun(data.input);
+                break;
+            case "continue":
+                env.onWorkerContinue();
+                break;
+            case "stop":
+                env.onWorkerStop();
+                postMessageSafe({ label: "stopped" });
+                break;
+            case "pass":
+                env.onWorkerDataPass(data.data);
+                postMessageSafe({ label: "received" });
+                break;
+        }
+    };
+}

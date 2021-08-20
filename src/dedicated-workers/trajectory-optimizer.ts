@@ -1,43 +1,46 @@
-{
-    importScripts("libs/common.js", "libs/evolution.js", "libs/math.js", "libs/physics.js", "libs/physics-3d.js", "libs/lambert.js", "libs/trajectory-calculator.js");
+importScripts("libs/common.js", "libs/evolution.js", "libs/math.js", "libs/physics.js", "libs/physics-3d.js", "libs/lambert.js", "libs/trajectory-calculator.js");
 
-    let config:         Config;
-    let system:         IOrbitingBody[];
-    let depAltitude:    number;
-    let sequence:       number[];
-    let startDateMin:   number;
-    let startDateMax:   number;
+class TrajectoryOptimizer extends WorkerEnvironment {
+    private _config!:       Config;
+    private _system!:       IOrbitingBody[];
 
-    let bestDeltaV:     number;
-    let bestSteps:      TrajectoryStep[];
+    private _depAltitude!:  number;
+    private _sequence!:     number[];
+    private _startDateMin!: number;
+    private _startDateMax!: number;
 
-    onWorkerInitialize = data => {
-        config = data.config;
-        system = data.system;
-    };
+    private _bestDeltaV!:   number;
+    private _bestSteps!:    TrajectoryStep[];
 
-    onWorkerDataPass = data => {
-        depAltitude = data.depAltitude;
-        sequence = data.sequence;
-        startDateMin = data.startDateMin;
-        startDateMax = data.startDateMax;
-    };
+    override onWorkerInitialize(data: any){
+        this._config = data.config;
+        this._system = data.system;
+    }
 
-    onWorkerRun = input => {
+    override onWorkerDataPass(data: any){
+        this._depAltitude = data.depAltitude;
+        this._sequence = data.sequence;
+        this._startDateMin = data.startDateMin;
+        this._startDateMax = data.startDateMax;
+    }
+
+    override onWorkerRun(input: any){
+        const evaluate = (params: Agent) => this._evaluate(params);
+
         if(input.start) {
-            bestDeltaV = Infinity;
+            this._bestDeltaV = Infinity;
             const chunkSize = input.chunkEnd - input.chunkStart + 1;
-            const popChunk = createRandomMGAPopulationChunk(chunkSize);
+            const popChunk = this._createRandomMGAPopulationChunk(chunkSize);
             const dvChunk = populationChunkFitness(popChunk, evaluate);
             sendResult({
-                bestSteps: bestSteps, 
-                bestDeltaV: bestDeltaV,
+                bestSteps: this._bestSteps, 
+                bestDeltaV: this._bestDeltaV,
                 fitChunk: dvChunk, 
                 popChunk: popChunk,
             });
 
         } else {
-            const {crossoverProba, diffWeight} = config.trajectorySearch;
+            const {crossoverProba, diffWeight} = this._config.trajectorySearch;
             const results = evolvePopulationChunk(
                 input.population, 
                 input.deltaVs, 
@@ -47,24 +50,23 @@
             );
             sendResult({
                 ...results, 
-                bestSteps: bestSteps, 
-                bestDeltaV: bestDeltaV
+                bestSteps: this._bestSteps, 
+                bestDeltaV: this._bestDeltaV
             });
         }
-    };
+    }
 
     /**
      * Evaluates a trajectory cost and stores it if it's the best found so far.
      * @param params A trajectory paremeters (agent)
      * @returns The fitness (total deltaV) of the trajectory, used for the DE algorithm.
      */
-    function evaluate(params: Agent) {
-        const trajectory = computeTrajectory(params);
-        if(trajectory.totalDeltaV < bestDeltaV){
-            bestDeltaV = trajectory.totalDeltaV;
-            bestSteps = trajectory.steps;
+    private _evaluate(params: Agent) {
+        const trajectory = this._computeTrajectory(params);
+        if(trajectory.totalDeltaV < this._bestDeltaV){
+            this._bestDeltaV = trajectory.totalDeltaV;
+            this._bestSteps = trajectory.steps;
         }
-
         return trajectory.totalDeltaV;
     };
 
@@ -75,16 +77,16 @@
      * @param params A trajectory paremeters (agent)
      * @returns The calculated trajectory
      */
-    function computeTrajectory(params: Agent){
+    private _computeTrajectory(params: Agent){
         const calculate = () => {
-            const trajectory = new TrajectoryCalculator(system, config.trajectorySearch, sequence);
-            trajectory.setParameters(depAltitude, startDateMin, startDateMax, params);
+            const trajectory = new TrajectoryCalculator(this._system, this._config.trajectorySearch, this._sequence);
+            trajectory.setParameters(this._depAltitude, this._startDateMin, this._startDateMax, params);
             trajectory.compute();
             return trajectory;
         }
         let trajectory = calculate();
         while(!trajectory.noError) {
-            randomizeExistingAgent(params);
+            this._randomizeExistingAgent(params);
             trajectory = calculate();
         }
         return trajectory;
@@ -96,10 +98,10 @@
      * @param chunkSize The size of the population chunk to generate
      * @returns A random population chunk.
      */
-    function createRandomMGAPopulationChunk(chunkSize: number, ){
+    private _createRandomMGAPopulationChunk(chunkSize: number, ){
         const popChunk: Agent[] = [];
         for(let i = 0; i < chunkSize; i++) {
-            popChunk.push(createRandomMGAAgent());
+            popChunk.push(this._createRandomMGAAgent());
         }
         return popChunk;
     }
@@ -108,19 +110,19 @@
      * Generates a random agent representing an MGA trajectory based on the given sequence.
      * @returns A random trajectory agent
      */
-    function createRandomMGAAgent() {
-        const dim = 4 * (sequence.length - 1) + 2;
+    private _createRandomMGAAgent() {
+        const dim = 4 * (this._sequence.length - 1) + 2;
         const solution: Agent = Array<number>(dim).fill(0);
         
         // Initial ejection condition on departure body
-        solution[0] = randomInInterval(startDateMin, startDateMax); // departure date
+        solution[0] = randomInInterval(this._startDateMin, this._startDateMax); // departure date
         solution[1] = randomInInterval(1, 3); // ejection deltaV scale
 
         // Interplanetary legs' parameters
-        for(let i = 1; i < sequence.length; i++){
+        for(let i = 1; i < this._sequence.length; i++){
             const j = 2 + (i - 1) * 4;
             
-            const {legDuration, dsmOffset} = legDurationAndDSM(i);
+            const {legDuration, dsmOffset} = this._legDurationAndDSM(i);
             solution[j] = legDuration;
             solution[j+1] = dsmOffset;
             
@@ -136,8 +138,8 @@
      * Randomizes an existing agent instance.
      * @param agent The angent to randomize
      */
-    function randomizeExistingAgent(agent: Agent){
-        const newAgent = createRandomMGAAgent();
+    private _randomizeExistingAgent(agent: Agent){
+        const newAgent = this._createRandomMGAAgent();
         for(let i = 0; i < agent.length; i++){
             agent[i] = newAgent[i];
         }
@@ -147,12 +149,12 @@
      * @param index The index on the planetary sequence.
      * @returns A random leg duration and DSM offset
      */
-    function legDurationAndDSM(index: number){
-        const isResonant = sequence[index-1] == sequence[index];
-        const {dsmOffsetMin, dsmOffsetMax} = config.trajectorySearch;
+    private _legDurationAndDSM(index: number){
+        const isResonant = this._sequence[index-1] == this._sequence[index];
+        const {dsmOffsetMin, dsmOffsetMax} = this._config.trajectorySearch;
 
         if(isResonant) {
-            const sideralPeriod = <number>system[sequence[index]].orbit.sideralPeriod;
+            const sideralPeriod = <number>this._system[this._sequence[index]].orbit.sideralPeriod;
 
             const revs = randomInInterval(1, 4);
             const legDuration = revs * sideralPeriod;
@@ -163,10 +165,10 @@
             return {legDuration, dsmOffset};
 
         } else {
-            const body1 = system[sequence[index-1]];
-            const body2 = system[sequence[index]];
+            const body1 = this._system[this._sequence[index-1]];
+            const body2 = this._system[this._sequence[index]];
 
-            const attractor = system[body1.orbiting];
+            const attractor = this._system[body1.orbiting];
             const period = getHohmannPeriod(body1, body2, attractor);
 
             const legDuration = randomInInterval(0.1, 1) * period;
@@ -176,3 +178,5 @@
         }
     }
 }
+
+initWorker(TrajectoryOptimizer);

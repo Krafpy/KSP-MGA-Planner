@@ -146,7 +146,8 @@ type ProgressCallback = (progress: number, data?: any) => any;
 type GeneratingSequence = {
     sequence: number[], 
     resonant: number, 
-    backLegs: number
+    backLegs: number,
+    backSpacingExceeded: boolean;
 };
 
 type Agent = number[];
