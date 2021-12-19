@@ -12,8 +12,8 @@ export class ErrorMessage {
         this.paragraph.hidden = true;
     }
 
-    show(msg: string){
-        this.span.innerHTML = msg;
+    show(msg: Error){
+        this.span.innerHTML = msg.message;
         this.paragraph.hidden = false;
     }
 }

@@ -27,7 +27,7 @@ export class IntegerInput {
     }
     assertValidity() {
         if (!this.validate())
-            throw "Invalid numeric input.";
+            throw new Error("Invalid numeric input.");
     }
     setMinMax(min, max) {
         this.min = min;

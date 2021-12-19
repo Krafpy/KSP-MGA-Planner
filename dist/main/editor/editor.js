@@ -38,9 +38,9 @@ export function initEditor(controls, system, config, canvas) {
             maxResonant.assertValidity();
             maxBackLegs.assertValidity();
             if (originSelector.body.attractor.id != destSelector.body.attractor.id)
-                throw "Origin and destination bodies must orbit the same body.";
+                throw new Error("Origin and destination bodies must orbit the same body.");
             if (originSelector.body.id == destSelector.body.id)
-                throw "Same origin and destination bodies.";
+                throw new Error("Same origin and destination bodies.");
         };
         const generator = new FlybySequenceGenerator(system, config);
         const progressMsg = new ProgressMessage("sequence-progress");
@@ -72,7 +72,7 @@ export function initEditor(controls, system, config, canvas) {
                 sequenceSelector.enable();
             }
             catch (err) {
-                if (err != "WORKER CANCELLED")
+                if (err instanceof Error && err.message != "WORKER CANCELLED")
                     paramsErr.show(err);
                 console.error(err);
             }
@@ -144,7 +144,7 @@ export function initEditor(controls, system, config, canvas) {
                 const startDate = timeRangeStart.dateSeconds;
                 const endDate = timeRangeEnd.dateSeconds;
                 if (endDate < startDate)
-                    throw "Departure date range end must be greater than the start date.";
+                    throw new Error("Departure date range end must be greater than the start date.");
                 const altitude = depAltitude.value * 1000;
                 resetFoundTrajectory();
                 const perfStart = performance.now();
@@ -153,7 +153,7 @@ export function initEditor(controls, system, config, canvas) {
                 displayFoundTrajectory();
             }
             catch (err) {
-                if (err != "TRAJECTORY FINDER CANCELLED")
+                if (err instanceof Error && err.message != "TRAJECTORY FINDER CANCELLED")
                     paramsErr.show(err);
                 console.error(err);
             }

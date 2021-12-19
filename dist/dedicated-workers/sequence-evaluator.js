@@ -1,5 +1,5 @@
 "use strict";
-importScripts("libs/common.js", "libs/math.js", "libs/physics.js", "libs/physics-2d.js");
+importScripts("libs/common.js", "libs/math.js", "libs/physics-2d.js");
 class SequenceEvaluator extends WorkerEnvironment {
     constructor() {
         super(...arguments);
@@ -23,14 +23,13 @@ class SequenceEvaluator extends WorkerEnvironment {
         if (done)
             sendResult(value);
     }
-    onWorkerStop() {
-        this._current = null;
-    }
+    onWorkerStop() { this._current = null; }
     *_evaluateSequenceChunks() {
         const results = [];
         const { progressStep } = this._config.workers;
         for (let i = 0; i < this._sequences.length; i++) {
-            results.push(this._evaluateSequence(this._sequences[i]));
+            const cost = this._evaluateSequence(this._sequences[i]);
+            results.push(cost);
             if (i % progressStep == 0) {
                 sendProgress(i);
                 yield;
@@ -38,67 +37,68 @@ class SequenceEvaluator extends WorkerEnvironment {
         }
         return results;
     }
-    _evaluateSequence(sequence) {
-        const bodies = this._bodySequenceOf(sequence);
-        const depDeltaV = hohmannTransferDeltaV(bodies[0], bodies[1]);
-        if (bodies.length == 2) {
-            const depVel = depDeltaV + bodies[0].circularVel;
-            const relativeArrVel = hohmannEncounterRelativeVel(bodies[0], bodies[1], depVel, this._attractor);
-            return Math.abs(depDeltaV) + Math.abs(relativeArrVel);
-        }
-        const statuses = this._generateInitialStatuses(bodies[0], depDeltaV);
-        const { maxEvalStatuses, radiusSamples } = this._config.flybySequence;
-        let evalCount = 0;
-        while (statuses.length > 0) {
-            evalCount++;
-            if (evalCount > maxEvalStatuses) {
-                break;
-            }
-            const status = statuses.pop();
-            const targetBody = bodies[status.target];
-            const itsc = calculateNextIntersection(status.pos, status.vel, targetBody, this._attractor);
-            if (itsc) {
-                const targetBodyVel = getBodyVelocity2D(itsc.pos, targetBody);
-                const arrivalVel = getRelativeVelocity2D(itsc.vel, targetBodyVel);
-                if (status.target == bodies.length - 1) {
-                    return Math.abs(depDeltaV) + mag2(arrivalVel);
-                }
-                for (let i = radiusSamples - 1; i >= 0; i--) {
-                    const radius = lerp(targetBody.radius, targetBody.soi, i / radiusSamples);
-                    const exitVels = calculateQuickFlyby(radius, arrivalVel, targetBody);
-                    statuses.push({
-                        pos: itsc.pos,
-                        vel: getGlobalVelocity2D(exitVels.v1, targetBodyVel),
-                        target: status.target + 1
-                    });
-                    statuses.push({
-                        pos: itsc.pos,
-                        vel: getGlobalVelocity2D(exitVels.v2, targetBodyVel),
-                        target: status.target + 1
-                    });
-                }
-            }
-        }
+    _directHohmannTransferCost(body1, body2) {
+        const attr = this._attractor;
+        const r1 = body1.orbit.semiMajorAxis;
+        const r2 = body2.orbit.semiMajorAxis;
+        const depDV = Physics2D.hohmannToEllipseDeltaV(attr, r1, r2);
+        const arrDV = Physics2D.hohmannCircularDeltaV(attr, r1, r2);
+        return Math.abs(depDV) + Math.abs(arrDV);
     }
-    _bodySequenceOf(sequence) {
+    _generateInitialNodes(depBody, nextBody) {
+        const nodes = [];
+        const attr = this._attractor;
+        const r1 = depBody.orbit.semiMajorAxis;
+        const r2 = nextBody.orbit.semiMajorAxis;
+        const hohDV = Physics2D.hohmannToEllipseDeltaV(attr, r1, r2);
+        const { initVelMaxScale, initVelSamples } = this._config.flybySequence;
+        for (let i = initVelSamples; i > 0; i--) {
+            const scale = lerp(1, initVelMaxScale, i / initVelSamples);
+            const dv = hohDV * scale;
+            nodes.push({
+                state: {
+                    pos: { x: depBody.orbit.semiMajorAxis, y: 0 },
+                    vel: { x: 0, y: dv + depBody.circularVel }
+                },
+                next: 1,
+                depDV: dv
+            });
+        }
+        return nodes;
+    }
+    _evaluateSequence(sequence) {
         const bodies = [];
         for (const id of sequence) {
             bodies.push(this._system[id]);
         }
-        return bodies;
-    }
-    _generateInitialStatuses(depBody, depDeltaV) {
-        const statuses = [];
-        const { initVelMaxScale, initVelSamples } = this._config.flybySequence;
-        for (let i = 0; i < initVelSamples; ++i) {
-            const scale = (i / initVelSamples) * initVelMaxScale;
-            statuses.push({
-                pos: { x: depBody.orbit.semiMajorAxis, y: 0 },
-                vel: { x: 0, y: depDeltaV * scale + depBody.circularVel },
-                target: 1
-            });
+        const attr = this._attractor;
+        if (bodies.length == 2)
+            return this._directHohmannTransferCost(bodies[0], bodies[1]);
+        const nodes = this._generateInitialNodes(bodies[0], bodies[1]);
+        const { maxEvalStatuses, radiusSamples } = this._config.flybySequence;
+        let evalCount = 0;
+        while (nodes.length > 0) {
+            if (++evalCount > maxEvalStatuses)
+                break;
+            const node = nodes.pop();
+            const { state } = node;
+            const tgBody = bodies[node.next];
+            const itscState = Physics2D.computeNextBodyOrbitIntersection(attr, state, tgBody);
+            if (itscState) {
+                if (node.next == bodies.length - 1) {
+                    const arrVel = Physics2D.relativeVelocity(itscState, tgBody);
+                    return Math.abs(node.depDV) + mag2(arrVel);
+                }
+                for (let i = radiusSamples - 1; i >= 0; i--) {
+                    const rp = lerp(tgBody.radius, tgBody.soi, i / radiusSamples);
+                    const { state1, state2 } = Physics2D.computeFlybyExitVelocities(tgBody, itscState, rp);
+                    const next = node.next + 1;
+                    const depDV = node.depDV;
+                    nodes.push({ state: state1, next, depDV });
+                    nodes.push({ state: state2, next, depDV });
+                }
+            }
         }
-        return statuses;
     }
 }
 initWorker(SequenceEvaluator);

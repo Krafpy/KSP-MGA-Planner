@@ -41,7 +41,7 @@ export class TrajectorySolver {
         if(this._cancelled){
             this._cancelled = false;
             this._running = false;
-            throw "TRAJECTORY FINDER CANCELLED";
+            throw new Error("TRAJECTORY FINDER CANCELLED");
         }
     }
 

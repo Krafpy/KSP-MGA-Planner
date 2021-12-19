@@ -16,7 +16,7 @@ export class BodySelector extends Selector {
         const bodyName = this.selected;
         const body = this.system.bodyFromName(bodyName) as OrbitingBody;
         if(!body)
-            throw "Invalid body selection.";
+            throw new Error("Invalid body selection.");
         return body;
     }
 }
