@@ -59,4 +59,4 @@ workers:
 
 trajectoryDraw:
   samplePoints:       2500          # number sample points for each tarjectory arc draw
-  maneuvreArrowSize:  0.05
+  maneuvreArrowSize:  0.08
