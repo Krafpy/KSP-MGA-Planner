@@ -238,16 +238,7 @@ input[type="text"]::placeholder
 
 #custom-sequence-group
 {
-    margin-top: 15px;
-}
-
-#sequence-or
-{
-    text-align: center;
-    vertical-align: middle;
-    margin-top: 15px;
-    margin-bottom: 15px;
-    color: #b3afaa;
+    margin-top: 25px;
 }
 
 /* Editor forms' action buttons */
