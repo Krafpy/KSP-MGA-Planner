@@ -241,6 +241,15 @@ input[type="text"]::placeholder
     margin-top: 15px;
 }
 
+#sequence-or
+{
+    text-align: center;
+    vertical-align: middle;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    color: #b3afaa;
+}
+
 /* Editor forms' action buttons */
 
 .form-actions
