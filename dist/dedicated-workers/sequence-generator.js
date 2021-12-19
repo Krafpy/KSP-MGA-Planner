@@ -8,6 +8,7 @@ class SequenceGenerator extends WorkerEnvironment {
         const { bodies, params } = input;
         this._bodies = bodies;
         this._params = params;
+        this._toHigherOrbit = params.destinationId > params.departureId;
         this._getRelativePositions();
         const feasible = this._generateFeasibleSet();
         sendResult(feasible);
@@ -17,7 +18,7 @@ class SequenceGenerator extends WorkerEnvironment {
                 sequence: [this._params.departureId],
                 resonant: 0,
                 backLegs: 0,
-                backSpacingExceeded: false
+                maxBackSpacing: 0
             }];
         let tempSet = [];
         const feasibleSet = [];
@@ -29,10 +30,10 @@ class SequenceGenerator extends WorkerEnvironment {
                         sequence: [...incSeq.sequence, bodyId],
                         resonant: incSeq.resonant,
                         backLegs: incSeq.backLegs,
-                        backSpacingExceeded: false
+                        maxBackSpacing: incSeq.maxBackSpacing
                     };
                     this._updateSequenceInfo(tempSeq);
-                    if (this._isSequenceFeasible(tempSeq)) {
+                    if (this._isSequenceValid(tempSeq)) {
                         if (bodyId == this._params.destinationId) {
                             feasibleSet.push(tempSeq.sequence);
                             if (feasibleSet.length >= maxEvalSequences)
@@ -57,27 +58,30 @@ class SequenceGenerator extends WorkerEnvironment {
         }
         this._relativePos = relativePos;
     }
-    _isSequenceFeasible(info) {
+    _isSequenceValid(info) {
         const params = this._params;
         const numSwingBys = info.sequence.length - 2;
         if (numSwingBys > params.maxSwingBys)
             return false;
-        const resonancesOk = info.resonant <= this._params.maxResonant;
-        const backLegsOk = info.backLegs <= this._params.maxBackLegs;
-        return resonancesOk && backLegsOk && !info.backSpacingExceeded;
+        if (info.resonant > params.maxResonant)
+            return false;
+        if (info.backLegs > params.maxBackLegs)
+            return false;
+        return info.maxBackSpacing <= params.maxBackSpacing;
     }
     _updateSequenceInfo(info) {
-        const params = this._params;
         const { sequence } = info;
-        const posCurr = this._relativePos[sequence[sequence.length - 1]];
-        const posPrev = this._relativePos[sequence[sequence.length - 2]];
-        const toHigherOrbit = params.destinationId > params.departureId;
-        const isBackLeg = (toHigherOrbit && posCurr < posPrev) || (!toHigherOrbit && posCurr > posPrev);
-        const spacing = Math.abs(posCurr - posPrev);
-        info.backSpacingExceeded = isBackLeg && spacing > params.maxBackSpacing;
-        if (isBackLeg)
+        const len = sequence.length;
+        const pcur = this._relativePos[sequence[len - 1]];
+        const ppre = this._relativePos[sequence[len - 2]];
+        const toHO = this._toHigherOrbit;
+        if ((toHO && pcur < ppre) || (!toHO && pcur > ppre)) {
             info.backLegs++;
-        if (posCurr == posPrev)
+            const spacing = Math.abs(pcur - ppre);
+            const cur = info.maxBackSpacing;
+            info.maxBackSpacing = Math.max(cur, spacing);
+        }
+        if (pcur == ppre)
             info.resonant++;
     }
 }

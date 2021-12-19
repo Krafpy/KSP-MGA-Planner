@@ -33,7 +33,7 @@ export class SolarSystem {
             if (body.name == name)
                 return body;
         }
-        throw `No body with name ${name}`;
+        throw new Error(`No body with name ${name}`);
     }
     bodyFromId(id) {
         if (id == 0) {
@@ -42,14 +42,14 @@ export class SolarSystem {
         else {
             const body = this._orbiting.get(id);
             if (!body)
-                throw `No body with id ${id}`;
+                throw new Error(`No body with id ${id}`);
             return body;
         }
     }
     objectsOfBody(id) {
         const object = this._objects.get(id);
         if (!object)
-            throw `No 3D objects from body of id ${id}`;
+            throw new Error(`No 3D objects from body of id ${id}`);
         return object;
     }
     fillSceneObjects(scene, canvas) {

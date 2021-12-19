@@ -1,5 +1,5 @@
 "use strict";
-importScripts("libs/common.js", "libs/evolution.js", "libs/math.js", "libs/physics.js", "libs/physics-3d.js", "libs/lambert.js", "libs/trajectory-calculator.js");
+importScripts("libs/common.js", "libs/evolution.js", "libs/math.js", "libs/physics-3d.js", "libs/lambert.js", "libs/trajectory-calculator.js");
 class TrajectoryOptimizer extends WorkerEnvironment {
     onWorkerInitialize(data) {
         this._config = data.config;

@@ -10,7 +10,7 @@ function postMessageSafe(msg) {
     postMessage(msg);
 }
 function sendProgress(progress, data) {
-    postMessageSafe({ label: "progress", progress: progress, data: data });
+    postMessageSafe({ label: "progress", progress, data });
 }
 function debug(...data) {
     postMessageSafe({ label: "debug", data: data });

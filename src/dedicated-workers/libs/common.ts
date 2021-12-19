@@ -11,7 +11,7 @@ function postMessageSafe(msg: MessageFromWorker) {
 }
 
 function sendProgress(progress: number, data?: any){
-    postMessageSafe({label: "progress", progress: progress, data: data});
+    postMessageSafe({label: "progress", progress, data});
 }
 
 function debug(...data: any[]){

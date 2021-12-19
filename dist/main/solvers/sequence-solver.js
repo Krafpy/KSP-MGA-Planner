@@ -11,8 +11,9 @@ export class FlybySequenceGenerator {
         this._sequenceWorker = new ComputeWorker("dist/dedicated-workers/sequence-generator.js");
         this._sequenceWorker.initialize(this.config);
     }
-    cancel() {
-        this._workerPool.cancel();
+    cancel() { this._workerPool.cancel(); }
+    get progression() {
+        return this._workerPool.totalProgress;
     }
     async generateFlybySequences(params, onProgress) {
         const toHigherOrbit = params.destinationId > params.departureId;
@@ -55,8 +56,5 @@ export class FlybySequenceGenerator {
             }
         }
         return evaluations;
-    }
-    get progression() {
-        return this._workerPool.totalProgress;
     }
 }

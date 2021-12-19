@@ -431,3 +431,16 @@ function propagateState(orbit: OrbitalElements, nu0: number, deltaTime: number, 
     const nuNext = solveTrueAnomalyFromMeanAnomaly(orbit.eccentricity, MNext);
     return stateFromOrbitElements(orbit, mu, nuNext);
 }
+
+function calculateOrbitPeriod(a: number, mu: number){
+    return TWO_PI * Math.sqrt(a*a*a/mu);
+}
+
+function getHohmannPeriod(body1: IOrbitingBody, body2: IOrbitingBody, attractor: ICelestialBody){
+    const orbit1 = body1.orbit;
+    const orbit2 = body2.orbit;
+    const {stdGravParam} = attractor;
+    const a = (orbit1.semiMajorAxis + orbit2.semiMajorAxis) * 0.5;
+    const period = calculateOrbitPeriod(a, stdGravParam);
+    return period;
+}

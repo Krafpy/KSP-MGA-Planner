@@ -15,6 +15,6 @@ export class SequenceSelector extends Selector {
             if (sequence.seqString == selectedString)
                 return sequence;
         }
-        throw "Invalid sequence selection.";
+        throw new Error("Invalid sequence selection.");
     }
 }

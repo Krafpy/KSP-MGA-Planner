@@ -43,7 +43,7 @@ export class SolarSystem {
             if(body.name == name)
                 return body;
         }
-        throw `No body with name ${name}`;
+        throw new Error(`No body with name ${name}`);
     }
 
     public bodyFromId(id: number) {
@@ -52,7 +52,7 @@ export class SolarSystem {
         } else {
             const body = this._orbiting.get(id);
             if(!body)
-                throw `No body with id ${id}`;
+                throw new Error(`No body with id ${id}`);
             return body;
         }
     }
@@ -60,7 +60,7 @@ export class SolarSystem {
     public objectsOfBody(id: number) {
         const object = this._objects.get(id);
         if(!object)
-            throw `No 3D objects from body of id ${id}`;
+            throw new Error(`No 3D objects from body of id ${id}`);
         return object;
     }
 

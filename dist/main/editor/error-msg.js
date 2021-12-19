@@ -8,7 +8,7 @@ export class ErrorMessage {
         this.paragraph.hidden = true;
     }
     show(msg) {
-        this.span.innerHTML = msg;
+        this.span.innerHTML = msg.message;
         this.paragraph.hidden = false;
     }
 }

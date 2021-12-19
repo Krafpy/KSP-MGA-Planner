@@ -116,7 +116,7 @@ export class WorkerPool {
 
     public async runPool<T>(inputs: any[], onProgress?: ProgressCallback){
         if(inputs.length > this.workersCount) {
-            throw "More inputs than workers in the worker pool.";
+            throw new Error("More inputs than workers in the worker pool.");
         }
 
         this.progressions = [];

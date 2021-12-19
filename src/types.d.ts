@@ -147,7 +147,13 @@ type GeneratingSequence = {
     sequence: number[], 
     resonant: number, 
     backLegs: number,
-    backSpacingExceeded: boolean;
+    maxBackSpacing: number;
+};
+
+type EvaluationNode = {
+    state:  OrbitalState2D,
+    next:   number,
+    depDV:  number
 };
 
 type Agent = number[];
@@ -158,7 +164,6 @@ type Vector3 = {x: number, y: number, z: number};
 type OrbitalState2D = {
     pos:    Vector2,
     vel:    Vector2,
-    target: number,
 };
 
 type OrbitalState3D = {
@@ -176,6 +181,14 @@ type OrbitalElements = {
     readonly ascNodeDir:         Vector3
     readonly orbitalParam:       number
 };
+
+type OrbitalElements2D = {
+    readonly eccentricity:       number,
+    readonly periapsisDir:       Vector2,
+    readonly semiMajorAxis:      number,
+    readonly orbitalParam:       number,
+    readonly clockwise:          boolean
+}
 
 type TrajectoryStep = {
     orbitElts:   OrbitalElements, 

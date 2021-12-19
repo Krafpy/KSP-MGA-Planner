@@ -48,10 +48,10 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
             maxBackLegs.assertValidity();
             
             if(originSelector.body.attractor.id != destSelector.body.attractor.id)
-                throw "Origin and destination bodies must orbit the same body.";
+                throw new Error("Origin and destination bodies must orbit the same body.");
             
             if(originSelector.body.id == destSelector.body.id)
-                throw "Same origin and destination bodies.";
+                throw new Error("Same origin and destination bodies.");
         }
 
         // Sequence generator
@@ -94,7 +94,7 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
                 sequenceSelector.enable();
 
             } catch(err) {
-                if(err != "WORKER CANCELLED") 
+                if(err instanceof Error && err.message != "WORKER CANCELLED") 
                     paramsErr.show(err);
                 console.error(err);
                 
@@ -187,7 +187,7 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
                 const startDate = timeRangeStart.dateSeconds;
                 const endDate = timeRangeEnd.dateSeconds;
                 if(endDate < startDate)
-                    throw "Departure date range end must be greater than the start date.";
+                    throw new Error("Departure date range end must be greater than the start date.");
 
                 const altitude = depAltitude.value * 1000;
                 
@@ -199,8 +199,8 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
                 
                 displayFoundTrajectory();
     
-            } catch(err) { 
-                if(err != "TRAJECTORY FINDER CANCELLED")
+            } catch(err) {
+                if(err instanceof Error && err.message != "TRAJECTORY FINDER CANCELLED")
                     paramsErr.show(err);
                 console.error(err);
             }

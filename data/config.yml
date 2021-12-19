@@ -30,8 +30,8 @@ time:
 
 flybySequence:
   radiusSamples:      10            # number of samples radius samples to test when evaluating a sequence feasability
-  initVelMaxScale:    2             # upper bound of ejection velocity range, as factor of direct hohmann transfert to the next body
-  initVelSamples:     10            # number of samples for start body ejection between direct hohmann transfert and initVelMaxScale
+  initVelMaxScale:    3             # upper bound of ejection velocity range, as factor of direct hohmann transfert to the next body
+  initVelSamples:     20            # number of samples for start body ejection between direct hohmann transfert and initVelMaxScale
   maxPropositions:    15            # maximum number of sequences propositions after sequence generation
   maxEvalStatuses:    100000        # maximum number status considered when evaluating a sequence before timeout
   maxEvalSequences:   100000        # maximum number of sequences to evaluate
@@ -55,7 +55,7 @@ editor:
   defaultAltitude:    100           # default altitude from the default body (in km above surface)
 
 workers:
-  progressStep:       2500          # number of inputs processed per chunk before progress callback
+  progressStep:       250           # number of inputs processed per chunk before progress callback
 
 trajectoryDraw:
   samplePoints:       2500          # number sample points for each tarjectory arc draw

@@ -35,7 +35,7 @@ export class FlybySequence {
                     if(i == 0) {
                         attractor = body.attractor.id;
                     } else if(body.attractor.id != attractor) {
-                        throw "All bodies of the sequence must orbit around the same body.";
+                        throw new Error("All bodies of the sequence must orbit around the same body.");
                     }
                     ids.push(body.id);
                     valid = true;
@@ -43,12 +43,12 @@ export class FlybySequence {
                 }
             }
             if(!valid){
-                throw "Invalid custom sequence input.";
+                throw new Error("Invalid custom sequence input.");
             }
         }
 
         if(ids.length <= 1){
-            throw "The sequence must contain at least two bodies.";
+            throw new Error("The sequence must contain at least two bodies.");
         }
 
         return new FlybySequence(system, ids);
