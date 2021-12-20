@@ -224,12 +224,13 @@ namespace Physics2D
     }
 
     /**
-     * Computes velocity of a vessel relative to a body when entering its SOI.
+     * Computes the velocity of a vessel relative to a body when entering its SOI.
+     * The position stored in `state` is supposed to lay on the orbit of the body considered.
      * @param state The orbital state of the vessel when entered the body SOI
      * @param body The body whose SOI the vessel is entering
      * @returns The relative velocity
      */
-    export function relativeVelocity(state: OrbitalState2D, body: IOrbitingBody) {
+    export function relativeVelocityToBody(state: OrbitalState2D, body: IOrbitingBody) {
         // Compute the body's velocity at the intersection position.
         // The radius of the circular orbit of the body is equal
         // to the semi major axis of its real orbit.

@@ -1,15 +1,3 @@
-class WorkerEnvironment {
-    public onWorkerInitialize(data: any) {}
-    public onWorkerRun(input?: any) {}
-    public onWorkerContinue(input?: any) {}
-    public onWorkerStop() {}
-    public onWorkerDataPass(data: any) {}
-}
-
-function postMessageSafe(msg: MessageFromWorker) {
-    postMessage(msg);
-}
-
 function sendProgress(progress: number, data?: any){
     postMessageSafe({label: "progress", progress, data});
 }
@@ -20,6 +8,18 @@ function debug(...data: any[]){
 
 function sendResult(result: any) {
     postMessageSafe({label: "complete", result: result});
+}
+
+function postMessageSafe(msg: MessageFromWorker) {
+    postMessage(msg);
+}
+
+class WorkerEnvironment {
+    public onWorkerInitialize(data: any) {}
+    public onWorkerRun(input?: any) {}
+    public onWorkerContinue(input?: any) {}
+    public onWorkerStop() {}
+    public onWorkerDataPass(data: any) {}
 }
 
 function initWorker(Env: typeof WorkerEnvironment){

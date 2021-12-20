@@ -104,7 +104,7 @@ var Physics2D;
         return Math.sqrt(mu / r2) * (1 - Math.sqrt(2 * r1 / (r1 + r2)));
     }
     Physics2D.hohmannCircularDeltaV = hohmannCircularDeltaV;
-    function relativeVelocity(state, body) {
+    function relativeVelocityToBody(state, body) {
         const radius = body.orbit.semiMajorAxis;
         const bodyVel = {
             x: (-state.pos.y / radius) * body.circularVel,
@@ -112,5 +112,5 @@ var Physics2D;
         };
         return sub2(state.vel, bodyVel);
     }
-    Physics2D.relativeVelocity = relativeVelocity;
+    Physics2D.relativeVelocityToBody = relativeVelocityToBody;
 })(Physics2D || (Physics2D = {}));

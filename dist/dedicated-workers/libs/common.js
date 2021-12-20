@@ -1,14 +1,4 @@
 "use strict";
-class WorkerEnvironment {
-    onWorkerInitialize(data) { }
-    onWorkerRun(input) { }
-    onWorkerContinue(input) { }
-    onWorkerStop() { }
-    onWorkerDataPass(data) { }
-}
-function postMessageSafe(msg) {
-    postMessage(msg);
-}
 function sendProgress(progress, data) {
     postMessageSafe({ label: "progress", progress, data });
 }
@@ -17,6 +7,16 @@ function debug(...data) {
 }
 function sendResult(result) {
     postMessageSafe({ label: "complete", result: result });
+}
+function postMessageSafe(msg) {
+    postMessage(msg);
+}
+class WorkerEnvironment {
+    onWorkerInitialize(data) { }
+    onWorkerRun(input) { }
+    onWorkerContinue(input) { }
+    onWorkerStop() { }
+    onWorkerDataPass(data) { }
 }
 function initWorker(Env) {
     const env = new Env();

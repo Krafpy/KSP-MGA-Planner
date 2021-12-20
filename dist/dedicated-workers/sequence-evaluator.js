@@ -11,10 +11,13 @@ class SequenceEvaluator extends WorkerEnvironment {
     }
     onWorkerRun(input) {
         this._sequences = input;
-        const { orbiting } = this._system[this._sequences[0][0]];
+        const { orbiting } = this._system[input[0][0]];
         this._attractor = this._system[orbiting];
-        this._current = this._evaluateSequenceChunks();
+        this._current = this._evaluateSequenceChunk();
         sendProgress(0);
+    }
+    onWorkerStop() {
+        this._current = null;
     }
     onWorkerContinue() {
         if (!this._current)
@@ -23,8 +26,7 @@ class SequenceEvaluator extends WorkerEnvironment {
         if (done)
             sendResult(value);
     }
-    onWorkerStop() { this._current = null; }
-    *_evaluateSequenceChunks() {
+    *_evaluateSequenceChunk() {
         const results = [];
         const { progressStep } = this._config.workers;
         for (let i = 0; i < this._sequences.length; i++) {
@@ -52,16 +54,13 @@ class SequenceEvaluator extends WorkerEnvironment {
         const r2 = nextBody.orbit.semiMajorAxis;
         const hohDV = Physics2D.hohmannToEllipseDeltaV(attr, r1, r2);
         const { initVelMaxScale, initVelSamples } = this._config.flybySequence;
+        const circVel = depBody.circularVel;
         for (let i = initVelSamples; i > 0; i--) {
             const scale = lerp(1, initVelMaxScale, i / initVelSamples);
-            const dv = hohDV * scale;
+            const depDV = hohDV * scale;
             nodes.push({
-                state: {
-                    pos: { x: depBody.orbit.semiMajorAxis, y: 0 },
-                    vel: { x: 0, y: dv + depBody.circularVel }
-                },
-                next: 1,
-                depDV: dv
+                state: { pos: vec2(r1, 0), vel: vec2(0, depDV + circVel) },
+                next: 1, depDV
             });
         }
         return nodes;
@@ -71,27 +70,26 @@ class SequenceEvaluator extends WorkerEnvironment {
         for (const id of sequence) {
             bodies.push(this._system[id]);
         }
-        const attr = this._attractor;
         if (bodies.length == 2)
             return this._directHohmannTransferCost(bodies[0], bodies[1]);
         const nodes = this._generateInitialNodes(bodies[0], bodies[1]);
         const { maxEvalStatuses, radiusSamples } = this._config.flybySequence;
+        const attr = this._attractor;
         let evalCount = 0;
-        while (nodes.length > 0) {
-            if (++evalCount > maxEvalStatuses)
-                break;
+        while (nodes.length > 0 && ++evalCount < maxEvalStatuses) {
             const node = nodes.pop();
             const { state } = node;
             const tgBody = bodies[node.next];
             const itscState = Physics2D.computeNextBodyOrbitIntersection(attr, state, tgBody);
             if (itscState) {
                 if (node.next == bodies.length - 1) {
-                    const arrVel = Physics2D.relativeVelocity(itscState, tgBody);
+                    const arrVel = Physics2D.relativeVelocityToBody(itscState, tgBody);
                     return Math.abs(node.depDV) + mag2(arrVel);
                 }
-                for (let i = radiusSamples - 1; i >= 0; i--) {
+                for (let i = radiusSamples; i >= 0; i--) {
                     const rp = lerp(tgBody.radius, tgBody.soi, i / radiusSamples);
-                    const { state1, state2 } = Physics2D.computeFlybyExitVelocities(tgBody, itscState, rp);
+                    const states = Physics2D.computeFlybyExitVelocities(tgBody, itscState, rp);
+                    const { state1, state2 } = states;
                     const next = node.next + 1;
                     const depDV = node.depDV;
                     nodes.push({ state: state1, next, depDV });
