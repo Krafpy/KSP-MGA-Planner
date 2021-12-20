@@ -184,7 +184,7 @@ type OrbitalElements = {
 
 type OrbitalElements2D = {
     readonly eccentricity:       number,
-    readonly periapsisDir:       Vector2,
+    readonly periapsisVec:       Vector2,
     readonly semiMajorAxis:      number,
     readonly orbitalParam:       number,
     readonly clockwise:          boolean

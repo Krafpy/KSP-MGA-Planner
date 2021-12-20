@@ -18,11 +18,11 @@ var Physics2D;
         const a = -mu * r0 / (r0 * v0 * v0 - 2 * mu);
         const p = a * (1 - e * e);
         const rp = a * (1 - e);
-        const pdir = mult2(div2(evec, e), rp);
+        const pvec = mult2(div2(evec, e), rp);
         const clk = det(pos, vel) < 0;
         return {
             eccentricity: e,
-            periapsisDir: pdir,
+            periapsisVec: pvec,
             semiMajorAxis: a,
             orbitalParam: p,
             clockwise: clk
@@ -65,7 +65,7 @@ var Physics2D;
         const orbitElts = stateToOrbitElements(attractor, state);
         const e = orbitElts.eccentricity;
         const p = orbitElts.orbitalParam;
-        const pdir = orbitElts.periapsisDir;
+        const pvec = orbitElts.periapsisVec;
         const pos0 = state.pos;
         const vel0 = state.vel;
         const tgRadius = target.orbit.semiMajorAxis;
@@ -87,7 +87,7 @@ var Physics2D;
             x: -sinNu * vmag * vdir,
             y: (e + cosNu) * vmag * vdir
         };
-        const pangle = Math.atan2(pdir.y, pdir.x);
+        const pangle = Math.atan2(pvec.y, pvec.x);
         return {
             pos: rotate2(pos, pangle),
             vel: rotate2(vel, pangle)
