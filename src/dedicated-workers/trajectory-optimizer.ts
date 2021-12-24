@@ -111,7 +111,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                 failed = true;
             }
             
-            if(failed || trajectory.mathError) {
+            if(failed || this._hasNaNValuesInSteps(trajectory)) {
                 this._evolver.randomizeAgent(agent);
                 trajectory.reset();
             } else {
@@ -122,6 +122,33 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         }
 
         throw new Error("Impossible to compute the trajectory.");
+    }
+
+    /**
+     * Checks if there is a NaN value in the computed steps (caused by a math error)
+     * @param trajectory The trajectory we want to check its steps for NaN values.
+     * @returns true if there is a NaN value in the computed steps, false otherwise.
+     */
+    private _hasNaNValuesInSteps(trajectory: TrajectoryCalculator){
+        const hasNaN: (obj: Object) => boolean = obj => {
+            for(const value of Object.values(obj)){
+                if(typeof value == "object"){
+                    if(hasNaN(value))
+                        return true;
+                } else if(typeof value == "number") {
+                    if(isNaN(value))
+                        return true;
+                }
+            }
+            return false;
+        };
+
+        const {steps} = trajectory;
+        for(let i = steps.length - 1; i >= 0; i--){
+            if(hasNaN(steps[i]))
+                return true;
+        }
+        return false;
     }
 }
 

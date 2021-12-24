@@ -68,7 +68,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             catch {
                 failed = true;
             }
-            if (failed || trajectory.mathError) {
+            if (failed || this._hasNaNValuesInSteps(trajectory)) {
                 this._evolver.randomizeAgent(agent);
                 trajectory.reset();
             }
@@ -78,6 +78,27 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             attempts++;
         }
         throw new Error("Impossible to compute the trajectory.");
+    }
+    _hasNaNValuesInSteps(trajectory) {
+        const hasNaN = obj => {
+            for (const value of Object.values(obj)) {
+                if (typeof value == "object") {
+                    if (hasNaN(value))
+                        return true;
+                }
+                else if (typeof value == "number") {
+                    if (isNaN(value))
+                        return true;
+                }
+            }
+            return false;
+        };
+        const { steps } = trajectory;
+        for (let i = steps.length - 1; i >= 0; i--) {
+            if (hasNaN(steps[i]))
+                return true;
+        }
+        return false;
     }
 }
 WorkerEnvironment.init(TrajectoryOptimizer);

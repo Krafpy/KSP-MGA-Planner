@@ -20,8 +20,6 @@ class TrajectoryCalculator {
 
     private _secondArcsData: SecondArcData[] = [];
 
-    public mathError: boolean = false;
-
     constructor(public readonly system: IOrbitingBody[], public readonly config: TrajectorySearchSettings, public readonly sequence: number[]){
         const attractorId = this._departureBody.orbiting;
         this._mainAttractor = this.system[attractorId];
@@ -62,11 +60,10 @@ class TrajectoryCalculator {
     }
 
     public reset(){
+        this._secondArcsData = [];
         this._legs   = [];
         this._flybys = [];
         this.steps   = [];
-        this._secondArcsData = [];
-        this.mathError = false;
     }
 
     /** 
@@ -137,10 +134,6 @@ class TrajectoryCalculator {
         const last = this._legs[numOfLegs-1];
         this._computeFirstLegArc(last);
         this._computeLegSecondArcSimple(last);
-
-        // Check for math error that may have occured during the
-        // calculation
-        this.mathError = this._hasNaNValues();
     }
 
     public get totalDeltaV(){
@@ -154,32 +147,6 @@ class TrajectoryCalculator {
             }
         }
         return total;
-    }
-
-    /**
-     * Checks if there is a NaN value in the computed steps (caused by a math error)
-     * @returns true if there is a NaN value in the computed steps, false otherwise.
-     */
-    private _hasNaNValues(){
-        const hasNaN: (obj: Object) => boolean = obj => {
-            for(const value of Object.values(obj)){
-                if(typeof value == "object"){
-                    if(hasNaN(value))
-                        return true;
-                } else if(typeof value == "number") {
-                    if(isNaN(value))
-                        return true;
-                }
-            }
-            return false;
-        };
-
-        for(let i = this.steps.length - 1; i >= 0; i--){
-            if(hasNaN(this.steps[i])){
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

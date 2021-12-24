@@ -8,7 +8,6 @@ class TrajectoryCalculator {
         this._legs = [];
         this._flybys = [];
         this._secondArcsData = [];
-        this.mathError = false;
         const attractorId = this._departureBody.orbiting;
         this._mainAttractor = this.system[attractorId];
     }
@@ -40,11 +39,10 @@ class TrajectoryCalculator {
         this._getFlybySettings();
     }
     reset() {
+        this._secondArcsData = [];
         this._legs = [];
         this._flybys = [];
         this.steps = [];
-        this._secondArcsData = [];
-        this.mathError = false;
     }
     _getDepartureSettings() {
         this._departureInfos = {
@@ -93,7 +91,6 @@ class TrajectoryCalculator {
         const last = this._legs[numOfLegs - 1];
         this._computeFirstLegArc(last);
         this._computeLegSecondArcSimple(last);
-        this.mathError = this._hasNaNValues();
     }
     get totalDeltaV() {
         let total = 0;
@@ -106,27 +103,6 @@ class TrajectoryCalculator {
             }
         }
         return total;
-    }
-    _hasNaNValues() {
-        const hasNaN = obj => {
-            for (const value of Object.values(obj)) {
-                if (typeof value == "object") {
-                    if (hasNaN(value))
-                        return true;
-                }
-                else if (typeof value == "number") {
-                    if (isNaN(value))
-                        return true;
-                }
-            }
-            return false;
-        };
-        for (let i = this.steps.length - 1; i >= 0; i--) {
-            if (hasNaN(this.steps[i])) {
-                return true;
-            }
-        }
-        return false;
     }
     _computeLegDuration(infos) {
         const exitedBody = this.system[infos.exitedBodyId];
