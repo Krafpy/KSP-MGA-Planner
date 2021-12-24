@@ -125,11 +125,6 @@ class TrajectoryCalculator {
         infos.duration = Math.max(minLegDuration, infos.duration);
     }
     recomputeLegsSecondArcs() {
-        for (let i = 0; i < this._secondArcsData.length; i++) {
-            const data = this._secondArcsData[i];
-            const step = this.steps[3 + i * 3];
-            this._recomputeSecondArc(step, data);
-        }
     }
     _recomputeSecondArc(lambertStep, arcData) {
         const fbBody = this.system[arcData.fbBodyId];

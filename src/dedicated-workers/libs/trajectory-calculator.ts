@@ -185,13 +185,16 @@ class TrajectoryCalculator {
      * Recomputes the second arc of a all legs accounting this time for SOI enter points,
      * thus providing a more precise visualization of the orbit.
      */
-     public recomputeLegsSecondArcs(){
-        for(let i = 0; i < this._secondArcsData.length; i++){
+    public recomputeLegsSecondArcs(){
+        // FIX: This causes wrong arc orbits recalculations in the case of resonant
+        // swing bys, because of the Lambert solver not considering multirevolutions... 
+        // I guess that's the problem ?
+        /*for(let i = 0; i < this._secondArcsData.length; i++){
             const data = this._secondArcsData[i];
             const step = this.steps[3 + i*3];
             
             this._recomputeSecondArc(step, data);
-        }
+        }*/
     }
 
     /**
