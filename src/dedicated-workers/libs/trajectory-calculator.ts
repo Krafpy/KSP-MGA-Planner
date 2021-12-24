@@ -141,8 +141,6 @@ class TrajectoryCalculator {
         // Check for math error that may have occured during the
         // calculation
         this.mathError = this._hasNaNValues();
-        if(this.mathError)
-            return;
     }
 
     public get totalDeltaV(){

@@ -94,8 +94,6 @@ class TrajectoryCalculator {
         this._computeFirstLegArc(last);
         this._computeLegSecondArcSimple(last);
         this.mathError = this._hasNaNValues();
-        if (this.mathError)
-            return;
     }
     get totalDeltaV() {
         let total = 0;
