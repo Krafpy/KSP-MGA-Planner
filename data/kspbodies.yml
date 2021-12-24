@@ -30,7 +30,8 @@
 #   For example :
 #    Body :  Sun | Moho | Eve | Gilly | Kerbin | Mun | Minmus ...
 #    ID   :  0   | 1    | 2   | 3     | 4      | 5   | 6      ...
-# - The blocks of data describing a body in this file must be ordered according to the IDs.
+# - The blocks of data describing the bodies in this file must be ordered according to their ID.
+#   For example, the sun's data are written first, followed by Moho's data... etc.
 
 
 - !!map
