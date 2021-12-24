@@ -66,7 +66,6 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             // Create the first generation and evaluate it
             const popChunk = this._evolver.createRandomPopulationChunk();
             const dvChunk = this._evolver.evaluateChunkFitness(popChunk);
-            this._bestTrajectory.recomputeLegsSecondArcs();
             sendResult({
                 bestSteps: this._bestTrajectory.steps, 
                 bestDeltaV: this._bestDeltaV,
@@ -77,7 +76,6 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             // If not the first generation, then evolve the current population
             const {population, deltaVs} = input;
             const {popChunk, fitChunk} = this._evolver.evolvePopulationChunk(population, deltaVs);
-            this._bestTrajectory.recomputeLegsSecondArcs();
             sendResult({
                 popChunk, fitChunk, 
                 bestSteps: this._bestTrajectory.steps, 
@@ -108,6 +106,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             // FIX: "This radius is never reached" error thrown... why ?
             try {
                 trajectory.compute();
+                trajectory.recomputeLegsSecondArcs();
             } catch {
                 failed = true;
             }

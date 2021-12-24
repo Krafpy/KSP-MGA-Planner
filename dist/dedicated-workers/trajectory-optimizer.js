@@ -36,7 +36,6 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             this._bestDeltaV = Infinity;
             const popChunk = this._evolver.createRandomPopulationChunk();
             const dvChunk = this._evolver.evaluateChunkFitness(popChunk);
-            this._bestTrajectory.recomputeLegsSecondArcs();
             sendResult({
                 bestSteps: this._bestTrajectory.steps,
                 bestDeltaV: this._bestDeltaV,
@@ -47,7 +46,6 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         else {
             const { population, deltaVs } = input;
             const { popChunk, fitChunk } = this._evolver.evolvePopulationChunk(population, deltaVs);
-            this._bestTrajectory.recomputeLegsSecondArcs();
             sendResult({
                 popChunk, fitChunk,
                 bestSteps: this._bestTrajectory.steps,
@@ -65,6 +63,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             let failed = false;
             try {
                 trajectory.compute();
+                trajectory.recomputeLegsSecondArcs();
             }
             catch {
                 failed = true;

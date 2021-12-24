@@ -8,7 +8,6 @@ class TrajectoryCalculator {
         this._legs = [];
         this._flybys = [];
         this._secondArcsData = [];
-        this.totalDeltaV = 0;
         this.mathError = false;
         const attractorId = this._departureBody.orbiting;
         this._mainAttractor = this.system[attractorId];
@@ -97,14 +96,18 @@ class TrajectoryCalculator {
         this.mathError = this._hasNaNValues();
         if (this.mathError)
             return;
+    }
+    get totalDeltaV() {
+        let total = 0;
         for (const step of this.steps) {
-            if (!step.maneuvre)
-                continue;
-            const { maneuvre } = step;
-            const { deltaVToPrevStep } = maneuvre;
-            const dv = mag3(deltaVToPrevStep);
-            this.totalDeltaV += dv;
+            if (step.maneuvre) {
+                const { maneuvre } = step;
+                const { deltaVToPrevStep } = maneuvre;
+                const dv = mag3(deltaVToPrevStep);
+                total += dv;
+            }
         }
+        return total;
     }
     _hasNaNValues() {
         const hasNaN = obj => {
@@ -180,7 +183,7 @@ class TrajectoryCalculator {
         lambertStep.angles = angles;
         lambertStep.drawAngles = drawAngles;
         const maneuvre = lambertStep.maneuvre;
-        const dsmDV = sub3(v1, preDSMState.vel);
+        const dsmDV = sub3(postDSMState.vel, preDSMState.vel);
         maneuvre.deltaVToPrevStep = dsmDV;
     }
     _computeFlyby(flybyInfo) {

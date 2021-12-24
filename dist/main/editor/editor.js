@@ -124,7 +124,7 @@ export function initEditor(controls, system, config, canvas) {
         const displayFoundTrajectory = () => {
             trajectory = new Trajectory(solver.bestTrajectorySteps, system, config);
             trajectory.draw(canvas);
-            trajectory.fillResultControls(maneuvreSelector, resultSpans, stepSlider, systemTime);
+            trajectory.fillResultControls(maneuvreSelector, resultSpans, stepSlider, systemTime, controls);
             maneuvreSelector.select(0);
             maneuvreSelector.enable();
             stepSlider.enable();

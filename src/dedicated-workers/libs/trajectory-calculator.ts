@@ -20,8 +20,6 @@ class TrajectoryCalculator {
 
     private _secondArcsData: SecondArcData[] = [];
 
-    public totalDeltaV: number = 0;
-
     public mathError: boolean = false;
 
     constructor(public readonly system: IOrbitingBody[], public readonly config: TrajectorySearchSettings, public readonly sequence: number[]){
@@ -145,16 +143,19 @@ class TrajectoryCalculator {
         this.mathError = this._hasNaNValues();
         if(this.mathError)
             return;
+    }
 
-        // Computes the total deltaV from the maneuvers
+    public get totalDeltaV(){
+        let total = 0;
         for(const step of this.steps){
-            if(!step.maneuvre)
-                continue;
-            const {maneuvre} = step;
-            const {deltaVToPrevStep} = maneuvre;
-            const dv = mag3(deltaVToPrevStep);
-            this.totalDeltaV += dv;
+            if(step.maneuvre) {
+                const {maneuvre} = step;
+                const {deltaVToPrevStep} = maneuvre;
+                const dv = mag3(deltaVToPrevStep);
+                total += dv;
+            }
         }
+        return total;
     }
 
     /**
@@ -266,7 +267,7 @@ class TrajectoryCalculator {
         lambertStep.drawAngles = drawAngles;
 
         const maneuvre = lambertStep.maneuvre as ManeuvreInfo;
-        const dsmDV = sub3(v1, preDSMState.vel);
+        const dsmDV = sub3(postDSMState.vel, preDSMState.vel);
         maneuvre.deltaVToPrevStep = dsmDV;
     }
 

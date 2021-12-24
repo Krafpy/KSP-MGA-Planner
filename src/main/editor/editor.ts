@@ -163,7 +163,7 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
         const displayFoundTrajectory = () => {
             trajectory = new Trajectory(solver.bestTrajectorySteps, system, config);
             trajectory.draw(canvas);
-            trajectory.fillResultControls(maneuvreSelector, resultSpans, stepSlider, systemTime);
+            trajectory.fillResultControls(maneuvreSelector, resultSpans, stepSlider, systemTime, controls);
 
             maneuvreSelector.select(0);
             maneuvreSelector.enable();

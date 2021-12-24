@@ -60,7 +60,7 @@ export class TrajectorySolver {
             await this._generateNextPopulation();
             this._updatePlot(1 + i);
         }
-
+        
         this._running = false;
     }
 
