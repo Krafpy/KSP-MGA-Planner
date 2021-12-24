@@ -280,7 +280,7 @@
                     <h3>Planetary sequence</h3>
                     <p>
                         The flyby sequence is the sequence of bodies encountered during the mission's
-                        flight time. It starts with the departure body and ends with the arrival body.
+                        flight time. It starts with the departure body and ends with the destination body.
                         All intermediate bodies of the sequence are used for gravity assist. <br>
                         Sequences are represented using the first two characters of each body's name. For example, a mission
                         going from Kerbin to Jool, with a first flyby of Eve followed by a flyby of Duna would be written:
@@ -299,12 +299,19 @@
 
                     <h3>Sequence generation</h3>
                     <p>
-                        The first step of the trajectory planning consists of generating a <em>possible</em> planetary sequence.
+                        The first step of the trajectory planning consists of generating a planetary sequence.
                         It will list a bunch of <em>possible</em> sequences considering a very simplified model of the solar system
                         and swing-bys, without any phasing.
                         Therefore there is <strong>no guarantee</strong> to have the most optimal sequence generated. But it tries to
                         provide feasible sequences. <br>
-                        The following settings must be defined:
+                    </p>
+                    <p>
+                        Alternatively, it is possible to set a custom sequence if no interesting sequences is proposed by the generator, 
+                        or to define custom routes. The input text must be a valid sequence representation.
+                        The trajectory calculation step will choose the custom sequence first if it is defined.
+                    </p>
+                    <p>
+                        For the sequence generator, the following settings must be defined:
                     </p>
                     <ul>
                         <li>The <strong>origin</strong> and <strong>destination</strong> body of the trajectory.</li>
@@ -332,11 +339,6 @@
                             this back leg has a spacing of 1.
                         </li>
                     </ul>
-                    <p>
-                        Alternatively, it is possible to set a custom sequence if no interesting sequences is proposed by the generator, 
-                        or to define custom routes. The input text must be a valid sequence representation.
-                        The trajectory calculation step will choose the custom sequence first if defined.
-                    </p>
                     
                     <h3>Trajectory calculation</h3>
                     <p>
@@ -381,13 +383,14 @@
                         and then choose the best one.
                     </p>
                     <p>
-                        Currently, although the tool allows it, searching trajectories between moons (e.g. in Jool's system)
-                        may give absurd trajectories due to implementation details.
+                        The computed trajectory itself may not be feasible in game because
+                        the current implementation of the application may not consider some in game particularities.
+                        Therefore the maneuvers' details are more indicative and fine tunings are necessary.
                     </p>
                     <p>
-                        The computed trajectory itself may not be feasible in game because
-                        it follows the current implementation of the application and may not consider some in game particularities.
-                        Therefore the maneuvers' details are more indicative and fine tunings are necessary.
+                        For the Jool's system, since the SOIs of the satellites are large compared to the radius of their
+                        orbits, it is possible that a produced trajectory is not feasible because it intersects a satellites's SOI
+                        before reaching the final state of an arc.
                     </p>
                 </article>
                 <!-- End of Issues section -->

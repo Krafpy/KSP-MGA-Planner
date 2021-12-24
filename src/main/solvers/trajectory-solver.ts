@@ -23,13 +23,13 @@ export class TrajectorySolver {
         this._workerPool = new WorkerPool("dist/dedicated-workers/trajectory-optimizer.js", this.config);
         this._workerPool.initialize({system: this.system.data, config: this.config});
     }
-    
-    private _initPlot(){
-        this.plot.clearPlot();
-    }
 
     private _updatePlot(iteration: number){
-        const {best, mean} = this._bestMeanDeltaV;
+        let mean = 0;
+        for(const dv of this._deltaVs)
+            mean += dv;
+        mean /= this.popSize;
+        const best = this.bestDeltaV;
         this.plot.addIterationData(iteration, mean, best);
     }
 
@@ -37,18 +37,10 @@ export class TrajectorySolver {
         if(this._running) this._cancelled = true;
     }
 
-    private _checkCancellation(){
-        if(this._cancelled){
-            this._cancelled = false;
-            this._running = false;
-            throw new Error("TRAJECTORY FINDER CANCELLED");
-        }
-    }
-
     public async searchOptimalTrajectory(sequence: FlybySequence, startDateMin: number, startDateMax: number, depAltitude: number){
         this._running = true;
-
-        this._initPlot();
+        
+        this.plot.clearPlot()
 
         this._calculatePopulationSize(sequence);
         this._calculatePopulationChunks();
@@ -57,26 +49,23 @@ export class TrajectorySolver {
         
         await this._createStartPopulation();
         this._updatePlot(0);
-        this._checkCancellation();
 
         const {maxGenerations} = this.config.trajectorySearch;
         for(let i = 0; i < maxGenerations; i++) {
+            if(this._cancelled){
+                this._cancelled = false;
+                this._running = false;
+                throw new Error("TRAJECTORY FINDER CANCELLED");
+            }
             await this._generateNextPopulation();
             this._updatePlot(1 + i);
-            this._checkCancellation();
         }
-
+        
         this._running = false;
     }
 
     private async _passSettingsData(sequence: number[], startDateMin: number, startDateMax: number, depAltitude: number){
         return this._workerPool.passData({depAltitude, sequence, startDateMin, startDateMax});
-    }
-
-    private async _createStartPopulation(){
-        const inputs = this._firstGenerationInputs();
-        const results = await this._workerPool.runPool<GenerationResult>(inputs);
-        this._mergeResultsChunks(results);
     }
 
     private _calculatePopulationChunks(){
@@ -97,15 +86,36 @@ export class TrajectorySolver {
         this._chunkIndices = chunkIndices;
     }
 
-    private _calculatePopulationSize(sequence: FlybySequence){
-        const {popSizeDimScale} = this.config.trajectorySearch;
-        this.popSize = popSizeDimScale * (4 * (sequence.length - 1) + 2);
+    private async _createStartPopulation(){
+        const inputs = [];
+        for(let i = 0; i < this._numChunks; i++) {
+            const start = this._chunkIndices[i * 2];
+            const end = this._chunkIndices[i * 2 + 1];
+            inputs.push({
+                start:      true,
+                chunkStart: start,
+                chunkEnd:   end
+            });
+        }
+        const results = await this._workerPool.runPool<GenerationResult>(inputs);
+        this._mergeResultsChunks(results);
     }
 
     private async _generateNextPopulation(){
-        const inputs = this._nextGenerationInputs();
+        const inputs = [];
+        for(let i = 0; i < this._numChunks; i++) {
+            inputs[i] = {
+                population: this._population,
+                deltaVs:    this._deltaVs,
+            };
+        }
         const results = await this._workerPool.runPool<GenerationResult>(inputs);
         this._mergeResultsChunks(results);
+    }
+
+    private _calculatePopulationSize(sequence: FlybySequence){
+        const {popSizeDimScale} = this.config.trajectorySearch;
+        this.popSize = popSizeDimScale * sequence.length;
     }
 
     private _mergeResultsChunks(results: GenerationResult[]){
@@ -126,50 +136,5 @@ export class TrajectorySolver {
         this._deltaVs = mergeArrayChunks(dVChunks);
         this.bestTrajectorySteps = bestSteps;
         this.bestDeltaV = bestDeltaV;
-    }
-
-    private _firstGenerationInputs() {
-        const inputs = [];
-        for(let i = 0; i < this._numChunks; i++) {
-            const {start, end} = this._chunkStartEnd(i);
-            inputs.push({
-                start:      true,
-                chunkStart: start,
-                chunkEnd:   end
-            });
-        }
-        return inputs;
-    }
-
-    private _nextGenerationInputs() {
-        const inputs = [];
-        for(let i = 0; i < this._numChunks; i++) {
-            const {start, end} = this._chunkStartEnd(i);
-            inputs[i] = {
-                population: this._population,
-                deltaVs:    this._deltaVs,
-                chunkStart: start,
-                chunkEnd:   end
-            };
-        }
-        return inputs;
-    }
-
-    private _chunkStartEnd(index: number){
-        return {
-            start: this._chunkIndices[index * 2],
-            end:   this._chunkIndices[index * 2 + 1]
-        };
-    }
-
-    private get _bestMeanDeltaV() {
-        let mean = 0;
-        for(const dv of this._deltaVs)
-            mean += dv;
-        mean /= this.popSize;
-        return {
-            mean: mean,
-            best: this.bestDeltaV
-        };
     }
 }

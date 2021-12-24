@@ -99,4 +99,4 @@ class SequenceEvaluator extends WorkerEnvironment {
         }
     }
 }
-initWorker(SequenceEvaluator);
+WorkerEnvironment.init(SequenceEvaluator);

@@ -124,4 +124,4 @@ class SequenceGenerator extends WorkerEnvironment {
     }
 }
 
-initWorker(SequenceGenerator);
+WorkerEnvironment.init(SequenceGenerator);

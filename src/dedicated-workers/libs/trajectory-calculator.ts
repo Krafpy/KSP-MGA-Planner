@@ -1,444 +1,535 @@
 class TrajectoryCalculator {
-    public readonly steps: TrajectoryStep[] = [];
-
     private readonly _mainAttractor!: ICelestialBody;
-    private readonly _legs:           LegInfo[] = [];
 
-    public totalDeltaV:   number = 0;
-    public noError!:      boolean;
+    public steps: TrajectoryStep[] = [];
 
-    public depAltitude!:  number;
-    public startDateMin!: number;
-    public startDateMax!: number;
-    public params!:       Agent; 
+    private _vesselState!: OrbitalState3D;
+    private _fbBodyState!: OrbitalState3D;
+    private _preDSMState!: OrbitalState3D;
 
-    private _missionTime:           number = 0;
-    private _sequenceIndex:         number = 0;
-    private _preDSMState!:          OrbitalState3D;
-    private _flybyIncomingState!:   OrbitalState3D;
-    private _flybyBodyState!:       OrbitalState3D;
+    private _depAltitude!:  number;
+    private _startDateMin!: number;
+    private _startDateMax!: number;
+    private _params!:       Agent;
 
-    private _departureDate:    number = 0;
-    private _departureDVScale: number = 0;
+    private _bodiesOrbits!: OrbitalElements3D[];
     
-    constructor(
-        public readonly system:         IOrbitingBody[],
-        public readonly config:         TrajectorySearchSettings,
-        public readonly sequence:       number[],
-    ) {
+    private _legs:   LegInfo[] = [];
+    private _flybys: FlybyInfo[] = [];
+    private _departureInfos!: DepartureInfo;
+
+    private _secondArcsData: SecondArcData[] = [];
+
+    constructor(public readonly system: IOrbitingBody[], public readonly config: TrajectorySearchSettings, public readonly sequence: number[]){
         const attractorId = this._departureBody.orbiting;
         this._mainAttractor = this.system[attractorId];
-    }
-
-    public setParameters(
-        depAltitude:    number,
-        startDateMin:   number,
-        startDateMax:   number,
-        params:         Agent, 
-    ){
-        this.depAltitude  = depAltitude;
-        this.startDateMin = startDateMin;
-        this.startDateMax = startDateMax;
-        this.params = params;
-
-        this._getDepartureInfo();
-        this._clampDepartureInfos();
-        this._getLegsInfo();
-    }
-
-    public compute(){
-        this.noError = false;
-        this._missionTime = this._departureDate;
-
-        this._calculateParkingOrbit();
-        this._calculateEjectionOrbit();
-        /*if(this._lastStep.duration < 0){
-            return;
-        }*/
-        this._missionTime += this._lastStep.duration;
-
-        for(let i = 1; i < this.sequence.length; i++) {
-            this._sequenceIndex = i;
-            const leg = this._legs[i-1];
-
-            if(!this._calculateLegFirstArc()){
-                return;
-            }
-            this._calculateLegSecondArc();
-            this._updateLegInfos(i-1);
-            this._missionTime += leg.duration;
-
-            this._calculateFlybyTrajectory();
-            /*if(this._lastStep.duration < 0){
-                return;
-            }*/
-            this._missionTime += this._lastStep.duration;
-
-            if(i == this.sequence.length - 1){
-                this._calculateArrivalCircularization();
-            }
-        }
-
-        this.noError = true;
-    }
-
-    private get _destinationBody() {
-        const id = this.sequence[this.sequence.length - 1];
-        return this.system[id];
     }
 
     private get _departureBody(){
         return this.system[this.sequence[0]];
     }
 
-    private get _attractorMu(){
-        return this._mainAttractor.stdGravParam;
+    private get _destinationBody(){
+        const last = this.sequence.length - 1;
+        return this.system[this.sequence[last]];
     }
 
-    private get _lastStep() {
+    private get _lastStep(){
         return this.steps[this.steps.length - 1];
     }
 
-    private get _lastStepDateOfEnd(){
-        const {dateOfStart, duration} = this._lastStep;
+    private get _lastStepEndDate(){
+        const last = this._lastStep;
+        const {dateOfStart, duration} = last;
         return dateOfStart + duration;
     }
 
-    /**
-     * Gets the departure information to be used in a more convenient way.
-     */
-    private _getDepartureInfo(){
-        this._departureDate = this.params[0];
-        this._departureDVScale = this.params[1];
+    public addPrecomputedOrbits(bodiesOrbits: OrbitalElements3D[]){
+        this._bodiesOrbits = bodiesOrbits;
     }
 
-    /**
-     * Apply constraints on the trajectory parameters. The DE may make the agents escape the initial constraints,
-     * thus the need to apply the constraints on each trajectory evaluation.
+    public setParameters(depAltitude: number, startDateMin: number, startDateMax: number, params: Agent){
+        this._depAltitude  = depAltitude;
+        this._startDateMin = startDateMin;
+        this._startDateMax = startDateMax;
+        this._params = params;
+
+        this._getDepartureSettings();
+        this._getLegsSettings();
+        this._getFlybySettings();
+    }
+
+    public reset(){
+        this._secondArcsData = [];
+        this._legs   = [];
+        this._flybys = [];
+        this.steps   = [];
+    }
+
+    /** 
+     * Extracts the departures settings from the parameters to be used in a more convenient way.
      */
-    private _clampDepartureInfos(){
-        this._departureDate = clamp(this._departureDate, this.startDateMin, this.startDateMax);
-        const {depDVScaleMin, depDVScaleMax} = this.config;
-        this._departureDVScale = clamp(this._departureDVScale, depDVScaleMin, depDVScaleMax);
-        this.params[0] = this._departureDate;
-        this.params[1] = this._departureDVScale;
+    private _getDepartureSettings(){
+        this._departureInfos = {
+            dateParam:  this._params[0],
+            phaseParam: this._params[1],
+            ejVelParam: this._params[2]
+        };
     }
 
     /**
      * Retrieves the leg informations for the parameters to be used in a more convenient way.
      */
-    private _getLegsInfo(){
-        for(let i = 2; i < this.params.length; i += 4) {
-            this._legs.push({
-                duration:   this.params[i],
-                dsmOffset:  this.params[i+1],
-                theta:      this.params[i+2],
-                phi:        this.params[i+3]
-            });
+    private _getLegsSettings(){
+        const {dsmOffsetMin, dsmOffsetMax} = this.config;
+        for(let i = 1; i < this.sequence.length; i++) {
+            const idx = 3 + (i-1)*4;
+            const infos = {
+                exitedBodyId:  this.sequence[i-1],
+                targetBodyId:  this.sequence[i],
+                durationParam: this._params[idx],
+                duration:      0,
+                dsmParam:      lerp(dsmOffsetMin, dsmOffsetMax, this._params[idx+1])
+            };
+            this._computeLegDuration(infos);
+            this._legs.push(infos);
+        }
+    }
+
+    /** Retrieves the flyby information from the parameters to be used in a more convenient way.
+     */
+    private _getFlybySettings(){
+        for(let i = 1; i < this.sequence.length - 1; i++) {
+            const idx = 3 + (i-1)*4 + 2;
+            const infos = {
+                flybyBodyId:    this.sequence[i],
+                normAngleParam: this._params[idx],
+                periRadiParam:  this._params[idx+1]
+            };
+            this._flybys.push(infos);
         }
     }
 
     /**
-     * Updates the parameters of the trajectory (direct agent access) to apply eventual modification
-     * relative to constraints, which can only be calculated when the trajectory is calculated.
-     * @param legIndex The index of the leg being updated.
+     * Computes the whole trajectory with its steps and maneuvers, and stores
+     * the total delta V.
      */
-    private _updateLegInfos(legIndex: number){
-        const leg = this._legs[legIndex];
-        this.params[2 + legIndex * 4] = leg.duration;
-        this.params[2 + legIndex * 4 + 1] = leg.dsmOffset;
-        this.params[2 + legIndex * 4 + 2] = leg.theta;
-        this.params[2 + legIndex * 4 + 3] = leg.phi;
-    }
+    public compute(){
+        // Compute the departure circular orbit and ejection orbit
+        this._appendDepartureParkingOrbit();
+        this._computeDepartureEjectionOrbit();
 
-    /**
-     * Calculates the circularization orbit and maneuver at the arrival body
-     */
-    private _calculateArrivalCircularization(){
-        const body = this._destinationBody;
-        const flybyOrbit = this._lastStep.orbitElts;
-
-        const periapsisState = stateFromOrbitElements(flybyOrbit, body.stdGravParam, 0);
-        const progradeDir = normalize3(periapsisState.vel);
-        const circularVel = circularVelocity(body, mag3(periapsisState.pos));
+        const numOfLegs = this._legs.length;
+        // Compute all the interplanetary arcs and flybys
+        for(let i = 0; i < numOfLegs - 1; i++){
+            const leg = this._legs[i];
+            const flyby = this._flybys[i];
+            this._computeFirstLegArc(leg);
+            this._computeLegSecondArcSimple(leg);
+            this._computeFlyby(flyby);
+        }
         
-        const deltaVMag = Math.abs(circularVel - mag3(periapsisState.vel));
-        const deltaV = mult3(progradeDir, -deltaVMag);
-
-        this.totalDeltaV += deltaVMag;
-
-        const circularState = {
-            pos: periapsisState.pos, 
-            vel: mult3(progradeDir, circularVel)
-        }
-        const circularOrbit = stateToOrbitElements(circularState, body);
-
-        const maneuvre: ManeuvreInfo = {
-            deltaVToPrevStep:   deltaV,
-            progradeDir:        progradeDir,
-            manoeuvrePosition:  periapsisState.pos,
-            context: {
-                type:           "circularization",
-            }
-        };
-
-        this.steps.push({
-            orbitElts:      circularOrbit,
-            attractorId:    body.id,
-            beginAngle:     0,
-            endAngle:       TWO_PI,
-            duration:       0,
-            dateOfStart:    this._lastStep.dateOfStart + this._lastStep.duration,
-            maneuvre:       maneuvre
-        });
+        // Compute the last leg reaching the destination body
+        // with no flyby
+        const last = this._legs[numOfLegs-1];
+        this._computeFirstLegArc(last);
+        this._computeLegSecondArcSimple(last);
     }
 
-    /**
-     * Calculates the swing-by orbit from the external incoming state.
-     * If the body is the destination body of the sequence, a deltaV is calculated as the difference 
-     * in velocity needed to circularize around the body at the arrival radius.
-     */
-    private _calculateFlybyTrajectory(){
-        const body = this.system[this.sequence[this._sequenceIndex]];
-
-        const localIncomingState = {
-            pos: sub3(this._flybyIncomingState.pos, this._flybyBodyState.pos),
-            vel: sub3(this._flybyIncomingState.vel, this._flybyBodyState.vel)
-        };
-
-        const flybyOrbit = stateToOrbitElements(localIncomingState, body);
-
-        const isDestinationBody = body.id == this._destinationBody.id;
-
-        let nu1 = trueAnomalyFromOrbitalState(flybyOrbit, localIncomingState);
-        let nu2 = isDestinationBody ? 0 : -nu1;
-
-        const tof = tofBetweenAnomalies(flybyOrbit, body, nu1, nu2);
-        
-        this.steps.push({
-            orbitElts:      flybyOrbit,
-            attractorId:    body.id,
-            beginAngle:     nu1,
-            endAngle:       nu2,
-            duration:       tof,
-            dateOfStart:    this._missionTime
-        });
-    }
-
-    /**
-     * Calculates the second arc of a leg : solves the Lambert problem to join the pre-DSM state
-     * and the targeted body from the sequence. The parameters relative to the leg are clamped 
-     * to ensure a feasible trajectory and respect of the constraints.
-     */
-    private _calculateLegSecondArc(){
-        const leg = this._legs[this._sequenceIndex-1];
-        const preDSMState = this._preDSMState;
-        const origin = this.system[this.sequence[this._sequenceIndex-1]];
-        const target = this.system[this.sequence[this._sequenceIndex]];
-
-        const startPos = preDSMState.pos;
-        const encounterDate = this._missionTime + leg.duration;
-        const targetState = getBodyStateAtDate(target, encounterDate, this._attractorMu);
-
-        const arcDuration = (1 - leg.dsmOffset) * leg.duration;
-
-        const incomingVel = solveLambert(startPos, targetState.pos, arcDuration, this._mainAttractor).v2;
-        const relativeVel = sub3(incomingVel, targetState.vel);
-        const incomingDir = normalize3(mult3(relativeVel, -1));
-
-        // Calculate the position of the entrance point on the SOI
-        const {thetaMin, thetaMax} = minMaxRingAngle(target.soi, target.radius, target.radius * 2);
-
-        const pointIsValid = leg.theta >= thetaMin && leg.theta <= thetaMax;
-        if(!pointIsValid) {
-            const {theta, phi} = randomPointOnSphereRing(thetaMin, thetaMax);
-            leg.theta = theta;
-            leg.phi = phi;
-        }
-
-        const soiPointLocal = mult3(pointOnSphereRing(incomingDir, leg.theta, leg.phi), target.soi);
-        const soiPoint = add3(targetState.pos, soiPointLocal);
-
-        // Solve lambert problem to reach this point
-        const {v1, v2} = solveLambert(startPos, soiPoint, arcDuration, this._mainAttractor);
-        const secondLegArc = stateToOrbitElements({pos: startPos, vel: v1}, this._mainAttractor);
-
-        let nu1 = trueAnomalyFromOrbitalState(secondLegArc, {pos: startPos, vel: v1});
-        let nu2 = trueAnomalyFromOrbitalState(secondLegArc, {pos: soiPoint, vel: v2});
-        if(nu1 > nu2) {
-            nu2 = TWO_PI + nu2;
-        }
-
-        this.totalDeltaV += mag3(sub3(v1, preDSMState.vel));
-
-        // Calculate the DSM maneuvre
-        const maneuvre: ManeuvreInfo = {
-            deltaVToPrevStep:   sub3(v1, preDSMState.vel),
-            progradeDir:        normalize3(preDSMState.vel),
-            manoeuvrePosition:  preDSMState.pos,
-            context: {
-                type:           "dsm",
-                originId:       origin.id,
-                targetId:       target.id
+    public get totalDeltaV(){
+        let total = 0;
+        for(const step of this.steps){
+            if(step.maneuvre) {
+                const {maneuvre} = step;
+                const {deltaVToPrevStep} = maneuvre;
+                const dv = mag3(deltaVToPrevStep);
+                total += dv;
             }
         }
-        
-        this.steps.push({
-            orbitElts:      secondLegArc,
-            attractorId:    this._mainAttractor.id,
-            beginAngle:     nu1,
-            endAngle:       nu2,
-            duration:       arcDuration,
-            dateOfStart:    this._lastStep.dateOfStart + this._lastStep.duration,
-            maneuvre:       maneuvre
-        });
-
-        this._flybyBodyState = targetState;
-        this._flybyIncomingState = {pos: soiPoint, vel: v2};
+        return total;
     }
 
     /**
-     * Propagates the orbit from the last body's SOI exit point to the date of the DSM.
-     * The parameters relative to the leg are clamped to ensure a feasible trajectory and respect
-     * of the constraints.
-     * @returns Returns whether the propagation returns a valid result
+     * Completes the provided leg infos by calculating the leg duration from the already given
+     * parameters
+     * @param infos The leg infos to complete
      */
-    private _calculateLegFirstArc() {
-        const seqIndex = this._sequenceIndex;
-        const leg = this._legs[seqIndex-1];
-        const isResonant = this.sequence[seqIndex-1] == this.sequence[seqIndex];
+    private _computeLegDuration(infos: LegInfo){
+        const exitedBody = this.system[infos.exitedBodyId];
+        const {durationParam} = infos;
+        const attr = this._mainAttractor;
 
+        if(infos.exitedBodyId != infos.targetBodyId) { // if the leg is not resonant
+            // The flight duration of the leg is between 35% and 75% of an ideal elliptic transfer
+            // orbit from the exited body to the target body
+            const targetBody = this.system[infos.targetBodyId];
+            const exBodyA = exitedBody.orbit.semiMajorAxis;
+            const tgBodyA = targetBody.orbit.semiMajorAxis;
+            const a = 0.5 * (exBodyA + tgBodyA);
+            const period = Physics3D.orbitPeriod(attr, a);
+            infos.duration = lerp(0.35*period, 0.75*period, durationParam);
+
+        } else { // if the leg is resonant
+            // The flight duration of the leg is between 100% and 200% the orbital period of the
+            // exited body
+            const a = exitedBody.orbit.semiMajorAxis;
+            const period = Physics3D.orbitPeriod(attr, a);
+            infos.duration = lerp(1*period, 2*period, durationParam);
+        }
+
+        const {minLegDuration} = this.config;
+        infos.duration = Math.max(minLegDuration, infos.duration);
+    }
+
+    /**
+     * Recomputes the second arc of a all legs accounting this time for SOI enter points,
+     * thus providing a more precise visualization of the orbit.
+     */
+     public recomputeLegsSecondArcs(){
+        for(let i = 0; i < this._secondArcsData.length; i++){
+            const data = this._secondArcsData[i];
+            const step = this.steps[3 + i*3];
+            
+            this._recomputeSecondArc(step, data);
+        }
+    }
+
+    /**
+     * Recomputes the second arc of a leg accounting this time for SOI enter points.
+     * @param lambertStep The step when the lambert arc to this flyby is described
+     * @param arcData The data related to the lambert arc and flyby stored during the flyby calculation
+     */
+    private _recomputeSecondArc(lambertStep: TrajectoryStep, arcData: SecondArcData){
+        const fbBody = this.system[arcData.fbBodyId];
+        const {flybyOrbit, soiEnterAngle} = arcData;
+        const localEnterState = Physics3D.orbitElementsToState(flybyOrbit, fbBody, soiEnterAngle);
+
+        const {fbBodyState} = arcData;
+        const targetEnterPos = add3(fbBodyState.pos, localEnterState.pos);
+
+        const {preDSMState} = arcData;
+        const {v1, v2} = Lambert.solve(preDSMState.pos, targetEnterPos, lambertStep.duration, this._mainAttractor);
+
+        const postDSMState = {pos: preDSMState.pos, vel: v1};
+        const encounterState = {pos: targetEnterPos, vel: v2};
+        // Compute the orbit associated to this Lambert arc
+        const arcOrbit = Physics3D.stateToOrbitElements(postDSMState, this._mainAttractor);
+        // Compute the begin and end angles of the arc
+        const angles = {
+            begin: Physics3D.trueAnomalyFromOrbitalState(arcOrbit, postDSMState),
+            end:   Physics3D.trueAnomalyFromOrbitalState(arcOrbit, encounterState)
+        };
+        const drawAngles = {
+            begin: angles.begin,
+            end:   angles.end
+        };
+        if(drawAngles.begin > drawAngles.end){
+            drawAngles.end += TWO_PI;
+        }
+
+        lambertStep.orbitElts = arcOrbit;
+        lambertStep.angles = angles;
+        lambertStep.drawAngles = drawAngles;
+
+        const maneuvre = lambertStep.maneuvre as ManeuvreInfo;
+        const dsmDV = sub3(postDSMState.vel, preDSMState.vel);
+        maneuvre.deltaVToPrevStep = dsmDV;
+    }
+
+    /**
+     * Computes the flyby orbit with the provided parameters.
+     * @param flybyInfo The flyby parameters
+     */
+    private _computeFlyby(flybyInfo: FlybyInfo){
+        const body = this.system[flybyInfo.flybyBodyId];
+
+        // Compute the relative velocity to the body when entering its SOI
+        const bodyVel = this._fbBodyState.vel;
+        const globalIncomingVel = this._vesselState.vel;
+        const relativeIncomingVel = sub3(globalIncomingVel, bodyVel);
+        const incomingVelMag = mag3(relativeIncomingVel);
+        const incomingVelDir = div3(relativeIncomingVel, incomingVelMag);
+
+        // Compute the normal vector of the orbit : we compute the vector perpendicular to the incoming
+        // relative velocity and the body velocity (relative to the main attractor), and rotate it
+        // around the incoming relative velocity direction by angle angle defined in the parameters.
+        const normAngle = lerp(0, TWO_PI, flybyInfo.normAngleParam);
+        const t_normal = normalize3(cross(relativeIncomingVel, bodyVel));
+        const normal =  rotate3(t_normal, incomingVelDir, normAngle);    
+        
+        // Compute the temporary periapsis position vector, it is colinear to the incoming velcity
+        // vector
+        const t_periDir = incomingVelDir;
+        const {fbRadiusMaxScale} = this.config;
+        const periRadius = lerp(body.radius, fbRadiusMaxScale * body.radius, flybyInfo.periRadiParam);
+        const t_periPos = mult3(t_periDir, periRadius);
+
+        // Compute the temporary periapsis velocity velocity, at this point on the orbit,
+        // the velocity vector is perpendicular to the periapsis vector.
+        const periVelMag = Physics3D.deduceVelocityAtRadius(body, body.soi, incomingVelMag, periRadius); 
+        const t_periVelDir = rotate3(t_periDir, normal, HALF_PI);
+        const t_periVel = mult3(t_periVelDir, periVelMag);
+
+        // Compute the temporary flyby orbit
+        const t_periapsisState = {pos: t_periPos, vel: t_periVel};
+        const t_flybyOrbit = Physics3D.stateToOrbitElements(t_periapsisState, body);
+
+        // Compute the SOI enter and exit angles
+        const exitAngle = Physics3D.trueAnomalyAtRadius(t_flybyOrbit, body.soi);
+        const angles = {begin: -exitAngle, end: exitAngle};
+        const drawAngles = {begin: angles.begin, end: angles.end};
+
+        // Compute the angle between the incoming velocity vector and the velocity vector
+        // on the calculated orbit at the SOI enter point
+        const t_incomingVel = Physics3D.orbitElementsToState(t_flybyOrbit, body, angles.begin).vel;
+        const t_incomingVelDir = normalize3(t_incomingVel);
+        const dotCross = dot3(cross(incomingVelDir, t_incomingVelDir), normal);
+        const dotVel = dot3(incomingVelDir, t_incomingVelDir);
+        const offsetAngle = Math.atan2(dotCross, dotVel);
+        
+        // Recompute the flyby orbit by rotating the periapsis so that the incoming velocity calculated
+        // on the orbit matches the incoming velocity computed at the beginning.
+        // FIX: When `normAngle` is exactly 0 or TWO_PI, we must rotate by offsetAngle
+        // and not -offsetAngle... Why this happens ? I don't know, probably some floating point error
+        // stuff...
+        const periPos = rotate3(t_periPos, normal, -offsetAngle);
+        const periVel = rotate3(t_periVel, normal, -offsetAngle);
+        const periapsisState = {pos: periPos, vel: periVel};
+        const flybyOrbit = Physics3D.stateToOrbitElements(periapsisState, body);
+
+        // Compute the duration of the flyby
+        const tof = Physics3D.tofBetweenAnomalies(flybyOrbit, body, angles.begin, angles.end);
+        
+        // Append the flyby orbit
+        this.steps.push({
+            orbitElts:   flybyOrbit,
+            attractorId: body.id,
+            angles:      angles,
+            drawAngles:  drawAngles,
+            duration:    tof,
+            dateOfStart: this._lastStepEndDate
+        });
+
+        // Compute the vessel state relative to the body when exiting its SOI
+        const exitState = Physics3D.orbitElementsToState(flybyOrbit, body, exitAngle);
+        this._vesselState = exitState;
+
+        // Store the required information for eventual further recalculations of the
+        // legs' lambert arcs
+        this._secondArcsData.push({
+            preDSMState:    this._preDSMState,
+            fbBodyId:       body.id,
+            fbBodyState:    this._fbBodyState,
+            flybyOrbit:     flybyOrbit,
+            soiEnterAngle:  angles.begin
+        });
+    }
+    
+    /**
+     * Computes the second leg arc using a Lambert solver to aim at the body position
+     * supposing a null radius SOI.
+     * @param legInfo The leg parameters
+     */
+    private _computeLegSecondArcSimple(legInfo: LegInfo){
+        const attr = this._mainAttractor;
         const lastStep = this._lastStep;
-        const exitedBody = this.system[lastStep.attractorId];
-        const localState = stateFromOrbitElements(lastStep.orbitElts, exitedBody.stdGravParam, lastStep.endAngle);
-        const exitedBodyState = getBodyStateAtDate(exitedBody, this._missionTime, this._attractorMu);
-        const exitState = {
-            pos: add3(localState.pos, exitedBodyState.pos),
-            vel: add3(localState.vel, exitedBodyState.vel)
+        const preDSMState = this._vesselState;
+
+        // Compute the state of the body at the encounter date
+        const encounterDate = lastStep.dateOfStart + legInfo.duration;
+        const targetBody = this.system[legInfo.targetBodyId];
+        const tgBodyOrbit = this._bodiesOrbits[targetBody.id];
+        const tgBodyState = Physics3D.bodyStateAtDate(targetBody, tgBodyOrbit, attr, encounterDate);
+
+        // Solve the Lambert problem to reach the body.
+        // We suppose for now that the body has a null radius SOI, and so we target directly the body.
+        const arcDuration = legInfo.duration * (1 - legInfo.dsmParam);
+        const {v1, v2} = Lambert.solve(preDSMState.pos, tgBodyState.pos, arcDuration, attr);
+        
+        const postDSMState = {pos: preDSMState.pos, vel: v1};
+        const encounterState = {pos: tgBodyState.pos, vel: v2};
+        
+        // Compute the orbit associated to this Lambert arc
+        const arcOrbit = Physics3D.stateToOrbitElements(postDSMState, attr);
+        // Compute the begin and end angles of the arc
+        const angles = {
+            begin: Physics3D.trueAnomalyFromOrbitalState(arcOrbit, postDSMState),
+            end:   Physics3D.trueAnomalyFromOrbitalState(arcOrbit, encounterState)
         };
-        const firstLegArc = stateToOrbitElements(exitState, this._mainAttractor);
-        if(firstLegArc.semiMajorAxis >= this._mainAttractor.soi){
-            return false;
+        const drawAngles = {
+            begin: angles.begin,
+            end:   angles.end
+        };
+        if(drawAngles.begin > drawAngles.end){
+            drawAngles.end += TWO_PI;
         }
 
-        const {dsmOffsetMax, dsmOffsetMin, minLegDuration} = this.config;
-        if(firstLegArc.eccentricity < 1) {
-            const orbitPeriod = calculateOrbitPeriod(firstLegArc.semiMajorAxis, this._attractorMu);
-            let minScale = 0.5;
-            let maxScale = 1;
-            if(isResonant){
-                minScale = 1;
-                maxScale = 3;
+        // Compute DSM maneuver
+        const progradeDir = normalize3(preDSMState.vel);
+        const dsmDV = sub3(postDSMState.vel, preDSMState.vel);
+        const maneuvre: ManeuvreInfo = {
+            position:         preDSMState.pos,
+            deltaVToPrevStep: dsmDV,
+            progradeDir:      progradeDir,
+            context:          {
+                type: "dsm", 
+                originId: legInfo.exitedBodyId, 
+                targetId: legInfo.targetBodyId
             }
-            const minDuration = minScale * orbitPeriod;
-            const maxDuration = maxScale * orbitPeriod;
-            leg.duration = clamp(leg.duration, minDuration, maxDuration);
-            const revolutions = leg.duration / orbitPeriod;
-            const minDSMOffset = Math.max((revolutions - 1) / revolutions, dsmOffsetMin);
-            leg.dsmOffset = clamp(leg.dsmOffset, minDSMOffset, dsmOffsetMax);
-        }
-        leg.duration = clamp(leg.duration, minLegDuration, Infinity);
-        leg.dsmOffset = clamp(leg.dsmOffset, dsmOffsetMin, dsmOffsetMax);
+        };
 
-        const arcDuration = leg.dsmOffset * leg.duration;
-
-        let legStartNu = trueAnomalyFromOrbitalState(firstLegArc, exitState);
-
-        const preDSMState = propagateState(firstLegArc, legStartNu, arcDuration, this._mainAttractor);
-        let dsmNu = trueAnomalyFromOrbitalState(firstLegArc, preDSMState);
-        if(legStartNu > dsmNu) {
-            dsmNu += TWO_PI;
-        }
-
-        if(isNaN(legStartNu) || isNaN(dsmNu)){
-            return false;
-        }
-
+        // Append the second arc orbit
         this.steps.push({
-            orbitElts:      firstLegArc,
-            attractorId:    this._mainAttractor.id,
-            beginAngle:     legStartNu,
-            endAngle:       dsmNu,
-            duration:       arcDuration,
-            dateOfStart:    this._lastStep.dateOfStart + this._lastStep.duration
+            orbitElts:   arcOrbit,
+            attractorId: attr.id,
+            angles:      angles,
+            drawAngles:  drawAngles,
+            duration:    arcDuration,
+            dateOfStart: this._lastStepEndDate,
+            maneuvre:    maneuvre
         });
 
-        this._preDSMState = preDSMState;
-
-        return true;
+        // Store the incoming state of the vessel (relative to the main attractor) at encounter
+        // and the flyby body for the flyby calculation
+        this._vesselState = encounterState;
+        this._fbBodyState = tgBodyState;
     }
 
     /**
-     * Calculates the departure body's ejection orbit : hyperbolic orbit from the circular
-     * parking orbit to SOI exit.
+     * Computes the next leg first arc with the provided parameters.
+     * @param legInfo The parameters of the leg
      */
-    private _calculateEjectionOrbit(){
-        const startBody = this.system[this.sequence[0]];
-        const nextBody = this.system[this.sequence[1]];
+    private _computeFirstLegArc(legInfo: LegInfo){
+        // Compute the state of the vessel relatived to the exited body after exiting its SOI
+        /*const lastStep = this._lastStep;
+        const exitedBody = this.system[lastStep.attractorId];
+        const localExitState = Physics3D.orbitElementsToState(lastStep.orbitElts, exitedBody, lastStep.angles.end);*/
+        const localExitState = this._vesselState;
+        const exitedBody = this.system[this._lastStep.attractorId];
 
-        const parkingRadius = startBody.radius + this.depAltitude; 
-        const parkingVel = circularVelocity(startBody, parkingRadius);
-
-        const ejectionVel = this._departureDVScale * ejectionVelocity(startBody, parkingRadius);
-        const ejectionDV = ejectionVel - parkingVel;
-
-        this.totalDeltaV += ejectionDV;
-
-        const bodyPos = getBodyStateAtDate(startBody, this._departureDate, this._attractorMu).pos;
-        const r1 = startBody.orbit.semiMajorAxis;
-        const r2 = nextBody.orbit.semiMajorAxis;
-        let {tangent, nu} = idealEjectionDirection(bodyPos, r2 < r1);
-
-        const ejectionState = {
-            pos: vec3(parkingRadius * Math.cos(nu), 0, parkingRadius * Math.sin(nu)),
-            vel: mult3(tangent, ejectionVel),
-        };
-
-        const offsetAngle = hyperbolicEjectionOffsetAngle(ejectionVel, parkingRadius, startBody);
-        const up = vec3(0, 1, 0);
-        ejectionState.pos = rotate3(ejectionState.pos, up, -offsetAngle);
-        ejectionState.vel = rotate3(ejectionState.vel, up, -offsetAngle);
-
-        const ejectionOrbit = stateToOrbitElements(ejectionState, startBody);
-
-        const exitAnomaly = soiExitTrueAnomaly(ejectionOrbit, startBody.soi);
-
-        const tof = tofBetweenAnomalies(ejectionOrbit, startBody, 0, exitAnomaly);
+        // Compute the exited body state relative to its attractor at the moment the vessel exits its SOI
+        const bodyOrbit = this._bodiesOrbits[exitedBody.id];
+        const exitDate = this._lastStepEndDate;
+        const exitedBodyState = Physics3D.bodyStateAtDate(exitedBody, bodyOrbit, this._mainAttractor, exitDate);
         
-        // Calculate the maneuvre informations
-        const progradeDir = normalize3(ejectionState.vel);
-        const maneuvre: ManeuvreInfo = {
-            deltaVToPrevStep:   mult3(progradeDir, ejectionDV),
-            progradeDir:        progradeDir,
-            manoeuvrePosition:  ejectionState.pos,
-            context:            {type: "ejection"}
+        // Compute the vessel SOI-exit state relative to the main attractor (exited body's attractor)
+        const exitState = {
+            pos: add3(exitedBodyState.pos, localExitState.pos),
+            vel: add3(exitedBodyState.vel, localExitState.vel),
         };
 
+        // Compute the orbit of the vessel around the main attractor after exiting the exited body SOI.
+        const arcOrbit = Physics3D.stateToOrbitElements(exitState, this._mainAttractor);
+        const beginAngle = Physics3D.trueAnomalyFromOrbitalState(arcOrbit, exitState);
+        // Propagate the vessel on the arc for the arc duration
+        const arcDuration = legInfo.dsmParam * legInfo.duration;
+        const preDSMState = Physics3D.propagateStateFromTrueAnomaly(arcOrbit, this._mainAttractor, beginAngle, arcDuration);
+        let endAngle = Physics3D.trueAnomalyFromOrbitalState(arcOrbit, preDSMState);
+
+        const angles = {begin: beginAngle, end: endAngle};
+
+        // Compute the ends of the arc to show in the 3D view if the trajectory happens to be shown
+        const drawAngles = {begin: angles.begin, end: angles.end};
+        // It is possible that the duration of the arc is longer than the period of the arc orbit.
+        // In that case we must display all the orbit but keep the last angle meaningful.
+        const period = Physics3D.orbitPeriod(this._mainAttractor, arcOrbit.semiMajorAxis);
+        if(arcDuration > period){
+            drawAngles.begin = 0;
+            drawAngles.end = TWO_PI;
+        } else if(beginAngle > endAngle) {
+            drawAngles.end += TWO_PI;
+        }
+
+        // Append the arc to the steps
         this.steps.push({
-            orbitElts:      ejectionOrbit,
-            attractorId:    startBody.id,
-            beginAngle:     0,
-            endAngle:       exitAnomaly,
-            duration:       tof,
-            dateOfStart:    this._lastStepDateOfEnd,
-            maneuvre:       maneuvre
+            orbitElts:   arcOrbit,
+            attractorId: this._mainAttractor.id,
+            angles:      angles,
+            drawAngles:  drawAngles,
+            duration:    arcDuration,
+            dateOfStart: exitDate,
         });
+
+        // Store the pre-DSM state to use it in the second arc maneuver calculation
+        this._vesselState = preDSMState;
+        this._preDSMState = preDSMState;
+    }
+
+    /**
+     * Computes the ejection arc from the departure body parking orbit to exiting its SOI.
+     */
+    private _computeDepartureEjectionOrbit(){
+        const curOrbit = this._lastStep.orbitElts;
+        const depBody = this._departureBody;
+
+        const {phaseParam, ejVelParam} = this._departureInfos;
+
+        // Compute the phase angle, measured from the vector pointing to the body's
+        // attractor
+        const phase = lerp(0, TWO_PI, phaseParam);
+
+        // Compute the ejection velocity magnitude, i.e. the velocity at the parking
+        // orbit altitude which leads to exit the SOI with the specified
+        // scale given in parameters.
+        const ejVelMag0 = Physics3D.velocityToReachAltitude(depBody, curOrbit.semiMajorAxis, depBody.soi);
+        const {depDVScaleMin, depDVScaleMax} = this.config;
+        const ejVelMag = lerp(depDVScaleMin, depDVScaleMax, ejVelParam) * ejVelMag0;
+        
+        // Compute the ejection velocity vector; rotated by the phase angle relative to the
+        // reference vector (1, 0, 0)
+        const {vel, pos} = Physics3D.orbitElementsToState(curOrbit, depBody, phase);
+        const progradeDir = normalize3(vel);
+        const ejVel = mult3(progradeDir, ejVelMag);
+
+        // Compute the ejection orbit
+        const ejOrbit = Physics3D.stateToOrbitElements({pos, vel: ejVel}, depBody);
+        
+        // Compute the angle at which the SOI is exited
+        const soiExitAngle = Physics3D.trueAnomalyAtRadius(ejOrbit, depBody.soi);
+        // Compute the ejection maneuvre
+        const ejDV = ejVelMag - mag3(vel);
+        const maneuvre: ManeuvreInfo = {
+            position:         pos,
+            deltaVToPrevStep: mult3(progradeDir, ejDV),
+            progradeDir:      progradeDir,
+            context:          {type: "ejection"}
+        };
+
+        // Compute the duration of the flight from the parking orbit to SOI exit.
+        const tof = Physics3D.tofBetweenAnomalies(ejOrbit, depBody, 0, soiExitAngle);
+
+        // Append the ejection orbit
+        this.steps.push({
+            orbitElts:   ejOrbit,
+            attractorId: depBody.id,
+            angles:      {begin: 0, end: soiExitAngle},
+            drawAngles:  {begin: 0, end: soiExitAngle},
+            duration:    tof,
+            dateOfStart: this._lastStepEndDate,
+            maneuvre:    maneuvre
+        });
+
+        // Compute the state of the vessel relative to the exited body when exiting its SOI
+        const exitState = Physics3D.orbitElementsToState(ejOrbit, depBody, soiExitAngle);
+        this._vesselState = exitState;
     }
 
     /**
      * Calculates the orbital elements of the circular parking orbit
-     * around the departure body.
+     * around the departure body and appends it to the steps.
      */
-     private _calculateParkingOrbit(){
-        const startBody = this.system[this.sequence[0]];
-        const orbitRadius = startBody.radius + this.depAltitude;
+    private _appendDepartureParkingOrbit(){
+        const {dateParam} = this._departureInfos;
+        const radius = this._departureBody.radius + this._depAltitude;
+        const dateMin = this._startDateMin;
+        const dateMax = this._startDateMax;
         this.steps.push({
-            orbitElts:      equatorialCircularOrbit(orbitRadius),
-            attractorId:    startBody.id,
-            beginAngle:     0,
-            endAngle:       TWO_PI,
-            duration:       0,
-            dateOfStart:    this._departureDate
+            orbitElts:   Physics3D.equatorialCircularOrbit(radius),
+            attractorId: this._departureBody.id,
+            angles:      {begin: 0, end: 0},
+            drawAngles:  {begin: 0, end: TWO_PI},
+            duration:    0,
+            dateOfStart: lerp(dateMin, dateMax, dateParam)
         });
     }
 }

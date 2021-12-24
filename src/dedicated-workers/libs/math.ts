@@ -1,6 +1,7 @@
 /* Useful little functions and constants */
 
 const TWO_PI = 2 * Math.PI;
+const HALF_PI = 0.5 * Math.PI;
 
 function clamp(x: number, min: number, max: number) {
     return x > max ? max : x < min ? min : x;
@@ -26,31 +27,6 @@ function newtonRootSolve(
         n++;
     }
     return x;
-}
-
-function randomPointOnSphereRing(thetaMin: number, thetaMax: number){
-    return {
-        theta: randomInInterval(thetaMin, thetaMax),
-        phi: randomInInterval(0, TWO_PI)
-    }
-}
-
-function pointOnSphereRing(dir: Vector3, theta: number, phi: number){
-    let axis = normalize3(cross(dir, vec3(1, 0, 0)));
-    let point = rotate3(dir, axis, theta);
-    point = rotate3(point, dir, phi);
-    return point;
-}
-
-function minMaxRingAngle(r: number, rmin: number, rmax: number){
-    return {
-        thetaMin: Math.asin(rmin/r),
-        thetaMax: Math.asin(rmax/r)
-    };
-}
-
-function randomInInterval(a: number, b: number) {
-    return a + Math.random() * (b - a);
 }
 
 function randint(a: number, b: number){

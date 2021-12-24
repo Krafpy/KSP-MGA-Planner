@@ -63,7 +63,7 @@ export class Orbit implements IOrbit {
         };
     }
 
-    public static fromOrbitalElements(elements: OrbitalElements, attractor: ICelestialBody, config: OrbitSettings){
+    public static fromOrbitalElements(elements: OrbitalElements3D, attractor: ICelestialBody, config: OrbitSettings){
         const data = {
             eccentricity:     elements.eccentricity,
             semiMajorAxis:    elements.semiMajorAxis,
