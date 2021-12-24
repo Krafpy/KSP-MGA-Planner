@@ -244,12 +244,6 @@ namespace Physics3D
         const t_arg = Math.acos(cos_arg);
         let arg = evec.y >= 0 ? t_arg : TWO_PI - t_arg;
 
-        /*console.log(attractor.name);
-        console.log("nvec:", nvec);
-        console.log("evec:", evec);
-        console.log("dot:", dot3(nvec, evec));
-        console.log("prod:", (e * n));*/
-
         // Semi major axis
         const a = 1 / ( 2/r - v2/mu );
         
