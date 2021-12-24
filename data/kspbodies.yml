@@ -17,6 +17,21 @@
 # sideralPeriod:      s
 
 
+# EDIT NOTES FOR CUSTOM SOLAR SYSTEMS
+
+# - Follow the exact same format (names, indentations) as used in this file
+# - Numerical data must follow the units described above
+# - Each body has a unique ID, it must be an integer between 0 and N-1, where N is the number of bodies 
+# - The sun must have the ID 0
+# - The sun does not have an `orbit` attribute
+# - The ID given to a body must be representative of its order in the solar system.
+#   For planets, it represents its order from the sun; for sattelites, its order
+#   from its attractor body.
+#   For example :
+#    Body :  Sun | Moho | Eve | Gilly | Kerbin | Mun | Minmus ...
+#    ID   :  0   | 1    | 2   | 3     | 4      | 5   | 6      ...
+
+
 - !!map
   id:                 0
   name:               Sun

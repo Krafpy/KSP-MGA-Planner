@@ -41,18 +41,18 @@ trajectorySearch:
   splitLimit:         1000          # maximum input chunk size per worker in the worker pool, exceeded if all workers are already used
   crossoverProba:     0.9           # crossover probability (CR) of the DE algorithm
   diffWeight:         0.8           # differential weight (F) of the DE algorithm
-  depDVScaleMin:      1.01          # The minimum ejection velocity, in terms of scale of the minimum velocity required to escape the body
-  depDVScaleMax:      3             # The maximum ejection velocity
-  dsmOffsetMin:       0.01          # The minimum offset of a DSM on an interplanetary leg
-  dsmOffsetMax:       0.99          # The maximum offset of a DSM
-  minLegDuration:     21600         # The minimum duration of a leg (s)
-  fbRadiusMaxScale:   4
-  popSizeDimScale:    500           # The population size is equal to this value times the dimension of the search space (number of compnents agent vector)
+  depDVScaleMin:      1.01          # the minimum ejection velocity, in terms of scale of the minimum velocity required to escape the body
+  depDVScaleMax:      3             # the maximum ejection velocity
+  dsmOffsetMin:       0.01          # the minimum offset of a DSM on an interplanetary leg
+  dsmOffsetMax:       0.99          # the maximum offset of a DSM
+  minLegDuration:     21600         # the minimum duration of a leg (s)
+  fbRadiusMaxScale:   4             # the maximum periapsis height of a flyby orbit, in terms of times radius of the body
+  popSizeDimScale:    500           # the population size is equal to this value times the dimension of the search space (number of compnents agent vector)
   maxGenerations:     200           # Maximum number of evolution iterations
 
 editor:
-  defaultOrigin:      3             # default origin body on start (Kerbin)
-  defaultDest:        0             # default destination body on start (Moho)
+  defaultOrigin:      3             # default origin body on start (index of Kerbin in the selector)
+  defaultDest:        0             # default destination body on start (index of Moho in the selector)
   defaultAltitude:    100           # default altitude from the default body (in km above surface)
 
 workers:
@@ -60,4 +60,4 @@ workers:
 
 trajectoryDraw:
   samplePoints:       2500          # number sample points for each tarjectory arc draw
-  maneuvreArrowSize:  0.08
+  maneuvreArrowSize:  0.08          # size of the arrow sprites for maneuvers
