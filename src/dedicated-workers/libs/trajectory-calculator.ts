@@ -246,7 +246,7 @@ class TrajectoryCalculator {
         const {v1, v2} = Lambert.solve(preDSMState.pos, targetEnterPos, lambertStep.duration, this._mainAttractor);
 
         const postDSMState = {pos: preDSMState.pos, vel: v1};
-        const encounterState = {pos: fbBodyState.pos, vel: v2};
+        const encounterState = {pos: targetEnterPos, vel: v2};
         // Compute the orbit associated to this Lambert arc
         const arcOrbit = Physics3D.stateToOrbitElements(postDSMState, this._mainAttractor);
         // Compute the begin and end angles of the arc
