@@ -85,4 +85,4 @@ class SequenceGenerator extends WorkerEnvironment {
             info.resonant++;
     }
 }
-initWorker(SequenceGenerator);
+WorkerEnvironment.init(SequenceGenerator);

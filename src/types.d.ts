@@ -97,6 +97,7 @@ interface TrajectorySearchSettings {
     readonly minLegDuration:    number;
     readonly popSizeDimScale:   number;
     readonly maxGenerations:    number;
+    readonly fbRadiusMaxScale:  number;
 }
 
 interface Config {
@@ -171,7 +172,15 @@ type OrbitalState3D = {
     vel:    Vector3,
 };
 
-type OrbitalElements = {
+type OrbitalElements2D = {
+    readonly eccentricity:       number,
+    readonly periapsisVec:       Vector2,
+    readonly semiMajorAxis:      number,
+    readonly orbitalParam:       number,
+    readonly clockwise:          boolean
+}
+
+type OrbitalElements3D = {
     readonly eccentricity:       number,
     readonly periapsisDir:       Vector3,
     readonly semiMajorAxis:      number,
@@ -182,29 +191,23 @@ type OrbitalElements = {
     readonly orbitalParam:       number
 };
 
-type OrbitalElements2D = {
-    readonly eccentricity:       number,
-    readonly periapsisVec:       Vector2,
-    readonly semiMajorAxis:      number,
-    readonly orbitalParam:       number,
-    readonly clockwise:          boolean
-}
+type ArcEndsAngles = {begin: number, end: number};
 
 type TrajectoryStep = {
-    orbitElts:   OrbitalElements, 
+    orbitElts:   OrbitalElements3D, 
     attractorId: number,
-    beginAngle:  number,
-    endAngle:    number,
+    angles:      ArcEndsAngles,
+    drawAngles:  ArcEndsAngles,
     dateOfStart: number,
     duration:    number,
     maneuvre?:   ManeuvreInfo
 };
 
 type ManeuvreInfo = {
-    deltaVToPrevStep:   Vector3,
-    progradeDir:        Vector3,
-    manoeuvrePosition:  Vector3,
-    context:            ManeuvreContext
+    position:         Vector3,
+    deltaVToPrevStep: Vector3,
+    progradeDir:      Vector3,
+    context:          ManeuvreContext
 }
 
 type ManeuvreContext = 
@@ -213,12 +216,33 @@ type ManeuvreContext =
     | {type: "circularization"}
 ;
 
+type DepartureInfo = {
+    phaseParam: number,
+    ejVelParam: number,
+    dateParam:  number,
+};
+
 type LegInfo = {
-    duration:    number,
-    dsmOffset:   number,
-    theta:       number,
-    phi:         number
+    exitedBodyId:  number,
+    targetBodyId:  number,
+    durationParam: number,
+    duration:      number,
+    dsmParam:      number,
 }
+
+type FlybyInfo = {
+    flybyBodyId:    number,
+    normAngleParam: number,
+    periRadiParam:  number
+};
+
+type SecondArcData = {
+    preDSMState:   OrbitalState3D,
+    fbBodyId:      number,
+    fbBodyState:   OrbitalState3D,
+    flybyOrbit:    OrbitalElements3D,
+    soiEnterAngle: number,
+};
 
 type GenerationResult = {
     bestSteps:  TrajectoryStep[],

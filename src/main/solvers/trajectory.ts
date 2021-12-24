@@ -45,8 +45,8 @@ export class Trajectory {
 
         for(let i = 0; i < this.orbits.length; i++) {
             const orbit = this.orbits[i];
-            const {beginAngle, endAngle} = this.steps[i];
-            const orbitPoints = createOrbitPoints(orbit, samplePoints, scale, beginAngle, endAngle);
+            const {begin, end} = this.steps[i].drawAngles;
+            const orbitPoints = createOrbitPoints(orbit, samplePoints, scale, begin, end);
             const color = new THREE.Color(`hsl(${i*35 % 360}, 100%, 85%)`);
             const orbitLine = createLine(orbitPoints, resolution, {
                 color:      color.getHex(),
@@ -65,7 +65,7 @@ export class Trajectory {
             if(step.maneuvre){
                 const group = this.system.objectsOfBody(step.attractorId);
                 const sprite = createSprite(Trajectory.arrowMaterial, 0xFFFFFF, false, maneuvreArrowSize);
-                const {x, y, z} = step.maneuvre.manoeuvrePosition;
+                const {x, y, z} = step.maneuvre.position;
                 sprite.position.set(x, y, z);
                 sprite.position.multiplyScalar(scale);
                 group.add(sprite);
