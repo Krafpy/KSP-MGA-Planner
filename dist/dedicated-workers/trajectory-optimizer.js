@@ -28,7 +28,11 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                     this._bestDeltaV = trajectory.totalDeltaV;
                     this._bestTrajectory = trajectory;
                 }
-                return trajectory.totalDeltaV;
+                const lastIdx = trajectory.steps.length - 1;
+                const finalOrbit = trajectory.steps[lastIdx].orbitElts;
+                const totDV = trajectory.totalDeltaV;
+                const lastInc = Math.abs(finalOrbit.inclination);
+                return totDV + totDV * lastInc * 0.1;
             };
             const trajConfig = this._config.trajectorySearch;
             const { crossoverProba, diffWeight } = trajConfig;

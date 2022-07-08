@@ -202,12 +202,12 @@ class TrajectoryCalculator {
         // FIX: This causes wrong arc orbits recalculations in the case of resonant
         // swing bys, because of the Lambert solver not considering multirevolutions... 
         // I guess that's the problem ?
-        /*for(let i = 0; i < this._secondArcsData.length; i++){
+        for(let i = 0; i < this._secondArcsData.length; i++){
             const data = this._secondArcsData[i];
             const step = this.steps[3 + i*3];
             
             this._recomputeSecondArc(step, data);
-        }*/
+        }
     }
 
     /**
