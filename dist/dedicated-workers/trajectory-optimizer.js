@@ -13,6 +13,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
     }
     onWorkerDataPass(data) {
         this._depAltitude = data.depAltitude;
+        this._destAltitude = data.destAltitude;
         this._sequence = data.sequence;
         this._startDateMin = data.startDateMin;
         this._startDateMax = data.startDateMax;
@@ -59,7 +60,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         trajectory.addPrecomputedOrbits(this._bodiesOrbits);
         let attempts = 0;
         while (attempts < maxAttempts) {
-            trajectory.setParameters(this._depAltitude, this._startDateMin, this._startDateMax, agent);
+            trajectory.setParameters(this._depAltitude, this._destAltitude, this._startDateMin, this._startDateMax, agent);
             let failed = false;
             try {
                 trajectory.compute();

@@ -87,12 +87,13 @@ export function initEditor(controls, system, config, canvas) {
         const timeRangeStart = new TimeSelector("start", config, true);
         const timeRangeEnd = new TimeSelector("end", config, true);
         const depAltitude = new IntegerInput("start-altitude");
-        const updateAltitudeRange = (sequence) => {
-            const origin = sequence.bodies[0];
-            const max = Math.floor(0.75 * (origin.soi - origin.radius) / 1000);
-            depAltitude.setMinMax(0, max);
+        const destAltitude = new IntegerInput("end-altitude");
+        const updateAltitudeRange = (input, body) => {
+            const max = Math.floor((body.soi - body.radius) / 1000);
+            input.setMinMax(0, max);
         };
         depAltitude.value = config.editor.defaultAltitude;
+        destAltitude.value = config.editor.defaultAltitude;
         const customSequence = document.getElementById("custom-sequence");
         const deltaVPlot = new EvolutionPlot("evolution-plot");
         deltaVPlot.hide();
@@ -140,15 +141,18 @@ export function initEditor(controls, system, config, canvas) {
                 else {
                     sequence = FlybySequence.fromString(customSequence.value, system);
                 }
-                updateAltitudeRange(sequence);
+                updateAltitudeRange(depAltitude, sequence.bodies[0]);
+                const seqLen = sequence.length;
+                updateAltitudeRange(destAltitude, sequence.bodies[seqLen - 1]);
                 const startDate = timeRangeStart.dateSeconds;
                 const endDate = timeRangeEnd.dateSeconds;
                 if (endDate < startDate)
                     throw new Error("Departure date range end must be greater than the start date.");
-                const altitude = depAltitude.value * 1000;
+                const depAltitudeVal = depAltitude.value * 1000;
+                const destAltitudeVal = destAltitude.value * 1000;
                 resetFoundTrajectory();
                 const perfStart = performance.now();
-                await solver.searchOptimalTrajectory(sequence, startDate, endDate, altitude);
+                await solver.searchOptimalTrajectory(sequence, startDate, endDate, depAltitudeVal, destAltitudeVal);
                 console.log(`Search time: ${performance.now() - perfStart} ms`);
                 displayFoundTrajectory();
             }

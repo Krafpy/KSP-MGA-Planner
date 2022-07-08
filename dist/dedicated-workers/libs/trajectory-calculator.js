@@ -29,8 +29,9 @@ class TrajectoryCalculator {
     addPrecomputedOrbits(bodiesOrbits) {
         this._bodiesOrbits = bodiesOrbits;
     }
-    setParameters(depAltitude, startDateMin, startDateMax, params) {
+    setParameters(depAltitude, destAltitude, startDateMin, startDateMax, params) {
         this._depAltitude = depAltitude;
+        this._destAltitude = destAltitude;
         this._startDateMin = startDateMin;
         this._startDateMax = startDateMax;
         this._params = params;
@@ -91,6 +92,8 @@ class TrajectoryCalculator {
         const last = this._legs[numOfLegs - 1];
         this._computeFirstLegArc(last);
         this._computeLegSecondArcSimple(last);
+        this._computeInsertion();
+        this._computeCircularization();
     }
     get totalDeltaV() {
         let total = 0;
@@ -125,6 +128,81 @@ class TrajectoryCalculator {
         infos.duration = Math.max(minLegDuration, infos.duration);
     }
     recomputeLegsSecondArcs() {
+    }
+    _computeCircularization() {
+        const body = this._destinationBody;
+        const periapsisState = this._vesselState;
+        const radius = body.radius + this._destAltitude;
+        const circVelMag = Physics3D.circularVelocity(body, radius);
+        const currVelMag = mag3(periapsisState.vel);
+        const dvDir = normalize3(periapsisState.vel);
+        const dv = mult3(dvDir, circVelMag - currVelMag);
+        const newPeriapsisState = {
+            pos: periapsisState.pos,
+            vel: add3(periapsisState.vel, dv)
+        };
+        const circOrbit = Physics3D.stateToOrbitElements(newPeriapsisState, body);
+        const maneuvre = {
+            position: newPeriapsisState.pos,
+            deltaVToPrevStep: dv,
+            progradeDir: dvDir,
+            context: { type: "circularization" }
+        };
+        this.steps.push({
+            orbitElts: circOrbit,
+            attractorId: this._destinationBody.id,
+            angles: { begin: 0, end: 0 },
+            drawAngles: { begin: 0, end: TWO_PI },
+            duration: 0,
+            dateOfStart: this._lastStepEndDate,
+            maneuvre: maneuvre
+        });
+    }
+    _computeInsertion() {
+        const body = this._destinationBody;
+        const bodyVel = this._fbBodyState.vel;
+        const globalIncomingVel = this._vesselState.vel;
+        const relativeIncomingVel = sub3(globalIncomingVel, bodyVel);
+        const incomingVelMag = mag3(relativeIncomingVel);
+        const incomingVelDir = div3(relativeIncomingVel, incomingVelMag);
+        const normal = normalize3(cross(relativeIncomingVel, bodyVel));
+        const t_periDir = incomingVelDir;
+        const periRadius = body.radius + this._destAltitude;
+        const t_periPos = mult3(t_periDir, periRadius);
+        const periVelMag = Physics3D.deduceVelocityAtRadius(body, body.soi, incomingVelMag, periRadius);
+        const t_periVelDir = rotate3(t_periDir, normal, HALF_PI);
+        const t_periVel = mult3(t_periVelDir, periVelMag);
+        const t_periapsisState = { pos: t_periPos, vel: t_periVel };
+        const t_flybyOrbit = Physics3D.stateToOrbitElements(t_periapsisState, body);
+        const enterAngle = Physics3D.trueAnomalyAtRadius(t_flybyOrbit, body.soi);
+        const angles = { begin: -enterAngle, end: 0 };
+        const drawAngles = { begin: angles.begin, end: angles.end };
+        const t_incomingVel = Physics3D.orbitElementsToState(t_flybyOrbit, body, angles.begin).vel;
+        const t_incomingVelDir = normalize3(t_incomingVel);
+        const dotCross = dot3(cross(incomingVelDir, t_incomingVelDir), normal);
+        const dotVel = dot3(incomingVelDir, t_incomingVelDir);
+        const offsetAngle = Math.atan2(dotCross, dotVel);
+        const periPos = rotate3(t_periPos, normal, -offsetAngle);
+        const periVel = rotate3(t_periVel, normal, -offsetAngle);
+        const periapsisState = { pos: periPos, vel: periVel };
+        const insertionOrbit = Physics3D.stateToOrbitElements(periapsisState, body);
+        const tof = Physics3D.tofBetweenAnomalies(insertionOrbit, body, angles.begin, angles.end);
+        this.steps.push({
+            orbitElts: insertionOrbit,
+            attractorId: body.id,
+            angles: angles,
+            drawAngles: drawAngles,
+            duration: tof,
+            dateOfStart: this._lastStepEndDate
+        });
+        this._vesselState = periapsisState;
+        this._secondArcsData.push({
+            preDSMState: this._preDSMState,
+            fbBodyId: body.id,
+            fbBodyState: this._fbBodyState,
+            flybyOrbit: insertionOrbit,
+            soiEnterAngle: angles.begin
+        });
     }
     _recomputeSecondArc(lambertStep, arcData) {
         const fbBody = this.system[arcData.fbBodyId];

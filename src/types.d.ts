@@ -208,7 +208,7 @@ type ManeuvreInfo = {
     deltaVToPrevStep: Vector3,
     progradeDir:      Vector3,
     context:          ManeuvreContext
-}
+};
 
 type ManeuvreContext = 
     | {type: "ejection"}

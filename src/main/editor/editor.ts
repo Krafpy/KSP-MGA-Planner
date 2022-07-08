@@ -14,6 +14,7 @@ import { FlybySequence } from "../solvers/sequence.js";
 import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
+import { OrbitingBody } from "../objects/body.js";
 
 export function initEditor(controls: CameraController, system: SolarSystem, config: Config, canvas: HTMLCanvasElement){
     const systemTime = new TimeSelector("system", config);
@@ -115,12 +116,15 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
 
         // Numerical inputs
         const depAltitude = new IntegerInput("start-altitude");
-        const updateAltitudeRange = (sequence: FlybySequence) => {
-            const origin = sequence.bodies[0];
-            const max = Math.floor(0.75 * (origin.soi - origin.radius) / 1000);
-            depAltitude.setMinMax(0, max);
+        const destAltitude = new IntegerInput("end-altitude");
+
+        const updateAltitudeRange = (input: IntegerInput, body: OrbitingBody) => {
+            const max = Math.floor((body.soi - body.radius) / 1000);
+            input.setMinMax(0, max);
         };
+
         depAltitude.value = config.editor.defaultAltitude;
+        destAltitude.value = config.editor.defaultAltitude;
 
         // Custom sequence input
         const customSequence = document.getElementById("custom-sequence") as HTMLInputElement;
@@ -182,19 +186,24 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
                     sequence = FlybySequence.fromString(customSequence.value, system);
                 }
 
-                updateAltitudeRange(sequence);
+                updateAltitudeRange(depAltitude, sequence.bodies[0]);
+                const seqLen = sequence.length;
+                updateAltitudeRange(destAltitude, sequence.bodies[seqLen-1]);
 
                 const startDate = timeRangeStart.dateSeconds;
                 const endDate = timeRangeEnd.dateSeconds;
                 if(endDate < startDate)
                     throw new Error("Departure date range end must be greater than the start date.");
 
-                const altitude = depAltitude.value * 1000;
+                const depAltitudeVal = depAltitude.value * 1000;
+                const destAltitudeVal = destAltitude.value * 1000;
                 
                 resetFoundTrajectory();
 
                 const perfStart = performance.now();
-                await solver.searchOptimalTrajectory(sequence, startDate, endDate, altitude);
+                await solver.searchOptimalTrajectory(
+                    sequence, startDate, endDate, depAltitudeVal, destAltitudeVal
+                );
                 console.log(`Search time: ${performance.now() - perfStart} ms`);
                 
                 displayFoundTrajectory();
