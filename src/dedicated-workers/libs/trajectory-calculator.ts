@@ -8,6 +8,7 @@ class TrajectoryCalculator {
     private _preDSMState!: OrbitalState3D;
 
     private _depAltitude!:  number;
+    private _destAltitude!: number;
     private _startDateMin!: number;
     private _startDateMax!: number;
     private _params!:       Agent;
@@ -48,8 +49,15 @@ class TrajectoryCalculator {
         this._bodiesOrbits = bodiesOrbits;
     }
 
-    public setParameters(depAltitude: number, startDateMin: number, startDateMax: number, params: Agent){
+    public setParameters(
+        depAltitude:  number,
+        destAltitude: number,
+        startDateMin: number,
+        startDateMax: number,
+        params:       Agent
+    ){
         this._depAltitude  = depAltitude;
+        this._destAltitude = destAltitude;
         this._startDateMin = startDateMin;
         this._startDateMax = startDateMax;
         this._params = params;
@@ -134,6 +142,11 @@ class TrajectoryCalculator {
         const last = this._legs[numOfLegs-1];
         this._computeFirstLegArc(last);
         this._computeLegSecondArcSimple(last);
+
+        // Compute the insertion and circularization around
+        // the destination body
+        this._computeInsertion();
+        this._computeCircularization();
     }
 
     public get totalDeltaV(){
@@ -185,16 +198,141 @@ class TrajectoryCalculator {
      * Recomputes the second arc of a all legs accounting this time for SOI enter points,
      * thus providing a more precise visualization of the orbit.
      */
-    public recomputeLegsSecondArcs(){
+     public recomputeLegsSecondArcs(){
         // FIX: This causes wrong arc orbits recalculations in the case of resonant
         // swing bys, because of the Lambert solver not considering multirevolutions... 
         // I guess that's the problem ?
-        /*for(let i = 0; i < this._secondArcsData.length; i++){
+        for(let i = 0; i < this._secondArcsData.length; i++){
             const data = this._secondArcsData[i];
             const step = this.steps[3 + i*3];
             
             this._recomputeSecondArc(step, data);
-        }*/
+        }
+    }
+
+    /**
+     * Computes the circularization maneuver and orbit.
+     */
+    private _computeCircularization(){
+        const body = this._destinationBody;
+        const periapsisState = this._vesselState;
+        
+        const radius = body.radius + this._destAltitude;
+        const circVelMag = Physics3D.circularVelocity(body, radius);
+        const currVelMag = mag3(periapsisState.vel);
+        // Retrograde maneuver to slow down
+        const dvDir = normalize3(periapsisState.vel);
+        const dv = mult3(dvDir, circVelMag - currVelMag);
+
+        // Compute the circular orbit
+        const newPeriapsisState = {
+            pos: periapsisState.pos,
+            vel: add3(periapsisState.vel, dv)
+        };
+        const circOrbit = Physics3D.stateToOrbitElements(newPeriapsisState, body);
+
+        // Compute the maneuver
+        const maneuvre: ManeuvreInfo = {
+            position:         newPeriapsisState.pos,
+            deltaVToPrevStep: dv,
+            progradeDir:      dvDir,
+            context:          {type: "circularization"}
+        };
+
+        // Append the circular orbit
+        this.steps.push({
+            orbitElts:   circOrbit,
+            attractorId: this._destinationBody.id,
+            angles:      {begin: 0, end: 0},
+            drawAngles:  {begin: 0, end: TWO_PI},
+            duration:    0,
+            dateOfStart: this._lastStepEndDate,
+            maneuvre:    maneuvre
+        });
+    }
+
+    /**
+     * Computes the insertion orbit in the destination body's SOI.
+     */
+    private _computeInsertion(){
+        const body = this._destinationBody;
+
+        // Compute the relative velocity to the body when entering its SOI
+        const bodyVel = this._fbBodyState.vel;
+        const globalIncomingVel = this._vesselState.vel;
+        const relativeIncomingVel = sub3(globalIncomingVel, bodyVel);
+        const incomingVelMag = mag3(relativeIncomingVel);
+        const incomingVelDir = div3(relativeIncomingVel, incomingVelMag);
+
+        // Compute the normal vector of the orbit : we compute the vector perpendicular to the incoming
+        // relative velocity and the body velocity (relative to the main attractor)
+        const normal = normalize3(cross(relativeIncomingVel, bodyVel));
+        
+        // Compute the temporary periapsis position vector, it is colinear to the incoming velocity
+        // vector
+        const t_periDir = incomingVelDir;
+        const periRadius = body.radius + this._destAltitude;
+        const t_periPos = mult3(t_periDir, periRadius);
+
+        // Compute the temporary periapsis velocity, at this point on the orbit,
+        // the velocity vector is perpendicular to the periapsis vector.
+        const periVelMag = Physics3D.deduceVelocityAtRadius(body, body.soi, incomingVelMag, periRadius); 
+        const t_periVelDir = rotate3(t_periDir, normal, HALF_PI);
+        const t_periVel = mult3(t_periVelDir, periVelMag);
+
+        // Compute the temporary flyby orbit
+        const t_periapsisState = {pos: t_periPos, vel: t_periVel};
+        const t_flybyOrbit = Physics3D.stateToOrbitElements(t_periapsisState, body);
+
+        // Compute the SOI enter and exit angles
+        const enterAngle = Physics3D.trueAnomalyAtRadius(t_flybyOrbit, body.soi);
+        const angles = {begin: -enterAngle, end: 0};
+        const drawAngles = {begin: angles.begin, end: angles.end};
+
+        // Compute the angle between the incoming velocity vector and the velocity vector
+        // on the calculated orbit at the SOI enter point
+        const t_incomingVel = Physics3D.orbitElementsToState(t_flybyOrbit, body, angles.begin).vel;
+        const t_incomingVelDir = normalize3(t_incomingVel);
+        const dotCross = dot3(cross(incomingVelDir, t_incomingVelDir), normal);
+        const dotVel = dot3(incomingVelDir, t_incomingVelDir);
+        const offsetAngle = Math.atan2(dotCross, dotVel);
+        
+        // Recompute the flyby orbit by rotating the periapsis so that the incoming velocity calculated
+        // on the orbit matches the incoming velocity computed at the beginning.
+        // FIX: When `normAngle` is exactly 0 or TWO_PI, we must rotate by offsetAngle
+        // and not -offsetAngle... Why this happens ? I don't know, probably some floating point error
+        // stuff...
+        const periPos = rotate3(t_periPos, normal, -offsetAngle);
+        const periVel = rotate3(t_periVel, normal, -offsetAngle);
+        const periapsisState = {pos: periPos, vel: periVel};
+        const insertionOrbit = Physics3D.stateToOrbitElements(periapsisState, body);
+
+        // Compute the duration of the flyby
+        const tof = Physics3D.tofBetweenAnomalies(insertionOrbit, body, angles.begin, angles.end);
+        
+        // Append the insertion orbit
+        this.steps.push({
+            orbitElts:   insertionOrbit,
+            attractorId: body.id,
+            angles:      angles,
+            drawAngles:  drawAngles,
+            duration:    tof,
+            dateOfStart: this._lastStepEndDate
+        });
+
+        // Store the state of the vessel at periapsis for further
+        // circularization calculation
+        this._vesselState = periapsisState;
+
+        // Store the required information for eventual further recalculations of the
+        // legs' lambert arcs
+        this._secondArcsData.push({
+            preDSMState:    this._preDSMState,
+            fbBodyId:       body.id,
+            fbBodyState:    this._fbBodyState,
+            flybyOrbit:     insertionOrbit,
+            soiEnterAngle:  angles.begin
+        });
     }
 
     /**
@@ -260,14 +398,14 @@ class TrajectoryCalculator {
         const t_normal = normalize3(cross(relativeIncomingVel, bodyVel));
         const normal =  rotate3(t_normal, incomingVelDir, normAngle);    
         
-        // Compute the temporary periapsis position vector, it is colinear to the incoming velcity
+        // Compute the temporary periapsis position vector, it is colinear to the incoming velocity
         // vector
         const t_periDir = incomingVelDir;
         const {fbRadiusMaxScale} = this.config;
         const periRadius = lerp(body.radius, fbRadiusMaxScale * body.radius, flybyInfo.periRadiParam);
         const t_periPos = mult3(t_periDir, periRadius);
 
-        // Compute the temporary periapsis velocity velocity, at this point on the orbit,
+        // Compute the temporary periapsis velocity, at this point on the orbit,
         // the velocity vector is perpendicular to the periapsis vector.
         const periVelMag = Physics3D.deduceVelocityAtRadius(body, body.soi, incomingVelMag, periRadius); 
         const t_periVelDir = rotate3(t_periDir, normal, HALF_PI);

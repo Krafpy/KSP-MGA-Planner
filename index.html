@@ -164,6 +164,13 @@
                             km (above surface level)
                         </div>
                     </div>
+                    <div class="control-group">
+                        <label class="control-label" for="end-altitude">Destination altitude:</label>
+                        <div class="controls">
+                            <input class="number-input" name="end-altitude" id="end-altitude" type="number" value="0">
+                            km (above surface level)
+                        </div>
+                    </div>
                     <!-- Sequence optimization buttons and messages -->
                     <div class="form-actions">
                         <button class="submit-btn" id="search-btn">Search trajectory</button>
@@ -349,7 +356,8 @@
                             <strong>Earliest and latest departure date:</strong> the time range in which the departure date must stay.
                         </li>
                         <li>
-                            <strong>Departure altitude</strong>: the altitude of the parking orbit around the departure body.
+                            <strong>Departure and destination altitude:</strong> the altitude of the parking orbit
+                            around the departure and destination body.
                         </li>
                     </ul>
                     <p>
@@ -359,8 +367,6 @@
                     <p>
                         The resulting trajectory will be displayed in the interactive 3D window, alongside with
                         the details of each maneuver (ejection from the departure body and DSMs).
-                        Since the arrival conditions cannot be specified in advance, the circularization around the destination body is
-                        calculated with the final encounter conditions found by the optimizer.
                     </p>
 
                     <figure id="example-image-container">
@@ -380,11 +386,12 @@
                         of iterative optimization methods which <em>approximate</em> the optimal solution.
                         Thus this tool has no guarantee of giving the best trajectory, and therefore can propose
                         different trajectories for the same input settings. It is recommended to search for several trajectories
-                        and then choose the best one.
+                        and then choose the best one. It is also advised to look for small launch windows (i.e close earliest
+                        and latest departure dates) to improve the search.
                     </p>
                     <p>
                         The computed trajectory itself may not be feasible in game because
-                        the current implementation of the application may not consider some in game particularities.
+                        this tool may not consider some in game particularities.
                         Therefore the maneuvers' details are more indicative and fine tunings are necessary.
                     </p>
                     <p>

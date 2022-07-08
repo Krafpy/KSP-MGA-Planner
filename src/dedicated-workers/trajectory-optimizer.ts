@@ -6,6 +6,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
     private _bodiesOrbits!: OrbitalElements3D[];
 
     private _depAltitude!:  number;
+    private _destAltitude!: number;
     private _sequence!:     number[];
     private _startDateMin!: number;
     private _startDateMax!: number;
@@ -31,6 +32,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
 
     override onWorkerDataPass(data: any){
         this._depAltitude = data.depAltitude;
+        this._destAltitude = data.destAltitude;
         this._sequence = data.sequence;
         this._startDateMin = data.startDateMin;
         this._startDateMax = data.startDateMax;
@@ -50,7 +52,17 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                     this._bestDeltaV = trajectory.totalDeltaV;
                     this._bestTrajectory = trajectory;
                 }
-                return trajectory.totalDeltaV;
+                
+                // Get the circular final orbit
+                const lastIdx = trajectory.steps.length-1;
+                const finalOrbit = trajectory.steps[lastIdx].orbitElts;
+
+                const totDV = trajectory.totalDeltaV;
+                const lastInc = Math.abs(finalOrbit.inclination);
+                // Attempt to force a minimal inclination of the
+                // circular orbit around the destination body
+                // FIX : doesn't work so well...
+                return totDV + totDV*lastInc*0.1;
             };
             const trajConfig = this._config.trajectorySearch;
             const {crossoverProba, diffWeight} = trajConfig;
@@ -101,7 +113,9 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         // If an error occurs, the agent is randomized.
         let attempts = 0;
         while(attempts < maxAttempts){
-            trajectory.setParameters(this._depAltitude, this._startDateMin, this._startDateMax, agent);
+            trajectory.setParameters(
+                this._depAltitude, this._destAltitude, this._startDateMin, this._startDateMax, agent
+            );
             let failed = false;
             // FIX: "This radius is never reached" error thrown... why ?
             try {

@@ -13,6 +13,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
     }
     onWorkerDataPass(data) {
         this._depAltitude = data.depAltitude;
+        this._destAltitude = data.destAltitude;
         this._sequence = data.sequence;
         this._startDateMin = data.startDateMin;
         this._startDateMax = data.startDateMax;
@@ -27,7 +28,11 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                     this._bestDeltaV = trajectory.totalDeltaV;
                     this._bestTrajectory = trajectory;
                 }
-                return trajectory.totalDeltaV;
+                const lastIdx = trajectory.steps.length - 1;
+                const finalOrbit = trajectory.steps[lastIdx].orbitElts;
+                const totDV = trajectory.totalDeltaV;
+                const lastInc = Math.abs(finalOrbit.inclination);
+                return totDV + totDV * lastInc * 0.1;
             };
             const trajConfig = this._config.trajectorySearch;
             const { crossoverProba, diffWeight } = trajConfig;
@@ -59,7 +64,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         trajectory.addPrecomputedOrbits(this._bodiesOrbits);
         let attempts = 0;
         while (attempts < maxAttempts) {
-            trajectory.setParameters(this._depAltitude, this._startDateMin, this._startDateMax, agent);
+            trajectory.setParameters(this._depAltitude, this._destAltitude, this._startDateMin, this._startDateMax, agent);
             let failed = false;
             try {
                 trajectory.compute();

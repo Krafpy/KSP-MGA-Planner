@@ -57,15 +57,15 @@ export class CameraController extends THREE.OrbitControls {
 
     public onDoubleClick(event: MouseEvent){
         const rect = this.canvas.getBoundingClientRect();
-        const w2 = this.canvas.width * 0.5;
-        const h2 = this.canvas.height * 0.5;
+        const w2 = this.canvas.clientWidth * 0.5;
+        const h2 = this.canvas.clientHeight * 0.5;
         const mouse = new THREE.Vector2(
             event.clientX - rect.left - w2,
             event.clientY - rect.top - h2,
         );
         mouse.y *= -1;
         
-        let minDst = -1;
+        let minDst = Infinity;
         let tgBody = this.system.sun;
 
         const {mouseFocusDst} = this.config.solarSystem;
@@ -75,7 +75,7 @@ export class CameraController extends THREE.OrbitControls {
             const dst = screenPos.distanceTo(mouse);
 
             if(objects.visible && dst < mouseFocusDst){
-                if(minDst < 0 || dst < minDst) {
+                if(dst < minDst) {
                     minDst = dst;
                     tgBody = body;
                 }
