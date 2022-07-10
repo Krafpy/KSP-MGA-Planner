@@ -139,25 +139,40 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
         let trajectory: Trajectory | undefined;
 
         // Result panel
-        const maneuvreSelector = new Selector("maneuvre-selector");
+        const detailsSelector = new Selector("details-selector");
         const stepSlider = new DiscreteRange("displayed-steps-slider");
-        maneuvreSelector.disable();
+
+        detailsSelector.disable();
         stepSlider.disable();
 
-        const resultSpans = {
-            dateSpan:       document.getElementById("maneuvre-date")         as HTMLSpanElement,
-            progradeDVSpan: document.getElementById("prograde-delta-v")      as HTMLSpanElement,
-            normalDVSpan:   document.getElementById("normal-delta-v")        as HTMLSpanElement,
-            radialDVSpan:   document.getElementById("radial-delta-v")        as HTMLSpanElement,
-            depDateSpan:    document.getElementById("result-departure-date") as HTMLSpanElement,
-            totalDVSpan:    document.getElementById("result-total-delta-v")  as HTMLSpanElement,
-            maneuvreNumber: document.getElementById("maneuvre-number")       as HTMLSpanElement,
+        const getSpan = (id: string) =>  document.getElementById(id) as HTMLSpanElement;
+
+        const resultItems = {
+            dateSpan:         getSpan("maneuvre-date"),
+            progradeDVSpan:   getSpan("prograde-delta-v"),
+            normalDVSpan:     getSpan("normal-delta-v"),
+            radialDVSpan:     getSpan("radial-delta-v"),
+            depDateSpan:      getSpan("result-departure-date") ,
+            totalDVSpan:      getSpan("result-total-delta-v"),
+            maneuvreNumber:   getSpan("maneuvre-number"),
+
+            flybyNumberSpan:  getSpan("flyby-number"),
+            startDateSpan:    getSpan("flyby-start-date"),
+            endDateSpan:      getSpan("flyby-end-date"),
+            periAltitudeSpan: getSpan("flyby-periapsis-altitude"),
+            inclinationSpan:  getSpan("flyby-inclination"),
+
+            detailsSelector:  detailsSelector,
+            stepSlider:       stepSlider,
+
+            maneuverDiv:      document.getElementById("maneuvre-details") as HTMLDivElement,
+            flybyDiv:         document.getElementById("flyby-details")    as HTMLDivElement
         };
 
         const resetFoundTrajectory = () => {
             deltaVPlot.reveal();
-            maneuvreSelector.clear();
-            maneuvreSelector.disable();
+            detailsSelector.clear();
+            detailsSelector.disable();
             stepSlider.disable();
             if(trajectory){
                 trajectory.remove();
@@ -167,10 +182,10 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
         const displayFoundTrajectory = () => {
             trajectory = new Trajectory(solver.bestTrajectorySteps, system, config);
             trajectory.draw(canvas);
-            trajectory.fillResultControls(maneuvreSelector, resultSpans, stepSlider, systemTime, controls);
+            trajectory.fillResultControls(resultItems, systemTime, controls);
 
-            maneuvreSelector.select(0);
-            maneuvreSelector.enable();
+            detailsSelector.select(0);
+            detailsSelector.enable();
             stepSlider.enable();
 
             console.log(solver.bestDeltaV);

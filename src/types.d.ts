@@ -200,7 +200,8 @@ type TrajectoryStep = {
     drawAngles:  ArcEndsAngles,
     dateOfStart: number,
     duration:    number,
-    maneuvre?:   ManeuvreInfo
+    maneuvre?:   ManeuvreInfo,
+    flyby?:      FlybyInfo
 };
 
 type ManeuvreInfo = {
@@ -210,19 +211,28 @@ type ManeuvreInfo = {
     context:          ManeuvreContext
 };
 
+type FlybyInfo = {
+    bodyId:       number,
+    soiEnterDate: number,
+    soiExitDate:  number,
+    periRadius:   number,
+    inclination:  number
+};
+
+
 type ManeuvreContext = 
     | {type: "ejection"}
     | {type: "dsm", originId: number, targetId: number}
     | {type: "circularization"}
 ;
 
-type DepartureInfo = {
+type AgentDepartureInfo = {
     phaseParam: number,
     ejVelParam: number,
     dateParam:  number,
 };
 
-type LegInfo = {
+type AgentLegInfo = {
     exitedBodyId:  number,
     targetBodyId:  number,
     durationParam: number,
@@ -230,7 +240,7 @@ type LegInfo = {
     dsmParam:      number,
 }
 
-type FlybyInfo = {
+type AgentFlybyInfo = {
     flybyBodyId:    number,
     normAngleParam: number,
     periRadiParam:  number
@@ -252,19 +262,46 @@ type GenerationResult = {
 }
 
 type ManeuvreDetails = {
-    stepIndex:  number,
-    dateMET:    number,
-    progradeDV: number,
-    normalDV:   number,
-    radialDV:   number
+    stepIndex:   number,
+    dateMET:     number,
+    progradeDV:  number,
+    normalDV:    number,
+    radialDV:    number,
 };
 
-type ResultPanelSpans = {
-    dateSpan:       HTMLSpanElement,
-    progradeDVSpan: HTMLSpanElement,
-    normalDVSpan:   HTMLSpanElement,
-    radialDVSpan:   HTMLSpanElement,
-    depDateSpan:    HTMLSpanElement,
-    totalDVSpan:    HTMLSpanElement;
-    maneuvreNumber: HTMLSpanElement
-}
+type FlybyDetails = {
+    bodyId:          number,
+    soiEnterDateMET: number,
+    soiExitDateMET:  number,
+    periAltitude:    number,
+    inclinationDeg:  number
+};
+
+type ResultPannelItems = {
+    dateSpan:         HTMLSpanElement,
+    progradeDVSpan:   HTMLSpanElement,
+    normalDVSpan:     HTMLSpanElement,
+    radialDVSpan:     HTMLSpanElement,
+    depDateSpan:      HTMLSpanElement,
+    totalDVSpan:      HTMLSpanElement,
+    maneuvreNumber:   HTMLSpanElement,
+
+    flybyNumberSpan:  HTMLSpanElement,
+    startDateSpan:    HTMLSpanElement,
+    endDateSpan:      HTMLSpanElement,
+    periAltitudeSpan: HTMLSpanElement,
+    inclinationSpan:  HTMLSpanElement
+
+    detailsSelector:  Selector,
+    stepSlider:       DiscreteRange,
+
+    maneuverDiv:      HTMLDivElement,
+    flybyDiv:         HTMLDivElement
+};
+
+type DetailsSelectorOption = {
+    text:   string,
+    index:  number,
+    type:   "maneuver" | "flyby",
+    origin: number
+};

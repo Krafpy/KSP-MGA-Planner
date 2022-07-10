@@ -100,23 +100,33 @@ export function initEditor(controls, system, config, canvas) {
         const solver = new TrajectorySolver(system, config, deltaVPlot);
         const paramsErr = new ErrorMessage("search-params-error");
         let trajectory;
-        const maneuvreSelector = new Selector("maneuvre-selector");
+        const detailsSelector = new Selector("details-selector");
         const stepSlider = new DiscreteRange("displayed-steps-slider");
-        maneuvreSelector.disable();
+        detailsSelector.disable();
         stepSlider.disable();
-        const resultSpans = {
-            dateSpan: document.getElementById("maneuvre-date"),
-            progradeDVSpan: document.getElementById("prograde-delta-v"),
-            normalDVSpan: document.getElementById("normal-delta-v"),
-            radialDVSpan: document.getElementById("radial-delta-v"),
-            depDateSpan: document.getElementById("result-departure-date"),
-            totalDVSpan: document.getElementById("result-total-delta-v"),
-            maneuvreNumber: document.getElementById("maneuvre-number"),
+        const getSpan = (id) => document.getElementById(id);
+        const resultItems = {
+            dateSpan: getSpan("maneuvre-date"),
+            progradeDVSpan: getSpan("prograde-delta-v"),
+            normalDVSpan: getSpan("normal-delta-v"),
+            radialDVSpan: getSpan("radial-delta-v"),
+            depDateSpan: getSpan("result-departure-date"),
+            totalDVSpan: getSpan("result-total-delta-v"),
+            maneuvreNumber: getSpan("maneuvre-number"),
+            flybyNumberSpan: getSpan("flyby-number"),
+            startDateSpan: getSpan("flyby-start-date"),
+            endDateSpan: getSpan("flyby-end-date"),
+            periAltitudeSpan: getSpan("flyby-periapsis-altitude"),
+            inclinationSpan: getSpan("flyby-inclination"),
+            detailsSelector: detailsSelector,
+            stepSlider: stepSlider,
+            maneuverDiv: document.getElementById("maneuvre-details"),
+            flybyDiv: document.getElementById("flyby-details")
         };
         const resetFoundTrajectory = () => {
             deltaVPlot.reveal();
-            maneuvreSelector.clear();
-            maneuvreSelector.disable();
+            detailsSelector.clear();
+            detailsSelector.disable();
             stepSlider.disable();
             if (trajectory) {
                 trajectory.remove();
@@ -125,9 +135,9 @@ export function initEditor(controls, system, config, canvas) {
         const displayFoundTrajectory = () => {
             trajectory = new Trajectory(solver.bestTrajectorySteps, system, config);
             trajectory.draw(canvas);
-            trajectory.fillResultControls(maneuvreSelector, resultSpans, stepSlider, systemTime, controls);
-            maneuvreSelector.select(0);
-            maneuvreSelector.enable();
+            trajectory.fillResultControls(resultItems, systemTime, controls);
+            detailsSelector.select(0);
+            detailsSelector.enable();
             stepSlider.enable();
             console.log(solver.bestDeltaV);
         };

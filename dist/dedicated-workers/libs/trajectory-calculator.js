@@ -270,13 +270,21 @@ class TrajectoryCalculator {
         const periapsisState = { pos: periPos, vel: periVel };
         const flybyOrbit = Physics3D.stateToOrbitElements(periapsisState, body);
         const tof = Physics3D.tofBetweenAnomalies(flybyOrbit, body, angles.begin, angles.end);
+        const flybyDetails = {
+            bodyId: body.id,
+            soiEnterDate: this._lastStepEndDate,
+            soiExitDate: this._lastStepEndDate + tof,
+            periRadius: periRadius,
+            inclination: flybyOrbit.inclination
+        };
         this.steps.push({
             orbitElts: flybyOrbit,
             attractorId: body.id,
             angles: angles,
             drawAngles: drawAngles,
             duration: tof,
-            dateOfStart: this._lastStepEndDate
+            dateOfStart: this._lastStepEndDate,
+            flyby: flybyDetails
         });
         const exitState = Physics3D.orbitElementsToState(flybyOrbit, body, exitAngle);
         this._vesselState = exitState;
