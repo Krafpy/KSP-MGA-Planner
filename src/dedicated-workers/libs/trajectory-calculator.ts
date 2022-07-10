@@ -15,9 +15,9 @@ class TrajectoryCalculator {
 
     private _bodiesOrbits!: OrbitalElements3D[];
     
-    private _legs:   LegInfo[] = [];
-    private _flybys: FlybyInfo[] = [];
-    private _departureInfos!: DepartureInfo;
+    private _legs:   AgentLegInfo[] = [];
+    private _flybys: AgentFlybyInfo[] = [];
+    private _departureInfos!: AgentDepartureInfo;
 
     private _secondArcsData: SecondArcData[] = [];
 
@@ -167,7 +167,7 @@ class TrajectoryCalculator {
      * parameters
      * @param infos The leg infos to complete
      */
-    private _computeLegDuration(infos: LegInfo){
+    private _computeLegDuration(infos: AgentLegInfo){
         const exitedBody = this.system[infos.exitedBodyId];
         const {durationParam} = infos;
         const attr = this._mainAttractor;
@@ -381,7 +381,7 @@ class TrajectoryCalculator {
      * Computes the flyby orbit with the provided parameters.
      * @param flybyInfo The flyby parameters
      */
-    private _computeFlyby(flybyInfo: FlybyInfo){
+    private _computeFlyby(flybyInfo: AgentFlybyInfo){
         const body = this.system[flybyInfo.flybyBodyId];
 
         // Compute the relative velocity to the body when entering its SOI
@@ -442,13 +442,22 @@ class TrajectoryCalculator {
         const tof = Physics3D.tofBetweenAnomalies(flybyOrbit, body, angles.begin, angles.end);
         
         // Append the flyby orbit
+        const flybyDetails: FlybyInfo = {
+            bodyId:       body.id,
+            soiEnterDate: this._lastStepEndDate,
+            soiExitDate:  this._lastStepEndDate + tof,
+            periRadius:   periRadius,
+            inclination:  flybyOrbit.inclination
+        };
+
         this.steps.push({
             orbitElts:   flybyOrbit,
             attractorId: body.id,
             angles:      angles,
             drawAngles:  drawAngles,
             duration:    tof,
-            dateOfStart: this._lastStepEndDate
+            dateOfStart: this._lastStepEndDate,
+            flyby:       flybyDetails
         });
 
         // Compute the vessel state relative to the body when exiting its SOI
@@ -471,7 +480,7 @@ class TrajectoryCalculator {
      * supposing a null radius SOI.
      * @param legInfo The leg parameters
      */
-    private _computeLegSecondArcSimple(legInfo: LegInfo){
+    private _computeLegSecondArcSimple(legInfo: AgentLegInfo){
         const attr = this._mainAttractor;
         const lastStep = this._lastStep;
         const preDSMState = this._vesselState;
@@ -540,7 +549,7 @@ class TrajectoryCalculator {
      * Computes the next leg first arc with the provided parameters.
      * @param legInfo The parameters of the leg
      */
-    private _computeFirstLegArc(legInfo: LegInfo){
+    private _computeFirstLegArc(legInfo: AgentLegInfo){
         // Compute the state of the vessel relatived to the exited body after exiting its SOI
         /*const lastStep = this._lastStep;
         const exitedBody = this.system[lastStep.attractorId];

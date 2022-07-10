@@ -222,13 +222,21 @@
                 <!-- End of the 3D display panel -->
 
                 <div id="result-panel">
-                    <h2 class="calculation-panel-title">Calculated trajectory</h2>
+                    <div id="result-panel-header">
+                        <h2 class="calculation-panel-title">Calculated trajectory</h2>
+                        <div id="steps-slider-control-group" class="control-group">
+                            <label class="control-label" for="displayed-steps-slider">Displayed steps:</label>
+                            <div id="steps-slider-controls" class="controls">
+                                <input name="displayed-steps-slider" id="displayed-steps-slider" type="range" min="0" max="1" value="1" disabled>
+                            </div>
+                        </div>
+                    </div>
                     <div id="result-sub-panels">
                         <div id="result-controls">
                             
                             <div class="control-group">
                                 <label class="control-label">Departure date:</label>
-                                <p><strong><span id="result-departure-date">--</span> UT</strong></p>
+                                <p><strong><span id="result-departure-date" class="clickable-date">--</span> UT</strong></p>
                             </div>
                             
                             <div class="control-group">
@@ -237,32 +245,37 @@
                             </div>
                             
                             <div class="control-group">
-                                <label class="control-label" for="displayed-steps-slider">Displayed steps:</label>
+                                <label class="control-label" for="details-selector">Maneuvers:</label>
                                 <div class="controls">
-                                    <input name="displayed-steps-slider" id="displayed-steps-slider" type="range" min="0" max="1" value="1" disabled>
-                                </div>
-                            </div>
-                            
-                            <div class="control-group">
-                                <label class="control-label" for="maneuvre-selector">Maneuvres:</label>
-                                <div class="controls">
-                                    <select id="maneuvre-selector" name="maneuvre-selector" disabled>
+                                    <select id="details-selector" name="details-selector" disabled>
                                         <!-- filled by js -->
                                     </select>
                                 </div>
                             </div>
-
+                            
                         </div>
                         <!-- End of result controls -->
 
-                        <div id="maneuvre-details">
-                            <h3>Maneuver <span id="maneuvre-number"></span> details:</h3>
-                            <ul>
-                                <li><strong>Date:</strong> <span id="maneuvre-date">--</span> MET</li>
-                                <li><strong>Prograde ΔV:</strong> <span id="prograde-delta-v">--</span> m/s</li>
-                                <li><strong>Normal ΔV:</strong> <span id="normal-delta-v">--</span> m/s</li>
-                                <li><strong>Radial ΔV:</strong> <span id="radial-delta-v">--</span> m/s</li>
-                            </ul>
+                        <div>
+                            <div id="maneuvre-details" class="result-details">
+                                <h3>Maneuver <span id="maneuvre-number"></span> details:</h3>
+                                <ul>
+                                    <li><strong>Date:</strong> <span id="maneuvre-date" class="clickable-date">--</span> MET</li>
+                                    <li><strong>Prograde ΔV:</strong> <span id="prograde-delta-v">--</span> m/s</li>
+                                    <li><strong>Normal ΔV:</strong> <span id="normal-delta-v">--</span> m/s</li>
+                                    <li><strong>Radial ΔV:</strong> <span id="radial-delta-v">--</span> m/s</li>
+                                </ul>
+                            </div>
+
+                            <div id="flyby-details" class="result-details" hidden>
+                                <h3>Flyby <span id="flyby-number"></span> details:</h3>
+                                <ul>
+                                    <li><strong>SOI enter date:</strong> <span id="flyby-start-date" class="clickable-date">--</span> MET</li>
+                                    <li><strong>SOI exit date:</strong> <span id="flyby-end-date" class="clickable-date">--</span> MET</li>
+                                    <li><strong>Periapsis altitude:</strong> <span id="flyby-periapsis-altitude">--</span> km</li>
+                                    <li><strong>Inclination:</strong> <span id="flyby-inclination">--</span>°</li>
+                                </ul>
+                            </div>
                         </div>
                         <!-- End of maneuvre details -->
                     </div>
@@ -366,7 +379,7 @@
                     </p>
                     <p>
                         The resulting trajectory will be displayed in the interactive 3D window, alongside with
-                        the details of each maneuver (ejection from the departure body and DSMs).
+                        the details of each maneuver (ejection from the departure body and DSMs) and flybys' information.
                     </p>
 
                     <figure id="example-image-container">

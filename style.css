@@ -387,37 +387,69 @@ input[type="range"]
     flex-direction: row;
 }
 
-#maneuvre-details
+.result-details
 {
     margin-left: 0;
 }
 
-#maneuvre-details ul
+.result-details ul
 {
     margin-top: 0px;
     margin-bottom: 0px;
     padding-left: 20px;
 }
 
-#maneuvre-details h3
+.result-details h3
 {
     margin-top: 0;
 }
 
-#maneuvre-details li strong
+.result-details li strong
 {
     display: inline-block;
-    width: 100px;
+    width: 127px;
 }
 
-#result-departure-date, #maneuvre-date
+.clickable-date
 {
     color: rgb(86, 169, 224);
 }
 
-#result-departure-date:hover, #maneuvre-date:hover
+.clickable-date:hover
 {
     cursor: pointer;
+}
+
+#result-panel-header
+{
+    display: flex;
+    justify-content: space-between;
+}
+
+#steps-slider-control-group
+{
+    margin-bottom: 0;
+}
+
+#steps-slider-controls
+{
+    width: auto;
+}
+
+#displayed-steps-slider
+{
+    margin-bottom: 0;
+    margin-top: 5px;
+}
+
+#result-controls .controls
+{
+    width: auto;
+}
+
+#result-controls
+{
+    width: 413px;
 }
 
 /* Paragraphs */
