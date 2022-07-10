@@ -180,9 +180,17 @@ function rotate3(v: Vector3, axis: Vector3, angle: number) : Vector3 {
     const c = Math.cos(angle);
     const s = Math.sin(angle);
 
-    const v1 = mult3(v, c);
+    /*const v1 = mult3(v, c);
     const v2 = mult3(cross(axis, v), s);
     const v3 = mult3(axis, dot3(axis, v) * (1 - c));
 
-    return add3(add3(v1, v2), v3);
+    return add3(add3(v1, v2), v3);*/
+
+    const kdv = dot3(axis, v) * (1 - c);
+
+    return {
+        x: v.x*c + (axis.y*v.z - axis.z*v.y)*s + axis.x*kdv,
+        y: v.y*c + (axis.z*v.x - axis.x*v.z)*s + axis.y*kdv,
+        z: v.z*c + (axis.x*v.y - axis.y*v.x)*s + axis.z*kdv
+    };
 }
