@@ -45,7 +45,8 @@ interface SystemDrawSettings {
 interface OrbitSettings {
     readonly planetSampPoints:  number;
     readonly satSampPoints:     number;
-    readonly lineWidth:         number;
+    readonly orbitLineWidth:    number;
+    readonly arcLineWidth:      number; 
 }
 
 interface TrajectoryDrawSettings {

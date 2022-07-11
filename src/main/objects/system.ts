@@ -79,7 +79,7 @@ export class SolarSystem {
                 });
 
                 const {scale} = this.config.rendering;
-                const {satSampPoints, planetSampPoints, lineWidth} = this.config.orbit;
+                const {satSampPoints, planetSampPoints, orbitLineWidth} = this.config.orbit;
                 const {planetFarSize, satFarSize} = this.config.solarSystem;
 
                 const sunSprite = createSprite(material, this.sun.color, true, scale * this.sun.radius * 2);
@@ -99,7 +99,7 @@ export class SolarSystem {
                     const orbitPoints = createOrbitPoints(orbit, samplePts, scale);
                     const ellipse = createLine(orbitPoints, canvas, {
                         color: color,
-                        linewidth: lineWidth,
+                        linewidth: orbitLineWidth,
                     });
                     parentGroup.add(ellipse);
 

@@ -42,22 +42,25 @@ export class Trajectory {
     }
 
     private _createTrajectoryArcs(resolution: {width: number, height: number}){
-        const {lineWidth} = this.config.orbit;
+        const {arcLineWidth} = this.config.orbit;
         const {samplePoints} = this.config.trajectoryDraw;
         const {scale} = this.config.rendering;
-
+        
+        let hue = 0;
         for(let i = 0; i < this.orbits.length; i++) {
             const orbit = this.orbits[i];
             const {begin, end} = this.steps[i].drawAngles;
             const orbitPoints = createOrbitPoints(orbit, samplePoints, scale, begin, end);
-            const color = new THREE.Color(`hsl(${i*35 % 360}, 100%, 85%)`);
+            const color = new THREE.Color(`hsl(${hue}, 100%, 70%)`);
             const orbitLine = createLine(orbitPoints, resolution, {
                 color:      color.getHex(),
-                linewidth:  lineWidth,
+                linewidth:  arcLineWidth,
             });
             const group = this.system.objectsOfBody(orbit.attractor.id);
             group.add(orbitLine);
             this._objects.push(orbitLine);
+
+            hue = (hue + 30) % 360;
         }
     }
 

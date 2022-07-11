@@ -15,7 +15,8 @@ solarSystem:
 orbit:
   satSampPoints:      1000          # sample points for satellites' orbits
   planetSampPoints:   10000         # sample points for planets' orbits
-  lineWidth:          1.5           # width of the rendered orbit lines
+  orbitLineWidth:     1.5           # width of the rendered orbit lines
+  arcLineWidth:       2.25          # width of the rendered trajectory arc lines
 
 camera:
   startDist:          100           # distance from sun of start
