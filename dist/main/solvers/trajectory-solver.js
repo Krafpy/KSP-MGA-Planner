@@ -9,10 +9,11 @@ export class TrajectorySolver {
         this._cancelled = false;
         this._running = false;
         this._population = [];
+        this._fitnesses = [];
         this._deltaVs = [];
         this._numChunks = 0;
         this._chunkIndices = [];
-        this.bestTrajectorySteps = [];
+        this.bestSteps = [];
         this.bestDeltaV = 0;
         this._workerPool = new WorkerPool("dist/dedicated-workers/trajectory-optimizer.js", this.config);
         this._workerPool.initialize({ system: this.system.data, config: this.config });
@@ -87,7 +88,7 @@ export class TrajectorySolver {
         for (let i = 0; i < this._numChunks; i++) {
             inputs[i] = {
                 population: this._population,
-                deltaVs: this._deltaVs,
+                fitnesses: this._fitnesses,
             };
         }
         const results = await this._workerPool.runPool(inputs);
@@ -99,21 +100,24 @@ export class TrajectorySolver {
     }
     _mergeResultsChunks(results) {
         const popChunks = [];
-        const dVChunks = [];
+        const fitChunks = [];
+        const dVsChunks = [];
         let bestDeltaV = Infinity;
         let bestSteps = [];
         for (let i = 0; i < this._numChunks; i++) {
             const chunk = results[i];
             popChunks.push(chunk.popChunk);
-            dVChunks.push(chunk.fitChunk);
+            fitChunks.push(chunk.fitChunk);
+            dVsChunks.push(chunk.dVsChunk);
             if (chunk.bestDeltaV < bestDeltaV) {
-                bestDeltaV = chunk.bestDeltaV;
                 bestSteps = chunk.bestSteps;
+                bestDeltaV = chunk.bestDeltaV;
             }
         }
         this._population = mergeArrayChunks(popChunks);
-        this._deltaVs = mergeArrayChunks(dVChunks);
-        this.bestTrajectorySteps = bestSteps;
+        this._fitnesses = mergeArrayChunks(fitChunks);
+        this._deltaVs = mergeArrayChunks(dVsChunks);
+        this.bestSteps = bestSteps;
         this.bestDeltaV = bestDeltaV;
     }
 }

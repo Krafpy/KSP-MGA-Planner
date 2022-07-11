@@ -3,28 +3,29 @@
  */
 class ChunkedEvolver {
     public readonly chunkSize!: number;
+    public readonly chunkStart!: number;
+    public readonly chunkEnd!: number;
+    public readonly agentDim!: number;
+
+    public fitness!: (x: Agent) => number;
+    public cr!: number;
+    public f!:  number;
 
     /**
      * Instantiates an evolver object, used to evolve a specified chunk of a whole population.
      * @param chunkStart The start index of the chunk in the population
      * @param chunkEnd The end index (inclusive) of the chunk in the population
-     * @param agentDim The dimension size of agents
-     * @param fitness The fitness function
-     * @param cr The CR coefficient of the DE
-     * @param f The F coefficient of the DE
+     * @param settings The settings for the evolution
      */
-    constructor(
-        public readonly chunkStart: number,
-        public readonly chunkEnd:   number,
-        public readonly agentDim:   number,
+    constructor(chunkStart: number, chunkEnd: number, settings: EvolutionSettings){
+        this.chunkStart = chunkStart;
+        this.chunkEnd = chunkEnd;
+        this.chunkSize = chunkEnd - chunkStart + 1;
 
-        public readonly fitness:    (x: Agent) => number,
-        public readonly cr:         number,
-        public readonly f:          number,
-    ){
-        const ce = chunkEnd;
-        const cs = chunkStart;
-        this.chunkSize = ce - cs + 1;
+        this.agentDim = settings.agentDim;
+        this.fitness = settings.fitness;
+        this.cr = settings.cr;
+        this.f = settings.f;
     }
 
     /**
@@ -83,8 +84,10 @@ class ChunkedEvolver {
      * @returns The new population chunk with it's fitness at generation G + 1
      */
     public evolvePopulationChunk(population: Agent[], fitnesses: number[]){
-        const dim = population[0].length;
+        const dim = this.agentDim;
 
+        const updated: number[] = [];
+        
         const nextPopChunk: Agent[] = Array(this.chunkSize);
         const nextFitChunk: number[] = Array(this.chunkSize);
 
@@ -109,6 +112,7 @@ class ChunkedEvolver {
             if(fy < fx) {
                 nextPopChunk[index] = y;
                 nextFitChunk[index] = fy;
+                updated.push(index);
             } else {
                 nextPopChunk[index] = x;
                 nextFitChunk[index] = fx;
@@ -117,8 +121,9 @@ class ChunkedEvolver {
 
         return {
             popChunk: nextPopChunk,
-            fitChunk: nextFitChunk
-        }
+            fitChunk: nextFitChunk,
+            updated:  updated
+        };
     }
 
     /**

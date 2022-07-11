@@ -1,6 +1,11 @@
 "use strict";
 importScripts("libs/common.js", "libs/evolution.js", "libs/math.js", "libs/physics-3d.js", "libs/lambert.js", "libs/trajectory-calculator.js");
 class TrajectoryOptimizer extends WorkerEnvironment {
+    constructor() {
+        super(...arguments);
+        this._newDeltaVs = [];
+        this._deltaVs = [];
+    }
     onWorkerInitialize(data) {
         this._config = data.config;
         this._system = data.system;
@@ -19,6 +24,9 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         this._startDateMax = data.startDateMax;
     }
     onWorkerRun(input) {
+        this._newDeltaVs = [];
+        let popChunk;
+        let fitChunk;
         if (input.start) {
             const numLegs = this._sequence.length - 1;
             const agentDim = 3 + numLegs * 4 - 2;
@@ -31,32 +39,38 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                 const lastIdx = trajectory.steps.length - 1;
                 const finalOrbit = trajectory.steps[lastIdx].orbitElts;
                 const totDV = trajectory.totalDeltaV;
+                this._newDeltaVs.push(totDV);
                 const lastInc = Math.abs(finalOrbit.inclination);
                 return totDV + totDV * lastInc * 0.1;
             };
             const trajConfig = this._config.trajectorySearch;
             const { crossoverProba, diffWeight } = trajConfig;
             const { chunkStart, chunkEnd } = input;
-            this._evolver = new ChunkedEvolver(chunkStart, chunkEnd, agentDim, fitness, crossoverProba, diffWeight);
+            const evolSettings = {
+                agentDim, fitness,
+                cr: crossoverProba, f: diffWeight
+            };
+            this._evolver = new ChunkedEvolver(chunkStart, chunkEnd, evolSettings);
             this._bestDeltaV = Infinity;
-            const popChunk = this._evolver.createRandomPopulationChunk();
-            const dvChunk = this._evolver.evaluateChunkFitness(popChunk);
-            sendResult({
-                bestSteps: this._bestTrajectory.steps,
-                bestDeltaV: this._bestDeltaV,
-                fitChunk: dvChunk,
-                popChunk: popChunk,
-            });
+            popChunk = this._evolver.createRandomPopulationChunk();
+            fitChunk = this._evolver.evaluateChunkFitness(popChunk);
+            this._deltaVs = [...this._newDeltaVs];
         }
         else {
-            const { population, deltaVs } = input;
-            const { popChunk, fitChunk } = this._evolver.evolvePopulationChunk(population, deltaVs);
-            sendResult({
-                popChunk, fitChunk,
-                bestSteps: this._bestTrajectory.steps,
-                bestDeltaV: this._bestDeltaV
-            });
+            const { population, fitnesses } = input;
+            const results = this._evolver.evolvePopulationChunk(population, fitnesses);
+            popChunk = results.popChunk;
+            fitChunk = results.fitChunk;
+            for (const i of results.updated) {
+                this._deltaVs[i] = this._newDeltaVs[i];
+            }
         }
+        sendResult({
+            fitChunk, popChunk,
+            bestSteps: this._bestTrajectory.steps,
+            bestDeltaV: this._bestDeltaV,
+            dVsChunk: this._deltaVs
+        });
     }
     _computeTrajectory(agent, maxAttempts = 1000) {
         const trajConfig = this._config.trajectorySearch;

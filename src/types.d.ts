@@ -160,6 +160,13 @@ type EvaluationNode = {
 
 type Agent = number[];
 
+type EvolutionSettings = {
+    agentDim: number
+    fitness: (x: Agent) => number,
+    cr: number,
+    f:  number,
+};
+
 type Vector2 = {x: number, y: number};
 type Vector3 = {x: number, y: number, z: number};
 
@@ -260,6 +267,7 @@ type GenerationResult = {
     bestDeltaV: number,
     popChunk:   Agent[],
     fitChunk:   number[],
+    dVsChunk:   number[]
 }
 
 type ManeuvreDetails = {

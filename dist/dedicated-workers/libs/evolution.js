@@ -1,15 +1,13 @@
 "use strict";
 class ChunkedEvolver {
-    constructor(chunkStart, chunkEnd, agentDim, fitness, cr, f) {
+    constructor(chunkStart, chunkEnd, settings) {
         this.chunkStart = chunkStart;
         this.chunkEnd = chunkEnd;
-        this.agentDim = agentDim;
-        this.fitness = fitness;
-        this.cr = cr;
-        this.f = f;
-        const ce = chunkEnd;
-        const cs = chunkStart;
-        this.chunkSize = ce - cs + 1;
+        this.chunkSize = chunkEnd - chunkStart + 1;
+        this.agentDim = settings.agentDim;
+        this.fitness = settings.fitness;
+        this.cr = settings.cr;
+        this.f = settings.f;
     }
     createRandomAgent() {
         const agent = Array(this.agentDim);
@@ -36,7 +34,8 @@ class ChunkedEvolver {
         return fitChunk;
     }
     evolvePopulationChunk(population, fitnesses) {
-        const dim = population[0].length;
+        const dim = this.agentDim;
+        const updated = [];
         const nextPopChunk = Array(this.chunkSize);
         const nextFitChunk = Array(this.chunkSize);
         for (let j = this.chunkStart; j <= this.chunkEnd; j++) {
@@ -59,6 +58,7 @@ class ChunkedEvolver {
             if (fy < fx) {
                 nextPopChunk[index] = y;
                 nextFitChunk[index] = fy;
+                updated.push(index);
             }
             else {
                 nextPopChunk[index] = x;
@@ -67,7 +67,8 @@ class ChunkedEvolver {
         }
         return {
             popChunk: nextPopChunk,
-            fitChunk: nextFitChunk
+            fitChunk: nextFitChunk,
+            updated: updated
         };
     }
     _pick3(population, parentIndex) {
