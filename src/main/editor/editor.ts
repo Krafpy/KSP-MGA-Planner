@@ -180,7 +180,7 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
         }
 
         const displayFoundTrajectory = () => {
-            trajectory = new Trajectory(solver.bestTrajectorySteps, system, config);
+            trajectory = new Trajectory(solver.bestSteps, system, config);
             trajectory.draw(canvas);
             trajectory.fillResultControls(resultItems, systemTime, controls);
 

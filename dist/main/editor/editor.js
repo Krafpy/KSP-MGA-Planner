@@ -133,7 +133,7 @@ export function initEditor(controls, system, config, canvas) {
             }
         };
         const displayFoundTrajectory = () => {
-            trajectory = new Trajectory(solver.bestTrajectorySteps, system, config);
+            trajectory = new Trajectory(solver.bestSteps, system, config);
             trajectory.draw(canvas);
             trajectory.fillResultControls(resultItems, systemTime, controls);
             detailsSelector.select(0);

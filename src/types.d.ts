@@ -89,7 +89,10 @@ interface WorkersSettings {
 
 interface TrajectorySearchSettings {
     readonly splitLimit:        number;
-    readonly crossoverProba:    number;
+    //readonly crossoverProba:    number;
+    readonly minCrossProba:     number;
+    readonly maxCrossProba:     number;
+    readonly crossProbaIncr:    number;
     readonly diffWeight:        number;
     readonly depDVScaleMin:     number;
     readonly depDVScaleMax:     number;
@@ -159,6 +162,16 @@ type EvaluationNode = {
 };
 
 type Agent = number[];
+
+type EvolutionSettings = {
+    agentDim: number
+    fitness: (x: Agent) => number,
+    crMin: number,
+    crMax: number,
+    crInc: number,
+    f:  number,
+    maxGens: number
+};
 
 type Vector2 = {x: number, y: number};
 type Vector3 = {x: number, y: number, z: number};
@@ -260,6 +273,7 @@ type GenerationResult = {
     bestDeltaV: number,
     popChunk:   Agent[],
     fitChunk:   number[],
+    dVsChunk:   number[]
 }
 
 type ManeuvreDetails = {

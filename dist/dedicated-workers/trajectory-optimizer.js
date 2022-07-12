@@ -1,6 +1,11 @@
 "use strict";
-importScripts("libs/common.js", "libs/evolution.js", "libs/math.js", "libs/physics-3d.js", "libs/lambert.js", "libs/trajectory-calculator.js");
+importScripts("libs/common.js", "libs/trajectory-calculator.js", "libs/evolution.js", "libs/math.js", "libs/physics-3d.js", "libs/lambert.js", "libs/utils.js");
 class TrajectoryOptimizer extends WorkerEnvironment {
+    constructor() {
+        super(...arguments);
+        this._newDeltaVs = [];
+        this._deltaVs = [];
+    }
     onWorkerInitialize(data) {
         this._config = data.config;
         this._system = data.system;
@@ -19,6 +24,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         this._startDateMax = data.startDateMax;
     }
     onWorkerRun(input) {
+        this._newDeltaVs = [];
         if (input.start) {
             const numLegs = this._sequence.length - 1;
             const agentDim = 3 + numLegs * 4 - 2;
@@ -31,32 +37,43 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                 const lastIdx = trajectory.steps.length - 1;
                 const finalOrbit = trajectory.steps[lastIdx].orbitElts;
                 const totDV = trajectory.totalDeltaV;
+                this._newDeltaVs.push(totDV);
                 const lastInc = Math.abs(finalOrbit.inclination);
                 return totDV + totDV * lastInc * 0.1;
             };
             const trajConfig = this._config.trajectorySearch;
-            const { crossoverProba, diffWeight } = trajConfig;
+            const { diffWeight } = trajConfig;
+            const { minCrossProba, maxCrossProba } = trajConfig;
+            const { crossProbaIncr, maxGenerations } = trajConfig;
             const { chunkStart, chunkEnd } = input;
-            this._evolver = new ChunkedEvolver(chunkStart, chunkEnd, agentDim, fitness, crossoverProba, diffWeight);
+            const evolSettings = {
+                maxGens: maxGenerations,
+                agentDim, fitness,
+                crInc: crossProbaIncr,
+                crMin: minCrossProba,
+                crMax: maxCrossProba,
+                f: diffWeight,
+            };
+            this._evolver = new Evolution.ChunkedEvolver(chunkStart, chunkEnd, evolSettings);
             this._bestDeltaV = Infinity;
-            const popChunk = this._evolver.createRandomPopulationChunk();
-            const dvChunk = this._evolver.evaluateChunkFitness(popChunk);
-            sendResult({
-                bestSteps: this._bestTrajectory.steps,
-                bestDeltaV: this._bestDeltaV,
-                fitChunk: dvChunk,
-                popChunk: popChunk,
-            });
+            this._evolver.createRandomPopulationChunk();
+            this._evolver.evaluateChunkFitness();
+            this._deltaVs = [...this._newDeltaVs];
         }
         else {
-            const { population, deltaVs } = input;
-            const { popChunk, fitChunk } = this._evolver.evolvePopulationChunk(population, deltaVs);
-            sendResult({
-                popChunk, fitChunk,
-                bestSteps: this._bestTrajectory.steps,
-                bestDeltaV: this._bestDeltaV
-            });
+            const { population, fitnesses } = input;
+            const updated = this._evolver.evolvePopulationChunk(population, fitnesses);
+            for (const i of updated) {
+                this._deltaVs[i] = this._newDeltaVs[i];
+            }
         }
+        sendResult({
+            popChunk: this._evolver.popChunk,
+            fitChunk: this._evolver.fitChunk,
+            dVsChunk: this._deltaVs,
+            bestSteps: this._bestTrajectory.steps,
+            bestDeltaV: this._bestDeltaV
+        });
     }
     _computeTrajectory(agent, maxAttempts = 1000) {
         const trajConfig = this._config.trajectorySearch;
@@ -73,8 +90,8 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             catch {
                 failed = true;
             }
-            if (failed || this._hasNaNValuesInSteps(trajectory)) {
-                this._evolver.randomizeAgent(agent);
+            if (failed || Utils.hasNaN(trajectory.steps)) {
+                Evolution.randomizeAgent(agent);
                 trajectory.reset();
             }
             else {
@@ -83,27 +100,6 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             attempts++;
         }
         throw new Error("Impossible to compute the trajectory.");
-    }
-    _hasNaNValuesInSteps(trajectory) {
-        const hasNaN = obj => {
-            for (const value of Object.values(obj)) {
-                if (typeof value == "object") {
-                    if (hasNaN(value))
-                        return true;
-                }
-                else if (typeof value == "number") {
-                    if (isNaN(value))
-                        return true;
-                }
-            }
-            return false;
-        };
-        const { steps } = trajectory;
-        for (let i = steps.length - 1; i >= 0; i--) {
-            if (hasNaN(steps[i]))
-                return true;
-        }
-        return false;
     }
 }
 WorkerEnvironment.init(TrajectoryOptimizer);

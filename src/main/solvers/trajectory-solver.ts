@@ -12,11 +12,12 @@ export class TrajectorySolver {
     private _cancelled:    boolean = false;
     private _running:      boolean = false;
     private _population:   Agent[] = [];
+    private _fitnesses:    number[] = [];
     private _deltaVs:      number[] = [];
     private _numChunks:    number = 0;
     private _chunkIndices: number[] = [];
 
-    public bestTrajectorySteps: TrajectoryStep[] = [];
+    public bestSteps:  TrajectoryStep[] = [];
     public bestDeltaV: number = 0;
 
     constructor(public readonly system: SolarSystem, public readonly config: Config, public readonly plot: EvolutionPlot) {
@@ -122,7 +123,7 @@ export class TrajectorySolver {
         for(let i = 0; i < this._numChunks; i++) {
             inputs[i] = {
                 population: this._population,
-                deltaVs:    this._deltaVs,
+                fitnesses:  this._fitnesses,
             };
         }
         const results = await this._workerPool.runPool<GenerationResult>(inputs);
@@ -135,22 +136,29 @@ export class TrajectorySolver {
     }
 
     private _mergeResultsChunks(results: GenerationResult[]){
-        const popChunks: Agent[][] = [];
-        const dVChunks: number[][] = [];
+        const popChunks: Agent[][]  = [];
+        const fitChunks: number[][] = [];
+        const dVsChunks: number[][] = [];
+
         let bestDeltaV = Infinity;
         let bestSteps: TrajectoryStep[] = [];
+
         for(let i = 0; i < this._numChunks; i++) {
             const chunk = results[i];
             popChunks.push(chunk.popChunk);
-            dVChunks.push(chunk.fitChunk);
+            fitChunks.push(chunk.fitChunk);
+            dVsChunks.push(chunk.dVsChunk);
+
             if(chunk.bestDeltaV < bestDeltaV) {
+                bestSteps  = chunk.bestSteps;
                 bestDeltaV = chunk.bestDeltaV;
-                bestSteps = chunk.bestSteps;
             }
         }
         this._population = mergeArrayChunks(popChunks);
-        this._deltaVs = mergeArrayChunks(dVChunks);
-        this.bestTrajectorySteps = bestSteps;
+        this._fitnesses  = mergeArrayChunks(fitChunks);
+        this._deltaVs    = mergeArrayChunks(dVsChunks);
+
+        this.bestSteps  = bestSteps;
         this.bestDeltaV = bestDeltaV;
     }
 }

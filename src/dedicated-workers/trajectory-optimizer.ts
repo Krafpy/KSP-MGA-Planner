@@ -1,20 +1,30 @@
-importScripts("libs/common.js", "libs/evolution.js", "libs/math.js", "libs/physics-3d.js", "libs/lambert.js", "libs/trajectory-calculator.js");
+importScripts(
+    "libs/common.js",
+    "libs/trajectory-calculator.js",
+    "libs/evolution.js",
+    "libs/math.js",
+    "libs/physics-3d.js",
+    "libs/lambert.js",
+    "libs/utils.js"
+);
 
 class TrajectoryOptimizer extends WorkerEnvironment {
-    private _config!:       Config;
-    private _system!:       IOrbitingBody[];
-    private _bodiesOrbits!: OrbitalElements3D[];
+    private _config!:         Config;
+    private _system!:         IOrbitingBody[];
+    private _bodiesOrbits!:   OrbitalElements3D[];
 
-    private _depAltitude!:  number;
-    private _destAltitude!: number;
-    private _sequence!:     number[];
-    private _startDateMin!: number;
-    private _startDateMax!: number;
+    private _depAltitude!:    number;
+    private _destAltitude!:   number;
+    private _sequence!:       number[];
+    private _startDateMin!:   number;
+    private _startDateMax!:   number;
 
     private _bestTrajectory!: TrajectoryCalculator;
     private _bestDeltaV!:     number;
+    private _newDeltaVs:      number[] = [];
+    private _deltaVs:         number[] = [];
 
-    private _evolver!: ChunkedEvolver;
+    private _evolver!: Evolution.ChunkedEvolver;
 
     override onWorkerInitialize(data: any){
         this._config = data.config;
@@ -39,6 +49,8 @@ class TrajectoryOptimizer extends WorkerEnvironment {
     }
 
     override onWorkerRun(input: any){
+        this._newDeltaVs = [];
+
         if(input.start){
             // If it's the first generation, we generate configure the evolver and generate
             // a new random population.
@@ -58,6 +70,8 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                 const finalOrbit = trajectory.steps[lastIdx].orbitElts;
 
                 const totDV = trajectory.totalDeltaV;
+                this._newDeltaVs.push(totDV);
+
                 const lastInc = Math.abs(finalOrbit.inclination);
                 // Attempt to force a minimal inclination of the
                 // circular orbit around the destination body
@@ -65,35 +79,44 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                 return totDV + totDV*lastInc*0.1;
             };
             const trajConfig = this._config.trajectorySearch;
-            const {crossoverProba, diffWeight} = trajConfig;
+            const {diffWeight} = trajConfig;
+            const {minCrossProba, maxCrossProba} = trajConfig;
+            const {crossProbaIncr, maxGenerations} = trajConfig;
             const {chunkStart, chunkEnd} = input;
 
-            this._evolver = new ChunkedEvolver(
-                chunkStart, chunkEnd, 
-                agentDim, fitness, crossoverProba, diffWeight
-            );
+            const evolSettings: EvolutionSettings = {
+                maxGens: maxGenerations,
+                agentDim, fitness,
+                crInc: crossProbaIncr,
+                crMin: minCrossProba,
+                crMax: maxCrossProba,
+                f: diffWeight,
+            };
+            this._evolver = new Evolution.ChunkedEvolver(chunkStart, chunkEnd, evolSettings);
 
             this._bestDeltaV = Infinity;
 
             // Create the first generation and evaluate it
-            const popChunk = this._evolver.createRandomPopulationChunk();
-            const dvChunk = this._evolver.evaluateChunkFitness(popChunk);
-            sendResult({
-                bestSteps: this._bestTrajectory.steps, 
-                bestDeltaV: this._bestDeltaV,
-                fitChunk: dvChunk, 
-                popChunk: popChunk,
-            });
+            this._evolver.createRandomPopulationChunk();
+            this._evolver.evaluateChunkFitness();
+            this._deltaVs = [...this._newDeltaVs];
         } else {
             // If not the first generation, then evolve the current population
-            const {population, deltaVs} = input;
-            const {popChunk, fitChunk} = this._evolver.evolvePopulationChunk(population, deltaVs);
-            sendResult({
-                popChunk, fitChunk, 
-                bestSteps: this._bestTrajectory.steps, 
-                bestDeltaV: this._bestDeltaV
-            });
+            const {population, fitnesses} = input;
+            const updated = this._evolver.evolvePopulationChunk(population, fitnesses);
+
+            for(const i of updated){
+                this._deltaVs[i] = this._newDeltaVs[i];
+            }
         }
+
+        sendResult({
+            popChunk:   this._evolver.popChunk,
+            fitChunk:   this._evolver.fitChunk,
+            dVsChunk:   this._deltaVs,
+            bestSteps:  this._bestTrajectory.steps, 
+            bestDeltaV: this._bestDeltaV
+        });
     }
 
     /**
@@ -114,7 +137,11 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         let attempts = 0;
         while(attempts < maxAttempts){
             trajectory.setParameters(
-                this._depAltitude, this._destAltitude, this._startDateMin, this._startDateMax, agent
+                this._depAltitude,
+                this._destAltitude,
+                this._startDateMin,
+                this._startDateMax,
+                agent
             );
             let failed = false;
             // FIX: "This radius is never reached" error thrown... why ?
@@ -125,8 +152,8 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                 failed = true;
             }
             
-            if(failed || this._hasNaNValuesInSteps(trajectory)) {
-                this._evolver.randomizeAgent(agent);
+            if(failed || Utils.hasNaN(trajectory.steps)) {
+                Evolution.randomizeAgent(agent);
                 trajectory.reset();
             } else {
                 return trajectory;
@@ -136,33 +163,6 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         }
 
         throw new Error("Impossible to compute the trajectory.");
-    }
-
-    /**
-     * Checks if there is a NaN value in the computed steps (caused by a math error)
-     * @param trajectory The trajectory we want to check its steps for NaN values.
-     * @returns true if there is a NaN value in the computed steps, false otherwise.
-     */
-    private _hasNaNValuesInSteps(trajectory: TrajectoryCalculator){
-        const hasNaN: (obj: Object) => boolean = obj => {
-            for(const value of Object.values(obj)){
-                if(typeof value == "object"){
-                    if(hasNaN(value))
-                        return true;
-                } else if(typeof value == "number") {
-                    if(isNaN(value))
-                        return true;
-                }
-            }
-            return false;
-        };
-
-        const {steps} = trajectory;
-        for(let i = steps.length - 1; i >= 0; i--){
-            if(hasNaN(steps[i]))
-                return true;
-        }
-        return false;
     }
 }
 
