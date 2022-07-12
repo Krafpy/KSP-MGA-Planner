@@ -16,7 +16,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
     private _newDeltaVs:      number[] = [];
     private _deltaVs:         number[] = [];
 
-    private _evolver!: ChunkedEvolver;
+    private _evolver!: Evolution.ChunkedEvolver;
 
     override onWorkerInitialize(data: any){
         this._config = data.config;
@@ -42,9 +42,6 @@ class TrajectoryOptimizer extends WorkerEnvironment {
 
     override onWorkerRun(input: any){
         this._newDeltaVs = [];
-
-        let popChunk: Agent[];
-        let fitChunk: number[];
 
         if(input.start){
             // If it's the first generation, we generate configure the evolver and generate
@@ -74,39 +71,43 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                 return totDV + totDV*lastInc*0.1;
             };
             const trajConfig = this._config.trajectorySearch;
-            const {crossoverProba, diffWeight} = trajConfig;
+            const {diffWeight} = trajConfig;
+            const {minCrossProba, maxCrossProba} = trajConfig;
+            const {crossProbaIncr, maxGenerations} = trajConfig;
             const {chunkStart, chunkEnd} = input;
 
             const evolSettings: EvolutionSettings = {
+                maxGens: maxGenerations,
                 agentDim, fitness,
-                cr: crossoverProba, f: diffWeight
+                crInc: crossProbaIncr,
+                crMin: minCrossProba,
+                crMax: maxCrossProba,
+                f: diffWeight,
             };
-            this._evolver = new ChunkedEvolver(chunkStart, chunkEnd, evolSettings);
+            this._evolver = new Evolution.ChunkedEvolver(chunkStart, chunkEnd, evolSettings);
 
             this._bestDeltaV = Infinity;
 
             // Create the first generation and evaluate it
-            popChunk = this._evolver.createRandomPopulationChunk();
-            fitChunk = this._evolver.evaluateChunkFitness(popChunk);
+            this._evolver.createRandomPopulationChunk();
+            this._evolver.evaluateChunkFitness();
             this._deltaVs = [...this._newDeltaVs];
         } else {
             // If not the first generation, then evolve the current population
             const {population, fitnesses} = input;
-            const results = this._evolver.evolvePopulationChunk(population, fitnesses);
+            const updated = this._evolver.evolvePopulationChunk(population, fitnesses);
 
-            popChunk = results.popChunk;
-            fitChunk = results.fitChunk;
-
-            for(const i of results.updated){
+            for(const i of updated){
                 this._deltaVs[i] = this._newDeltaVs[i];
             }
         }
 
         sendResult({
-            fitChunk, popChunk,
+            popChunk:   this._evolver.popChunk,
+            fitChunk:   this._evolver.fitChunk,
+            dVsChunk:   this._deltaVs,
             bestSteps:  this._bestTrajectory.steps, 
-            bestDeltaV: this._bestDeltaV,
-            dVsChunk:   this._deltaVs
+            bestDeltaV: this._bestDeltaV
         });
     }
 
@@ -140,7 +141,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             }
             
             if(failed || this._hasNaNValuesInSteps(trajectory)) {
-                this._evolver.randomizeAgent(agent);
+                Evolution.randomizeAgent(agent);
                 trajectory.reset();
             } else {
                 return trajectory;

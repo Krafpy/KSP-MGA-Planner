@@ -40,7 +40,9 @@ flybySequence:
 
 trajectorySearch:
   splitLimit:         1000          # maximum input chunk size per worker in the worker pool, exceeded if all workers are already used
-  crossoverProba:     0.9           # crossover probability (CR) of the DE algorithm
+  minCrossProba:      0.9           # The minimum crossover probability (CR) of the DE algorithm
+  maxCrossProba:      0.99          # The maximum crossover probability (CR) of the DE algorithm
+  crossProbaIncr:     8             # The exponential speed factor by which CR increases from its minium to maximum
   diffWeight:         0.3           # differential weight (F) of the DE algorithm
   depDVScaleMin:      1.01          # the minimum ejection velocity, in terms of scale of the minimum velocity required to escape the body
   depDVScaleMax:      3             # the maximum ejection velocity

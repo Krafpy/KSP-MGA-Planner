@@ -25,8 +25,6 @@ class TrajectoryOptimizer extends WorkerEnvironment {
     }
     onWorkerRun(input) {
         this._newDeltaVs = [];
-        let popChunk;
-        let fitChunk;
         if (input.start) {
             const numLegs = this._sequence.length - 1;
             const agentDim = 3 + numLegs * 4 - 2;
@@ -44,32 +42,37 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                 return totDV + totDV * lastInc * 0.1;
             };
             const trajConfig = this._config.trajectorySearch;
-            const { crossoverProba, diffWeight } = trajConfig;
+            const { diffWeight } = trajConfig;
+            const { minCrossProba, maxCrossProba } = trajConfig;
+            const { crossProbaIncr, maxGenerations } = trajConfig;
             const { chunkStart, chunkEnd } = input;
             const evolSettings = {
+                maxGens: maxGenerations,
                 agentDim, fitness,
-                cr: crossoverProba, f: diffWeight
+                crInc: crossProbaIncr,
+                crMin: minCrossProba,
+                crMax: maxCrossProba,
+                f: diffWeight,
             };
-            this._evolver = new ChunkedEvolver(chunkStart, chunkEnd, evolSettings);
+            this._evolver = new Evolution.ChunkedEvolver(chunkStart, chunkEnd, evolSettings);
             this._bestDeltaV = Infinity;
-            popChunk = this._evolver.createRandomPopulationChunk();
-            fitChunk = this._evolver.evaluateChunkFitness(popChunk);
+            this._evolver.createRandomPopulationChunk();
+            this._evolver.evaluateChunkFitness();
             this._deltaVs = [...this._newDeltaVs];
         }
         else {
             const { population, fitnesses } = input;
-            const results = this._evolver.evolvePopulationChunk(population, fitnesses);
-            popChunk = results.popChunk;
-            fitChunk = results.fitChunk;
-            for (const i of results.updated) {
+            const updated = this._evolver.evolvePopulationChunk(population, fitnesses);
+            for (const i of updated) {
                 this._deltaVs[i] = this._newDeltaVs[i];
             }
         }
         sendResult({
-            fitChunk, popChunk,
+            popChunk: this._evolver.popChunk,
+            fitChunk: this._evolver.fitChunk,
+            dVsChunk: this._deltaVs,
             bestSteps: this._bestTrajectory.steps,
-            bestDeltaV: this._bestDeltaV,
-            dVsChunk: this._deltaVs
+            bestDeltaV: this._bestDeltaV
         });
     }
     _computeTrajectory(agent, maxAttempts = 1000) {
@@ -88,7 +91,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                 failed = true;
             }
             if (failed || this._hasNaNValuesInSteps(trajectory)) {
-                this._evolver.randomizeAgent(agent);
+                Evolution.randomizeAgent(agent);
                 trajectory.reset();
             }
             else {
