@@ -1,5 +1,5 @@
 "use strict";
-importScripts("libs/common.js", "libs/evolution.js", "libs/math.js", "libs/physics-3d.js", "libs/lambert.js", "libs/trajectory-calculator.js");
+importScripts("libs/common.js", "libs/trajectory-calculator.js", "libs/evolution.js", "libs/math.js", "libs/physics-3d.js", "libs/lambert.js", "libs/utils.js");
 class TrajectoryOptimizer extends WorkerEnvironment {
     constructor() {
         super(...arguments);
@@ -90,7 +90,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             catch {
                 failed = true;
             }
-            if (failed || this._hasNaNValuesInSteps(trajectory)) {
+            if (failed || Utils.hasNaN(trajectory.steps)) {
                 Evolution.randomizeAgent(agent);
                 trajectory.reset();
             }
@@ -100,27 +100,6 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             attempts++;
         }
         throw new Error("Impossible to compute the trajectory.");
-    }
-    _hasNaNValuesInSteps(trajectory) {
-        const hasNaN = obj => {
-            for (const value of Object.values(obj)) {
-                if (typeof value == "object") {
-                    if (hasNaN(value))
-                        return true;
-                }
-                else if (typeof value == "number") {
-                    if (isNaN(value))
-                        return true;
-                }
-            }
-            return false;
-        };
-        const { steps } = trajectory;
-        for (let i = steps.length - 1; i >= 0; i--) {
-            if (hasNaN(steps[i]))
-                return true;
-        }
-        return false;
     }
 }
 WorkerEnvironment.init(TrajectoryOptimizer);

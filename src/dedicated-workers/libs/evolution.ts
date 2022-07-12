@@ -72,8 +72,8 @@ namespace Evolution {
 
             const updated: number[] = [];
             
-            const nextPopChunk: Agent[] = Array(this.chunkSize);
-            const nextFitChunk: number[] = Array(this.chunkSize);
+            const nextPopChunk = Array<Agent>(this.chunkSize);
+            const nextFitChunk = Array<number>(this.chunkSize);
 
             const genRatio = this.generation/this.maxGens;
             const genCoeff = Math.pow(1 - genRatio, this.crInc);
@@ -152,7 +152,7 @@ namespace Evolution {
             const t = arr[j];
             arr[j] = arr[i];
             arr[i] = t;
-        }
+        };
 
         swap(population, parentIndex, 0);
 
