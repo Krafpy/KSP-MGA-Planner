@@ -40,6 +40,7 @@ interface SystemDrawSettings {
     readonly satFarSize:        number;
     readonly satDispRadii:      number;
     readonly mouseFocusDst:     number;
+    readonly soiOpacity:        number;
 }
 
 interface OrbitSettings {
@@ -89,7 +90,6 @@ interface WorkersSettings {
 
 interface TrajectorySearchSettings {
     readonly splitLimit:        number;
-    //readonly crossoverProba:    number;
     readonly minCrossProba:     number;
     readonly maxCrossProba:     number;
     readonly crossProbaIncr:    number;

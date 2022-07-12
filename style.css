@@ -354,6 +354,9 @@ input[type="text"]::placeholder
 {
     font-size: 0.75em;
     color: rgba(255, 255, 255, 0.459);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .control-group p

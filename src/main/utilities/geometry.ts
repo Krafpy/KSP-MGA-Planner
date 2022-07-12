@@ -1,10 +1,16 @@
 import { Orbit } from "../objects/orbit";
 
-export function createSphere(radius: number, scale: number, color: number) {
+export function createSphere(radius: number, scale: number, material: THREE.MeshBasicMaterial) {
     const geometry = new THREE.SphereGeometry(radius * scale, 50, 50);
-    const material = new THREE.MeshBasicMaterial({color: color});
-    const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new THREE.Mesh(geometry, material.clone());
     return mesh;
+}
+
+export function createWireframeSphere(radius: number, scale: number, material: THREE.Material){
+    const geometry = new THREE.SphereGeometry(radius * scale, 15, 15);
+    const wireframe = new THREE.WireframeGeometry(geometry);
+    const lines = new THREE.LineSegments(wireframe, material.clone());
+    return lines;
 }
 
 export function createSprite(material: THREE.SpriteMaterial, color: number, sizeAttenuation: boolean, scale: number){
