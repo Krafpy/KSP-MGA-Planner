@@ -11,6 +11,7 @@ solarSystem:
   satFarSize:         0.04          # size of satellites sprites
   satDispRadii:       10            # minimum display distance of satellites (in radii of the scaled semi major axis)
   mouseFocusDst:      25            # minimum distance to between body on screen and mouse to set focus (in pixels)
+  soiOpacity:         0.3           # the opacity of SOI spheres
 
 orbit:
   satSampPoints:      1000          # sample points for satellites' orbits

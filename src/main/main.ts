@@ -40,6 +40,7 @@ async function main(){
         requestAnimationFrame(loop);
         controls.update();
         system.updateSatellitesDisplay(controls);
+        system.updateSOIsDisplay(controls);
         renderer.render(scene, camera);
     }
     requestAnimationFrame(loop);

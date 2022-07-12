@@ -21,6 +21,9 @@ export function initEditor(controls, system, config, canvas) {
     };
     systemTime.input(updateSystemTime);
     updateSystemTime();
+    const soiCheckbox = document.getElementById("soi-checkbox");
+    soiCheckbox.onchange = () => system.showSOIs = soiCheckbox.checked;
+    soiCheckbox.checked = false;
     const sequenceSelector = new SequenceSelector("sequence-selector");
     sequenceSelector.disable();
     const originSelector = new BodySelector("origin-selector", system);

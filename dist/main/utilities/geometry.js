@@ -1,8 +1,13 @@
-export function createSphere(radius, scale, color) {
+export function createSphere(radius, scale, material) {
     const geometry = new THREE.SphereGeometry(radius * scale, 50, 50);
-    const material = new THREE.MeshBasicMaterial({ color: color });
-    const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new THREE.Mesh(geometry, material.clone());
     return mesh;
+}
+export function createWireframeSphere(radius, scale, material) {
+    const geometry = new THREE.SphereGeometry(radius * scale, 15, 15);
+    const wireframe = new THREE.WireframeGeometry(geometry);
+    const lines = new THREE.LineSegments(wireframe, material.clone());
+    return lines;
 }
 export function createSprite(material, color, sizeAttenuation, scale) {
     const sprite = new THREE.Sprite(material.clone());

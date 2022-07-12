@@ -1,11 +1,13 @@
 import { OrbitingBody, CelestialBody } from "./body.js";
-import { createLine, createOrbitPoints, createSprite } from "../utilities/geometry.js";
+import * as Geometry from "../utilities/geometry.js";
 export class SolarSystem {
     constructor(sun, bodies, config) {
         this.config = config;
         this._orbiting = new Map();
         this._objects = new Map();
         this._orbits = new Map();
+        this._sois = new Map();
+        this.showSOIs = false;
         this.sun = new CelestialBody(sun);
         for (const data of bodies) {
             const { orbiting } = data;
@@ -56,31 +58,43 @@ export class SolarSystem {
         const textureLoader = new THREE.TextureLoader();
         return new Promise((resolve, _) => {
             const loaded = (texture) => {
-                const material = new THREE.SpriteMaterial({
+                const spriteMaterial = new THREE.SpriteMaterial({
                     map: texture
                 });
                 const { scale } = this.config.rendering;
                 const { satSampPoints, planetSampPoints, orbitLineWidth } = this.config.orbit;
                 const { planetFarSize, satFarSize } = this.config.solarSystem;
-                const sunSprite = createSprite(material, this.sun.color, true, scale * this.sun.radius * 2);
+                const { soiOpacity } = this.config.solarSystem;
+                const sunSprite = Geometry.createSprite(spriteMaterial, this.sun.color, true, scale * this.sun.radius * 2);
                 const sunGroup = new THREE.Group();
                 sunGroup.add(sunSprite);
                 this._objects.set(0, sunGroup);
                 for (const body of this.orbiting) {
-                    const { radius, orbit, color, attractor } = body;
+                    const { radius, soi, orbit, color, attractor } = body;
                     const parentGroup = this._objects.get(attractor.id);
                     const bodyGroup = new THREE.Group();
                     const samplePts = attractor.id == 0 ? planetSampPoints : satSampPoints;
                     const spriteSize = attractor.id == 0 ? planetFarSize : satFarSize;
-                    const orbitPoints = createOrbitPoints(orbit, samplePts, scale);
-                    const ellipse = createLine(orbitPoints, canvas, {
+                    const orbitPoints = Geometry.createOrbitPoints(orbit, samplePts, scale);
+                    const ellipse = Geometry.createLine(orbitPoints, canvas, {
                         color: color,
                         linewidth: orbitLineWidth,
                     });
                     parentGroup.add(ellipse);
                     this._orbits.set(body.id, ellipse);
-                    bodyGroup.add(createSprite(material, color, true, scale * radius * 2));
-                    bodyGroup.add(createSprite(material, color, false, spriteSize));
+                    const soiMaterial = new THREE.MeshBasicMaterial({
+                        color: color,
+                        transparent: true,
+                        opacity: soiOpacity
+                    });
+                    const soiLines = Geometry.createWireframeSphere(soi, scale, soiMaterial);
+                    bodyGroup.add(soiLines);
+                    this._sois.set(body.id, soiLines);
+                    const bodyMaterial = new THREE.MeshBasicMaterial({
+                        color: color
+                    });
+                    bodyGroup.add(Geometry.createSphere(radius, scale, bodyMaterial));
+                    bodyGroup.add(Geometry.createSprite(spriteMaterial, color, false, spriteSize));
                     parentGroup.add(bodyGroup);
                     this._objects.set(body.id, bodyGroup);
                 }
@@ -112,6 +126,35 @@ export class SolarSystem {
                 const ellipse = this._orbits.get(body.id);
                 ellipse.visible = visible;
                 group.visible = visible;
+            }
+        }
+    }
+    updateSOIsDisplay(camController) {
+        if (!this.showSOIs) {
+            for (const sphere of this._sois.values()) {
+                sphere.visible = false;
+            }
+        }
+        else {
+            const camPos = camController.camera.position;
+            const { scale } = this.config.rendering;
+            for (const body of this.orbiting) {
+                const group = this._objects.get(body.id);
+                const objPos = new THREE.Vector3();
+                group.getWorldPosition(objPos);
+                const dstToCam = camPos.distanceTo(objPos);
+                const sphere = this._sois.get(body.id);
+                sphere.visible = dstToCam > body.soi * scale;
+            }
+            for (const body of this.orbiting) {
+                const soi = this._sois.get(body.id);
+                const attrSoi = this._sois.get(body.attractor.id);
+                if (attrSoi === null || attrSoi === void 0 ? void 0 : attrSoi.visible) {
+                    soi.visible = false;
+                }
+                else {
+                    soi.visible && (soi.visible = true);
+                }
             }
         }
     }

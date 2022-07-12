@@ -25,7 +25,13 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
     };
     systemTime.input(updateSystemTime);
     updateSystemTime();
+
+    // SOI toggle
+    const soiCheckbox = document.getElementById("soi-checkbox") as HTMLInputElement;
+    soiCheckbox.onchange = () => system.showSOIs = soiCheckbox.checked;
+    soiCheckbox.checked = false; // default
     
+    // Sequence generation panel
     const sequenceSelector = new SequenceSelector("sequence-selector");
     sequenceSelector.disable();
 
