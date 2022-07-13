@@ -8,13 +8,15 @@ import { KSPTime } from "../utilities/time.js";
 import { CameraController } from "../objects/camera.js";
 
 export class Trajectory {
+    static sprites = new Map<string, THREE.SpriteMaterial>();
+
+    private _orbitObjects:  THREE.Object3D[] = [];
+    private _spriteObjects: THREE.Sprite[][] = [];
+
     public readonly orbits: Orbit[] = [];
 
-    private readonly _objects:    THREE.Object3D[] = [];
     private readonly _maneuvres: ManeuvreDetails[] = [];
     private readonly _flybys:       FlybyDetails[] = [];
-
-    static arrowMaterial: THREE.SpriteMaterial;
 
     constructor(public readonly steps: TrajectoryStep[], public readonly system: SolarSystem, public readonly config: Config) {
         for(const {orbitElts, attractorId} of this.steps) {
@@ -24,15 +26,21 @@ export class Trajectory {
         }
     }
 
-    public static preloadArrowMaterial() {
+    public static preloadSpriteMaterials(){
         const textureLoader = new THREE.TextureLoader();
-        const loaded = (texture: THREE.Texture) => {
-            this.arrowMaterial = new THREE.SpriteMaterial({
-                map: texture
-            });
-        }
-        textureLoader.load("sprites/arrow-512.png", loaded);
-    } 
+        const loaded = (name: string) => {
+            return (texture: THREE.Texture) => {
+                const material = new THREE.SpriteMaterial({
+                    map: texture
+                });
+                this.sprites.set(name, material);
+            };
+        };
+
+        textureLoader.load("sprites/encounter.png", loaded("encounter"));
+        textureLoader.load("sprites/escape.png", loaded("escape"));
+        textureLoader.load("sprites/maneuver.png", loaded("maneuver"));
+    }
 
     public draw(resolution: {width: number, height: number}){
         this._createTrajectoryArcs(resolution);
@@ -42,6 +50,8 @@ export class Trajectory {
     }
 
     private _createTrajectoryArcs(resolution: {width: number, height: number}){
+        this._orbitObjects = [];
+
         const {arcLineWidth} = this.config.orbit;
         const {samplePoints} = this.config.trajectoryDraw;
         const {scale} = this.config.rendering;
@@ -58,24 +68,62 @@ export class Trajectory {
             });
             const group = this.system.objectsOfBody(orbit.attractor.id);
             group.add(orbitLine);
-            this._objects.push(orbitLine);
+            this._orbitObjects.push(orbitLine);
 
             hue = (hue + 30) % 360;
         }
     }
 
     private _createManeuvreSprites(){
-        const {maneuvreArrowSize} = this.config.trajectoryDraw;
+        this._spriteObjects = [];
+        for(let i = 0; i < this.steps.length; i++){
+            this._spriteObjects.push([]);
+        }
+
+        const {spritesSize} = this.config.trajectoryDraw;
         const {scale} = this.config.rendering;
-        for(const step of this.steps){
-            if(step.maneuvre){
-                const group = this.system.objectsOfBody(step.attractorId);
-                const sprite = createSprite(Trajectory.arrowMaterial, 0xFFFFFF, false, maneuvreArrowSize);
-                const {x, y, z} = step.maneuvre.position;
-                sprite.position.set(x, y, z);
-                sprite.position.multiplyScalar(scale);
-                group.add(sprite);
-                this._objects.push(sprite);
+
+        const encounterSprite = <THREE.SpriteMaterial>Trajectory.sprites.get("encounter");
+        const escapeSprite = <THREE.SpriteMaterial>Trajectory.sprites.get("escape");
+        const maneuverSprite = <THREE.SpriteMaterial>Trajectory.sprites.get("maneuver");
+
+        const addSprite = (i: number, sprite: THREE.Sprite, pos: THREE.Vector3, group: THREE.Group) => {
+            sprite.position.set(pos.x, pos.y, pos.z);
+            sprite.position.multiplyScalar(scale);
+            group.add(sprite);
+            this._spriteObjects[i].push(sprite);
+        };
+
+        for(let i = 0; i < this.steps.length; i++){
+            const step = this.steps[i];
+            const orbit = this.orbits[i];
+            const {maneuvre, flyby} = step;
+            const group = this.system.objectsOfBody(step.attractorId);
+
+            if(maneuvre){
+                const sprite = createSprite(maneuverSprite, 0xFFFFFF, false, spritesSize);
+                const {x, y, z} = maneuvre.position;
+                const pos = new THREE.Vector3(x, y, z);
+                addSprite(i, sprite, pos, group);
+                const {type} = maneuvre.context;
+                if(type == "ejection"){
+                    const sprite = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
+                    const pos = orbit.positionFromTrueAnomaly(step.drawAngles.end);
+                    addSprite(i, sprite, pos, group);
+                }
+
+            } else if(flyby){
+                const sprite1 = createSprite(encounterSprite, 0xFFFFFF, false, spritesSize);
+                const sprite2 = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
+                const pos1 = orbit.positionFromTrueAnomaly(step.drawAngles.begin);
+                const pos2 = orbit.positionFromTrueAnomaly(step.drawAngles.end);
+                addSprite(i, sprite1, pos1, group);
+                addSprite(i, sprite2, pos2, group);
+
+            } else if(i == this.steps.length - 2){
+                const sprite = createSprite(encounterSprite, 0xFFFFFF, false, spritesSize);
+                const pos = orbit.positionFromTrueAnomaly(step.drawAngles.begin);
+                addSprite(i, sprite, pos, group);
             }
         }
     }
@@ -256,13 +304,13 @@ export class Trajectory {
 
     private _displayStepsUpTo(index: number){
         for(let i = 0; i < this.steps.length; i++){
-            const orbitLine = this._objects[i];
-            orbitLine.visible = i <= index;
-        }
-        const spritesStart = this.steps.length;
-        for(let i = 0; i < this._maneuvres.length; i++){
-            const visible = this._objects[this._maneuvres[i].stepIndex].visible;
-            this._objects[spritesStart + i].visible = visible;
+            const orbitLine = this._orbitObjects[i];
+            const sprites = this._spriteObjects[i];
+            const visible = i <= index;
+            orbitLine.visible = visible;
+            for(const sprite of sprites){
+                sprite.visible = visible;
+            }
         }
     }
 
@@ -278,8 +326,13 @@ export class Trajectory {
     }
 
     public remove() {
-        for(const object of this._objects) {
+        for(const object of this._orbitObjects) {
             if(object.parent) object.parent.remove(object);
+        }
+        for(const sprites of this._spriteObjects) {
+            for(const sprite of sprites){
+                if(sprite.parent) sprite.parent.remove(sprite);
+            }
         }
     }
 }
