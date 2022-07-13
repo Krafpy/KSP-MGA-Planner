@@ -64,4 +64,4 @@ workers:
 
 trajectoryDraw:
   samplePoints:       2500          # number sample points for each tarjectory arc draw
-  maneuvreArrowSize:  0.08          # size of the arrow sprites for maneuvers
+  spritesSize:        0.08          # size of the sprites for maneuvers, encounters, escapes

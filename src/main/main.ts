@@ -32,7 +32,7 @@ async function main(){
     const controls = new CameraController(camera, canvas, system, config);
     controls.targetBody = system.sun;
     
-    Trajectory.preloadArrowMaterial();
+    Trajectory.preloadSpriteMaterials();
 
     initEditor(controls, system, config, canvas);
 

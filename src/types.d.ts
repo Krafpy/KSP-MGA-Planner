@@ -52,7 +52,7 @@ interface OrbitSettings {
 
 interface TrajectoryDrawSettings {
     readonly samplePoints:      number;
-    readonly maneuvreArrowSize: number;
+    readonly spritesSize:       number;
 }
 
 interface CameraSettings {
