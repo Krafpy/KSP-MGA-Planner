@@ -10,6 +10,7 @@ solarSystem:
   planetFarSize:      0.05          # size of planet sprites
   satFarSize:         0.04          # size of satellites sprites
   satDispRadii:       10            # minimum display distance of satellites (in radii of the scaled semi major axis)
+  spriteDispSOIMul:   18             # minimum display distance of sprites (in multiple of the SOI of the body to which they are attached)
   mouseFocusDst:      25            # minimum distance to between body on screen and mouse to set focus (in pixels)
   soiOpacity:         0.3           # the opacity of SOI spheres
 

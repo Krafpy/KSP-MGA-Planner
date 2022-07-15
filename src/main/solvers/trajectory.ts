@@ -16,7 +16,9 @@ export class Trajectory {
     public readonly orbits: Orbit[] = [];
 
     private readonly _maneuvres: ManeuvreDetails[] = [];
-    private readonly _flybys:       FlybyDetails[] = [];
+    private readonly _flybys: FlybyDetails[] = [];
+
+    private _spritesUpdateFunId: number = -1;
 
     constructor(public readonly steps: TrajectoryStep[], public readonly system: SolarSystem, public readonly config: Config) {
         for(const {orbitElts, attractorId} of this.steps) {
@@ -87,9 +89,10 @@ export class Trajectory {
         const escapeSprite = <THREE.SpriteMaterial>Trajectory.sprites.get("escape");
         const maneuverSprite = <THREE.SpriteMaterial>Trajectory.sprites.get("maneuver");
 
-        const addSprite = (i: number, sprite: THREE.Sprite, pos: THREE.Vector3, group: THREE.Group) => {
+        const addSprite = (i: number, sprite: THREE.Sprite, pos: THREE.Vector3) => {
             sprite.position.set(pos.x, pos.y, pos.z);
             sprite.position.multiplyScalar(scale);
+            const group = this.system.objectsOfBody(this.steps[i].attractorId);
             group.add(sprite);
             this._spriteObjects[i].push(sprite);
         };
@@ -98,18 +101,17 @@ export class Trajectory {
             const step = this.steps[i];
             const orbit = this.orbits[i];
             const {maneuvre, flyby} = step;
-            const group = this.system.objectsOfBody(step.attractorId);
 
             if(maneuvre){
                 const sprite = createSprite(maneuverSprite, 0xFFFFFF, false, spritesSize);
                 const {x, y, z} = maneuvre.position;
                 const pos = new THREE.Vector3(x, y, z);
-                addSprite(i, sprite, pos, group);
+                addSprite(i, sprite, pos);
                 const {type} = maneuvre.context;
                 if(type == "ejection"){
                     const sprite = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
                     const pos = orbit.positionFromTrueAnomaly(step.drawAngles.end);
-                    addSprite(i, sprite, pos, group);
+                    addSprite(i, sprite, pos);
                 }
 
             } else if(flyby){
@@ -117,15 +119,41 @@ export class Trajectory {
                 const sprite2 = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
                 const pos1 = orbit.positionFromTrueAnomaly(step.drawAngles.begin);
                 const pos2 = orbit.positionFromTrueAnomaly(step.drawAngles.end);
-                addSprite(i, sprite1, pos1, group);
-                addSprite(i, sprite2, pos2, group);
+                addSprite(i, sprite1, pos1);
+                addSprite(i, sprite2, pos2);
 
             } else if(i == this.steps.length - 2){
                 const sprite = createSprite(encounterSprite, 0xFFFFFF, false, spritesSize);
                 const pos = orbit.positionFromTrueAnomaly(step.drawAngles.begin);
-                addSprite(i, sprite, pos, group);
+                addSprite(i, sprite, pos);
             }
         }
+
+        const updateSpritesDisplay = (camController: CameraController) => {
+            const camPos = camController.camera.position;
+            const {scale} = this.config.rendering;
+            const {spriteDispSOIMul} = this.config.solarSystem;
+
+            for(let i = 0; i < this.steps.length; i++){
+                if(this._spriteObjects[i].length == 0) continue;
+
+                const step = this.steps[i];
+                const body = this.system.bodyFromId(step.attractorId);
+                const bodyPos = new THREE.Vector3();
+                const bodyGroup = <THREE.Group>this.system.objectsOfBody(step.attractorId);
+                bodyGroup.getWorldPosition(bodyPos);
+
+                const dstToCam = bodyPos.distanceTo(camPos);
+                const visible = dstToCam < scale * body.soi * spriteDispSOIMul;
+
+                for(const sprite of this._spriteObjects[i]){
+                    sprite.visible = visible;
+                }
+            }
+        };
+
+        const id = this.system.addCustomUpdate(updateSpritesDisplay);
+        this._spritesUpdateFunId = id;
     }
 
     private _calculateManeuvresDetails(){
@@ -333,6 +361,10 @@ export class Trajectory {
             for(const sprite of sprites){
                 if(sprite.parent) sprite.parent.remove(sprite);
             }
+        }
+        const updateId = this._spritesUpdateFunId;
+        if(updateId >= 0){
+            this.system.removeCustomUpdate(updateId);
         }
     }
 }

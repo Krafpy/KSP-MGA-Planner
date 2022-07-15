@@ -24,8 +24,7 @@ async function main() {
     const loop = () => {
         requestAnimationFrame(loop);
         controls.update();
-        system.updateSatellitesDisplay(controls);
-        system.updateSOIsDisplay(controls);
+        system.update(controls);
         renderer.render(scene, camera);
     };
     requestAnimationFrame(loop);
