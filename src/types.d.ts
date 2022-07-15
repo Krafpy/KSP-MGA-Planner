@@ -39,6 +39,7 @@ interface SystemDrawSettings {
     readonly planetFarSize:     number;
     readonly satFarSize:        number;
     readonly satDispRadii:      number;
+    readonly spriteDispSOIMul:  number;
     readonly mouseFocusDst:     number;
     readonly soiOpacity:        number;
 }
