@@ -85,7 +85,8 @@ export class SolarSystem {
                 const {planetFarSize, satFarSize} = this.config.solarSystem;
                 const {soiOpacity} = this.config.solarSystem;
 
-                const sunSprite = Geometry.createSprite(spriteMaterial, this.sun.color, true, scale * this.sun.radius * 2);
+                const sunSize = scale * this.sun.radius * 2;
+                const sunSprite = Geometry.createSprite(spriteMaterial, this.sun.color, true, sunSize);
                 const sunGroup = new THREE.Group();
                 sunGroup.add(sunSprite);
 
@@ -152,26 +153,37 @@ export class SolarSystem {
     }
 
     /**
+     * Function called at each frame.
+     * @param camController The camera controller of the scene
+     */
+    public update(camController: CameraController){
+        this._updateSatellitesDisplay(camController);
+        this._updateSOIsDisplay(camController);
+    }
+
+    /**
      * Updates how sprites are displayed according to distance.
      */
-    public updateSatellitesDisplay(camController: CameraController){
+    private _updateSatellitesDisplay(camController: CameraController){
+        const {satDispRadii} = this.config.solarSystem;
+        const {scale} = this.config.rendering;
+        const camPos = camController.camera.position;
+
         for(const body of this.orbiting){
-            if(body.attractor.id != 0) {
-                const {satDispRadii} = this.config.solarSystem;
-                const {scale} = this.config.rendering;
+            const {attractor} = body;
+            if(attractor.id != 0) {
+                const bodyGroup  = <THREE.Group>this._objects.get(body.id);
+                const parentPos = new THREE.Vector3();
+                const parentGroup = <THREE.Group>this._objects.get(attractor.id);
+                parentGroup.getWorldPosition(parentPos);
 
-                const camPos = camController.camera.position;
-                const objPos = new THREE.Vector3();
-                const group  = <THREE.Group>this._objects.get(body.id);
-                group.getWorldPosition(objPos);
-
-                const dstToCam = objPos.distanceTo(camPos);
+                const dstToCam = parentPos.distanceTo(camPos);
                 const thresh = scale * satDispRadii * body.orbit.semiMajorAxis;
                 const visible = dstToCam <  thresh;
 
                 const ellipse = <THREE.Object3D>this._orbits.get(body.id);
                 ellipse.visible = visible;
-                group.visible   = visible;
+                bodyGroup.visible   = visible;
             }
         }
     }
@@ -179,7 +191,7 @@ export class SolarSystem {
     /**
      * Updates how SOIs are displayed based on camera position.
      */
-    public updateSOIsDisplay(camController: CameraController){
+    private _updateSOIsDisplay(camController: CameraController){
         if(!this.showSOIs){
             for(const sphere of this._sois.values()){
                 sphere.visible = false;
@@ -190,10 +202,10 @@ export class SolarSystem {
 
             for(const body of this.orbiting){
                 const group = <THREE.Group>this._objects.get(body.id);
-                const objPos = new THREE.Vector3();
-                group.getWorldPosition(objPos);
+                const bodyPos = new THREE.Vector3();
+                group.getWorldPosition(bodyPos);
 
-                const dstToCam = camPos.distanceTo(objPos);
+                const dstToCam = camPos.distanceTo(bodyPos);
 
                 const sphere = <THREE.Object3D>this._sois.get(body.id);
                 sphere.visible = dstToCam > body.soi * scale;
