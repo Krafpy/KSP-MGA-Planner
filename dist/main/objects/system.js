@@ -8,6 +8,7 @@ export class SolarSystem {
         this._orbits = new Map();
         this._sois = new Map();
         this.showSOIs = false;
+        this._customUpdates = [];
         this.sun = new CelestialBody(sun);
         for (const data of bodies) {
             const { orbiting } = data;
@@ -115,6 +116,9 @@ export class SolarSystem {
     update(camController) {
         this._updateSatellitesDisplay(camController);
         this._updateSOIsDisplay(camController);
+        for (const f of this._customUpdates) {
+            f(camController);
+        }
     }
     _updateSatellitesDisplay(camController) {
         const { satDispRadii } = this.config.solarSystem;
@@ -164,5 +168,21 @@ export class SolarSystem {
                 }
             }
         }
+    }
+    addCustomUpdate(f) {
+        const id = this._customUpdates.length;
+        this._customUpdates.push(f);
+        return id;
+    }
+    removeCustomUpdate(id) {
+        try {
+            this._customUpdates.splice(id);
+        }
+        catch (err) {
+            console.error(`Failed removing update callback with id ${id}`, err);
+        }
+    }
+    clearCustomUpdate() {
+        this._customUpdates = [];
     }
 }

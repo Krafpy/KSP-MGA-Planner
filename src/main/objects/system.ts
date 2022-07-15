@@ -10,6 +10,8 @@ export class SolarSystem {
     private readonly _sois:     Map<number, THREE.Object3D> = new Map();
     public showSOIs: boolean = false;
 
+    private _customUpdates: ((cam: CameraController) => void)[] = [];
+
     constructor(sun: ICelestialBody, bodies: IOrbitingBody[], public readonly config: Config) {
         this.sun = new CelestialBody(sun);
         
@@ -159,6 +161,10 @@ export class SolarSystem {
     public update(camController: CameraController){
         this._updateSatellitesDisplay(camController);
         this._updateSOIsDisplay(camController);
+        
+        for(const f of this._customUpdates){
+            f(camController);
+        }
     }
 
     /**
@@ -221,5 +227,35 @@ export class SolarSystem {
                 }
             }
         }
+    }
+
+    /**
+     * Adds a function to be called at each new frame.
+     * @param f A function
+     * @returns An id identifying the function that has been added
+     */
+     public addCustomUpdate(f: (cam: CameraController) => void){
+        const id = this._customUpdates.length;
+        this._customUpdates.push(f);
+        return id;
+    }
+
+    /**
+     * Removes a function from the calling list to be run at each frame.
+     * @param id The function id, created with `addCustomUpdate`
+     */
+    public removeCustomUpdate(id: number){
+        try {
+            this._customUpdates.splice(id);
+        } catch(err) {
+            console.error(`Failed removing update callback with id ${id}`, err);
+        }
+    }
+
+    /**
+     * Removes all custom functions added to the update list.
+     */
+    public clearCustomUpdate(){
+        this._customUpdates = [];
     }
 }
