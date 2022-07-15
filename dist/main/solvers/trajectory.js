@@ -11,6 +11,7 @@ export class Trajectory {
         this.orbits = [];
         this._maneuvres = [];
         this._flybys = [];
+        this._displayedSteps = [];
         this._spritesUpdateFunId = -1;
         for (const { orbitElts, attractorId } of this.steps) {
             const attractor = this.system.bodyFromId(attractorId);
@@ -33,6 +34,8 @@ export class Trajectory {
         textureLoader.load("sprites/maneuver.png", loaded("maneuver"));
     }
     draw(resolution) {
+        const numSteps = this.steps.length;
+        this._displayedSteps = Array(numSteps).fill(true);
         this._createTrajectoryArcs(resolution);
         this._createManeuvreSprites();
         this._calculateManeuvresDetails();
@@ -121,7 +124,7 @@ export class Trajectory {
                 const dstToCam = bodyPos.distanceTo(camPos);
                 const visible = dstToCam < scale * body.soi * spriteDispSOIMul;
                 for (const sprite of this._spriteObjects[i]) {
-                    sprite.visible = visible;
+                    sprite.visible = visible && this._displayedSteps[i];
                 }
             }
         };
@@ -273,6 +276,7 @@ export class Trajectory {
             for (const sprite of sprites) {
                 sprite.visible = visible;
             }
+            this._displayedSteps[i] = visible;
         }
     }
     get _totalDeltaV() {

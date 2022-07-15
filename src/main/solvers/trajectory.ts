@@ -18,6 +18,7 @@ export class Trajectory {
     private readonly _maneuvres: ManeuvreDetails[] = [];
     private readonly _flybys: FlybyDetails[] = [];
 
+    private  _displayedSteps: boolean[] = [];
     private _spritesUpdateFunId: number = -1;
 
     constructor(public readonly steps: TrajectoryStep[], public readonly system: SolarSystem, public readonly config: Config) {
@@ -45,6 +46,9 @@ export class Trajectory {
     }
 
     public draw(resolution: {width: number, height: number}){
+        const numSteps = this.steps.length;
+        this._displayedSteps = Array(numSteps).fill(true);
+
         this._createTrajectoryArcs(resolution);
         this._createManeuvreSprites();
         this._calculateManeuvresDetails();
@@ -147,7 +151,7 @@ export class Trajectory {
                 const visible = dstToCam < scale * body.soi * spriteDispSOIMul;
 
                 for(const sprite of this._spriteObjects[i]){
-                    sprite.visible = visible;
+                    sprite.visible = visible && this._displayedSteps[i];
                 }
             }
         };
@@ -339,6 +343,7 @@ export class Trajectory {
             for(const sprite of sprites){
                 sprite.visible = visible;
             }
+            this._displayedSteps[i] = visible;
         }
     }
 
