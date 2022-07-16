@@ -127,6 +127,14 @@ class TrajectoryCalculator {
         const { minLegDuration } = this.config;
         infos.duration = Math.max(minLegDuration, infos.duration);
     }
+    computeStartingMeanAnomalies() {
+        for (let i = 1; i < this.steps.length - 1; i++) {
+            const step = this.steps[i];
+            const { orbitElts, angles } = step;
+            const e = orbitElts.eccentricity;
+            step.startM = Physics3D.meanAnomalyFromTrueAnomaly(angles.begin, e);
+        }
+    }
     recomputeLegsSecondArcs() {
         for (let i = 0; i < this._secondArcsData.length; i++) {
             const data = this._secondArcsData[i];
@@ -160,6 +168,7 @@ class TrajectoryCalculator {
             drawAngles: { begin: 0, end: TWO_PI },
             duration: 0,
             dateOfStart: this._lastStepEndDate,
+            startM: 0,
             maneuvre: maneuvre
         });
     }
@@ -198,7 +207,8 @@ class TrajectoryCalculator {
             angles: angles,
             drawAngles: drawAngles,
             duration: tof,
-            dateOfStart: this._lastStepEndDate
+            dateOfStart: this._lastStepEndDate,
+            startM: 0
         });
         this._vesselState = periapsisState;
         this._secondArcsData.push({
@@ -284,6 +294,7 @@ class TrajectoryCalculator {
             drawAngles: drawAngles,
             duration: tof,
             dateOfStart: this._lastStepEndDate,
+            startM: 0,
             flyby: flybyDetails
         });
         const exitState = Physics3D.orbitElementsToState(flybyOrbit, body, exitAngle);
@@ -339,6 +350,7 @@ class TrajectoryCalculator {
             drawAngles: drawAngles,
             duration: arcDuration,
             dateOfStart: this._lastStepEndDate,
+            startM: 0,
             maneuvre: maneuvre
         });
         this._vesselState = encounterState;
@@ -376,6 +388,7 @@ class TrajectoryCalculator {
             drawAngles: drawAngles,
             duration: arcDuration,
             dateOfStart: exitDate,
+            startM: 0
         });
         this._vesselState = preDSMState;
         this._preDSMState = preDSMState;
@@ -408,7 +421,8 @@ class TrajectoryCalculator {
             drawAngles: { begin: 0, end: soiExitAngle },
             duration: tof,
             dateOfStart: this._lastStepEndDate,
-            maneuvre: maneuvre
+            startM: 0,
+            maneuvre: maneuvre,
         });
         const exitState = Physics3D.orbitElementsToState(ejOrbit, depBody, soiExitAngle);
         this._vesselState = exitState;
@@ -424,7 +438,8 @@ class TrajectoryCalculator {
             angles: { begin: 0, end: 0 },
             drawAngles: { begin: 0, end: TWO_PI },
             duration: 0,
-            dateOfStart: lerp(dateMin, dateMax, dateParam)
+            dateOfStart: lerp(dateMin, dateMax, dateParam),
+            startM: 0
         });
     }
 }

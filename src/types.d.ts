@@ -215,6 +215,7 @@ type TrajectoryStep = {
     drawAngles:  ArcEndsAngles,
     dateOfStart: number,
     duration:    number,
+    startM:      number,
     maneuvre?:   ManeuvreInfo,
     flyby?:      FlybyInfo
 };

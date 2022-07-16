@@ -194,6 +194,15 @@ class TrajectoryCalculator {
         infos.duration = Math.max(minLegDuration, infos.duration);
     }
 
+    public computeStartingMeanAnomalies(){
+        for(let i = 1; i < this.steps.length-1; i++){ // ignore begin and end circular orbits
+            const step = this.steps[i];
+            const {orbitElts, angles} = step;
+            const e = orbitElts.eccentricity;
+            step.startM = Physics3D.meanAnomalyFromTrueAnomaly(angles.begin, e);
+        }
+    }
+
     /**
      * Recomputes the second arc of a all legs accounting this time for SOI enter points,
      * thus providing a more precise visualization of the orbit.
@@ -247,6 +256,7 @@ class TrajectoryCalculator {
             drawAngles:  {begin: 0, end: TWO_PI},
             duration:    0,
             dateOfStart: this._lastStepEndDate,
+            startM:      0,
             maneuvre:    maneuvre
         });
     }
@@ -317,7 +327,8 @@ class TrajectoryCalculator {
             angles:      angles,
             drawAngles:  drawAngles,
             duration:    tof,
-            dateOfStart: this._lastStepEndDate
+            dateOfStart: this._lastStepEndDate,
+            startM:      0
         });
 
         // Store the state of the vessel at periapsis for further
@@ -457,6 +468,7 @@ class TrajectoryCalculator {
             drawAngles:  drawAngles,
             duration:    tof,
             dateOfStart: this._lastStepEndDate,
+            startM:      0,
             flyby:       flybyDetails
         });
 
@@ -536,6 +548,7 @@ class TrajectoryCalculator {
             drawAngles:  drawAngles,
             duration:    arcDuration,
             dateOfStart: this._lastStepEndDate,
+            startM:      0,
             maneuvre:    maneuvre
         });
 
@@ -598,6 +611,7 @@ class TrajectoryCalculator {
             drawAngles:  drawAngles,
             duration:    arcDuration,
             dateOfStart: exitDate,
+            startM:      0
         });
 
         // Store the pre-DSM state to use it in the second arc maneuver calculation
@@ -656,7 +670,8 @@ class TrajectoryCalculator {
             drawAngles:  {begin: 0, end: soiExitAngle},
             duration:    tof,
             dateOfStart: this._lastStepEndDate,
-            maneuvre:    maneuvre
+            startM:      0,
+            maneuvre:    maneuvre,
         });
 
         // Compute the state of the vessel relative to the exited body when exiting its SOI
@@ -679,7 +694,8 @@ class TrajectoryCalculator {
             angles:      {begin: 0, end: 0},
             drawAngles:  {begin: 0, end: TWO_PI},
             duration:    0,
-            dateOfStart: lerp(dateMin, dateMax, dateParam)
+            dateOfStart: lerp(dateMin, dateMax, dateParam),
+            startM:      0
         });
     }
 }

@@ -110,6 +110,8 @@ class TrajectoryOptimizer extends WorkerEnvironment {
             }
         }
 
+        this._bestTrajectory.computeStartingMeanAnomalies();
+        
         sendResult({
             popChunk:   this._evolver.popChunk,
             fitChunk:   this._evolver.fitChunk,
