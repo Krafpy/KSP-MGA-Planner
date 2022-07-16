@@ -88,8 +88,7 @@ export class Trajectory {
                 const { x, y, z } = maneuvre.position;
                 const pos = new THREE.Vector3(x, y, z);
                 addSprite(i, sprite, pos);
-                const { type } = maneuvre.context;
-                if (type == "ejection") {
+                if (maneuvre.context.type == "ejection") {
                     const sprite = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
                     const pos = orbit.positionFromTrueAnomaly(step.drawAngles.end);
                     addSprite(i, sprite, pos);
