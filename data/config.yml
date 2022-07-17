@@ -66,3 +66,4 @@ workers:
 trajectoryDraw:
   samplePoints:       2500          # number sample points for each tarjectory arc draw
   spritesSize:        0.08          # size of the sprites for maneuvers, encounters, escapes
+  podSpriteSize:      0.06          # size of the pod sprite

@@ -8,6 +8,7 @@ export class Trajectory {
         this.config = config;
         this._orbitObjects = [];
         this._spriteObjects = [];
+        this._podSpriteIndex = 0;
         this.orbits = [];
         this._maneuvres = [];
         this._flybys = [];
@@ -32,6 +33,7 @@ export class Trajectory {
         textureLoader.load("sprites/encounter.png", loaded("encounter"));
         textureLoader.load("sprites/escape.png", loaded("escape"));
         textureLoader.load("sprites/maneuver.png", loaded("maneuver"));
+        textureLoader.load("sprites/pod.png", loaded("pod"));
     }
     draw(resolution) {
         const numSteps = this.steps.length;
@@ -88,8 +90,7 @@ export class Trajectory {
                 const { x, y, z } = maneuvre.position;
                 const pos = new THREE.Vector3(x, y, z);
                 addSprite(i, sprite, pos);
-                const { type } = maneuvre.context;
-                if (type == "ejection") {
+                if (maneuvre.context.type == "ejection") {
                     const sprite = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
                     const pos = orbit.positionFromTrueAnomaly(step.drawAngles.end);
                     addSprite(i, sprite, pos);
@@ -130,6 +131,14 @@ export class Trajectory {
         };
         const id = this.system.addCustomUpdate(updateSpritesDisplay);
         this._spritesUpdateFunId = id;
+        const { podSpriteSize } = this.config.trajectoryDraw;
+        const podSpriteMat = Trajectory.sprites.get("pod");
+        podSpriteMat.depthTest = false;
+        const podSprite = createSprite(podSpriteMat, 0xFFFFFF, false, podSpriteSize);
+        const group = this.system.objectsOfBody(this.steps[0].attractorId);
+        group.add(podSprite);
+        this._podSpriteIndex = 0;
+        this._spriteObjects[this._podSpriteIndex].push(podSprite);
     }
     _calculateManeuvresDetails() {
         const departureDate = this.steps[0].dateOfStart;
@@ -181,6 +190,7 @@ export class Trajectory {
             controls.centerOnTarget();
             systemTime.time.dateSeconds = date;
             systemTime.update();
+            this.updatePodPosition(systemTime);
         };
         resultItems.depDateSpan.onclick = onDateClick(depDate.dateSeconds);
         const { stepSlider } = resultItems;
@@ -278,6 +288,41 @@ export class Trajectory {
             }
             this._displayedSteps[i] = visible;
         }
+    }
+    updatePodPosition(systemTime) {
+        const lastStep = this.steps[this.steps.length - 1];
+        const missionStart = this.steps[0].dateOfStart;
+        const missionEnd = lastStep.dateOfStart + lastStep.duration;
+        let date = systemTime.dateSeconds;
+        if (date < missionStart)
+            date = missionStart;
+        else if (date > missionEnd)
+            date = missionEnd;
+        let i = 1;
+        for (; i < this.steps.length - 1; i++) {
+            const { dateOfStart, duration } = this.steps[i];
+            if (date >= dateOfStart && date < dateOfStart + duration)
+                break;
+        }
+        i = Math.min(i, this.steps.length - 2);
+        const step = this.steps[i];
+        const pod = this._spriteObjects[this._podSpriteIndex].pop();
+        const curAttrId = this.steps[this._podSpriteIndex].attractorId;
+        const curGroup = this.system.objectsOfBody(curAttrId);
+        curGroup.remove(pod);
+        this._spriteObjects[i].push(pod);
+        this._podSpriteIndex = i;
+        const newAttrId = step.attractorId;
+        const newGroup = this.system.objectsOfBody(newAttrId);
+        newGroup.add(pod);
+        const orbit = this.orbits[i];
+        const relDate = date - step.dateOfStart;
+        const { startM } = step;
+        const trueAnom = orbit.solveTrueAnomalyAtDate(startM, relDate);
+        const pos = orbit.positionFromTrueAnomaly(trueAnom);
+        const { scale } = this.config.rendering;
+        pod.position.set(pos.x, pos.y, pos.z);
+        pod.position.multiplyScalar(scale);
     }
     get _totalDeltaV() {
         let total = 0;

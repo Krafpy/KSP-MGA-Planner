@@ -54,6 +54,7 @@ interface OrbitSettings {
 interface TrajectoryDrawSettings {
     readonly samplePoints:      number;
     readonly spritesSize:       number;
+    readonly podSpriteSize:     number;
 }
 
 interface CameraSettings {
@@ -215,6 +216,7 @@ type TrajectoryStep = {
     drawAngles:  ArcEndsAngles,
     dateOfStart: number,
     duration:    number,
+    startM:      number,
     maneuvre?:   ManeuvreInfo,
     flyby?:      FlybyInfo
 };

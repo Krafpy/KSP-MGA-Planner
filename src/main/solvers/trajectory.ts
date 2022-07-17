@@ -12,6 +12,7 @@ export class Trajectory {
 
     private _orbitObjects:  THREE.Object3D[] = [];
     private _spriteObjects: THREE.Sprite[][] = [];
+    private _podSpriteIndex: number = 0;
 
     public readonly orbits: Orbit[] = [];
 
@@ -29,6 +30,9 @@ export class Trajectory {
         }
     }
 
+    /**
+     * Preloads all the sprite materials in the `sprites` map.
+     */
     public static preloadSpriteMaterials(){
         const textureLoader = new THREE.TextureLoader();
         const loaded = (name: string) => {
@@ -43,8 +47,13 @@ export class Trajectory {
         textureLoader.load("sprites/encounter.png", loaded("encounter"));
         textureLoader.load("sprites/escape.png", loaded("escape"));
         textureLoader.load("sprites/maneuver.png", loaded("maneuver"));
+        textureLoader.load("sprites/pod.png", loaded("pod"));
     }
 
+    /**
+     * Draws the tajectory to the scene.
+     * @param resolution The resolution of the canvas
+     */
     public draw(resolution: {width: number, height: number}){
         const numSteps = this.steps.length;
         this._displayedSteps = Array(numSteps).fill(true);
@@ -55,6 +64,10 @@ export class Trajectory {
         this._calculateFlybyDetails();
     }
 
+    /**
+     * Computes all the leg arcs orbits, adds them to the scene and stores them.
+     * @param resolution The resolution of the canvas
+     */
     private _createTrajectoryArcs(resolution: {width: number, height: number}){
         this._orbitObjects = [];
 
@@ -80,7 +93,12 @@ export class Trajectory {
         }
     }
 
+    /**
+     * Adds the various sprites to the scene and the collections for managment.
+     */
     private _createManeuvreSprites(){
+        // Empty the sprite collection, for each step there is a list
+        // of sprites (initally empty).
         this._spriteObjects = [];
         for(let i = 0; i < this.steps.length; i++){
             this._spriteObjects.push([]);
@@ -94,6 +112,7 @@ export class Trajectory {
         const maneuverSprite = <THREE.SpriteMaterial>Trajectory.sprites.get("maneuver");
 
         const addSprite = (i: number, sprite: THREE.Sprite, pos: THREE.Vector3) => {
+            // adds a sprite to the sprite collection and the corresponding group
             sprite.position.set(pos.x, pos.y, pos.z);
             sprite.position.multiplyScalar(scale);
             const group = this.system.objectsOfBody(this.steps[i].attractorId);
@@ -107,18 +126,20 @@ export class Trajectory {
             const {maneuvre, flyby} = step;
 
             if(maneuvre){
+                // if there is a maneuver, add the maneuver sprite
                 const sprite = createSprite(maneuverSprite, 0xFFFFFF, false, spritesSize);
                 const {x, y, z} = maneuvre.position;
                 const pos = new THREE.Vector3(x, y, z);
                 addSprite(i, sprite, pos);
-                const {type} = maneuvre.context;
-                if(type == "ejection"){
+                if(maneuvre.context.type == "ejection"){
+                    // if the maneuver is an ejection, add the ejection maneuver sprite
                     const sprite = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
                     const pos = orbit.positionFromTrueAnomaly(step.drawAngles.end);
                     addSprite(i, sprite, pos);
                 }
 
             } else if(flyby){
+                // if the maneuver is a flyby, add the encounter and escape sprites
                 const sprite1 = createSprite(encounterSprite, 0xFFFFFF, false, spritesSize);
                 const sprite2 = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
                 const pos1 = orbit.positionFromTrueAnomaly(step.drawAngles.begin);
@@ -127,6 +148,7 @@ export class Trajectory {
                 addSprite(i, sprite2, pos2);
 
             } else if(i == this.steps.length - 2){
+                // if it's insertion orbit, add the circularization burn maneuver sprite
                 const sprite = createSprite(encounterSprite, 0xFFFFFF, false, spritesSize);
                 const pos = orbit.positionFromTrueAnomaly(step.drawAngles.begin);
                 addSprite(i, sprite, pos);
@@ -134,6 +156,9 @@ export class Trajectory {
         }
 
         const updateSpritesDisplay = (camController: CameraController) => {
+            // display maneuver sprites only if we are close enough to the body
+            // that contains them, and if the steps to which belong these maneuvers is
+            // actually displayed
             const camPos = camController.camera.position;
             const {scale} = this.config.rendering;
             const {spriteDispSOIMul} = this.config.solarSystem;
@@ -156,10 +181,26 @@ export class Trajectory {
             }
         };
 
+        // Add the display update as a callback of the system's update
+        // function which is called once each frame.
         const id = this.system.addCustomUpdate(updateSpritesDisplay);
         this._spritesUpdateFunId = id;
+
+
+        // Create pod sprite
+        const {podSpriteSize} = this.config.trajectoryDraw;
+        const podSpriteMat = <THREE.SpriteMaterial>Trajectory.sprites.get("pod");
+        podSpriteMat.depthTest = false;
+        const podSprite = createSprite(podSpriteMat, 0xFFFFFF, false, podSpriteSize);
+        const group = this.system.objectsOfBody(this.steps[0].attractorId);
+        group.add(podSprite);
+        this._podSpriteIndex = 0;
+        this._spriteObjects[this._podSpriteIndex].push(podSprite);
     }
 
+    /**
+     * Computes the maneuver details from the data given in the steps.
+     */
     private _calculateManeuvresDetails(){
         const departureDate = this.steps[0].dateOfStart;
 
@@ -196,6 +237,9 @@ export class Trajectory {
         }
     }
 
+    /**
+     * Computes the flyby details from the data given in the steps.
+     */
     private _calculateFlybyDetails(){
         const departureDate = this.steps[0].dateOfStart;
         for(const {flyby} of this.steps){
@@ -216,10 +260,18 @@ export class Trajectory {
         }
     }
     
+    /**
+     * Fills the various HTML elements of the result panel with the data and events needed.
+     * @param resultItems The list of HTML items attached to the result panel
+     * @param systemTime The system time manager
+     * @param controls The camera controller
+     */
     public fillResultControls(resultItems: ResultPannelItems, systemTime: TimeSelector, controls: CameraController){
         const depDate = new KSPTime(this.steps[0].dateOfStart, this.config.time);
 
+        // total delta-V
         resultItems.totalDVSpan.innerHTML = this._totalDeltaV.toFixed(1);
+        // departure date
         resultItems.depDateSpan.innerHTML = depDate.stringYDHMS("hms", "ut");
 
         const onDateClick = (date: number) => () => {
@@ -227,18 +279,21 @@ export class Trajectory {
             controls.centerOnTarget();
             systemTime.time.dateSeconds = date;
             systemTime.update();
+            this.updatePodPosition(systemTime);
         };
-
+        // set the system time to the departure date time when the span is clicked
         resultItems.depDateSpan.onclick = onDateClick(depDate.dateSeconds);
 
+        // configure the step slider
         const {stepSlider} = resultItems;
         stepSlider.setMinMax(0, this.steps.length - 1);
         stepSlider.input((index: number) => this._displayStepsUpTo(index));
         stepSlider.value = this.steps.length - 1;
 
-
+        // information about each selector options
         const selectorOptions: DetailsSelectorOption[] = [];
 
+        // keep index for the numbering of each maneuver and flybys
         let maneuvreIdx = 0, flybyIdx = 0;
         let optionNumber = 0;
 
@@ -249,6 +304,7 @@ export class Trajectory {
                 const step = this.steps[details.stepIndex];
                 const context = (<ManeuvreInfo>step.maneuvre).context;
 
+                // name of the options to display in the selector, if it's a maneuver
                 let optionName: string;
                 if(context.type == "ejection") {
                     const startBodyName = this.system.bodyFromId(step.attractorId).name;
@@ -271,6 +327,7 @@ export class Trajectory {
                 selectorOptions.push(option);
 
             } else if(flyby){
+                // details the options in the selector, if it's a flyby
                 const details = this._flybys[flybyIdx];
                 const bodyName = this.system.bodyFromId(details.bodyId).name;
                 const optionName = `${++optionNumber}: ${bodyName} flyby`;
@@ -285,11 +342,14 @@ export class Trajectory {
             }
         }
 
+        // retrieve the list of option names only from their details
         const optionNames = selectorOptions.map(opt => opt.text);
 
         const {detailsSelector} = resultItems;
         detailsSelector.fill(optionNames);
         detailsSelector.change((_: string, index: number) => {
+            // Fill the result panel with the correct data depending on what option
+            // is selected in the selector
             const option = selectorOptions[index];
             
             if(option.type == "maneuver"){
@@ -334,6 +394,10 @@ export class Trajectory {
         }*/
     }
 
+    /**
+     * Sets the visibility of the steps up to the provided indedx.
+     * @param index The index of the last step to display
+     */
     private _displayStepsUpTo(index: number){
         for(let i = 0; i < this.steps.length; i++){
             const orbitLine = this._orbitObjects[i];
@@ -347,6 +411,53 @@ export class Trajectory {
         }
     }
 
+    public updatePodPosition(systemTime: TimeSelector){
+        const lastStep = this.steps[this.steps.length-1];
+        const missionStart = this.steps[0].dateOfStart;
+        const missionEnd = lastStep.dateOfStart + lastStep.duration;
+
+        let date = systemTime.dateSeconds;
+        if(date < missionStart) date = missionStart;
+        else if(date > missionEnd) date = missionEnd;
+
+        let i = 1;
+        for(; i < this.steps.length-1; i++){
+            const {dateOfStart, duration} = this.steps[i];
+            if(date >= dateOfStart && date < dateOfStart + duration)
+                break;
+        }
+        i = Math.min(i, this.steps.length-2);
+
+        const step = this.steps[i];
+
+        // Remove the pod sprite from its current group
+        const pod = <THREE.Sprite>this._spriteObjects[this._podSpriteIndex].pop();
+        const curAttrId = this.steps[this._podSpriteIndex].attractorId;
+        const curGroup = this.system.objectsOfBody(curAttrId);
+        curGroup.remove(pod);
+
+        // Add the sprite to the new group
+        this._spriteObjects[i].push(pod);
+        this._podSpriteIndex = i;
+        const newAttrId = step.attractorId;
+        const newGroup = this.system.objectsOfBody(newAttrId);
+        newGroup.add(pod);
+
+        // Compute its position on the leg arc where the pod is
+        const orbit = this.orbits[i];
+        const relDate = date - step.dateOfStart;
+        const {startM} = step;
+        const trueAnom = orbit.solveTrueAnomalyAtDate(startM, relDate);
+        const pos = orbit.positionFromTrueAnomaly(trueAnom);
+
+        const {scale} = this.config.rendering;
+        pod.position.set(pos.x, pos.y, pos.z);
+        pod.position.multiplyScalar(scale);
+    }
+
+    /**
+     * Computes and returns the total delta-V of the trajectory
+     */
     private get _totalDeltaV(){
         let total = 0;
         for(const details of this._maneuvres){
@@ -358,6 +469,9 @@ export class Trajectory {
         return total;
     }
 
+    /**
+     * Removes all objects/events relative to this trajectory from the scene.
+     */
     public remove() {
         for(const object of this._orbitObjects) {
             if(object.parent) object.parent.remove(object);
