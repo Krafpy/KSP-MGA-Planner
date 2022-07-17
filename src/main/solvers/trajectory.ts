@@ -411,7 +411,13 @@ export class Trajectory {
         }
     }
 
+    /**
+     * Updates the position of the pod sprite on the trajectory to correspond
+     * the the date selected on the system time.
+     * @param systemTime The system time selector
+     */
     public updatePodPosition(systemTime: TimeSelector){
+        // Get and clamp the date for the pod
         const lastStep = this.steps[this.steps.length-1];
         const missionStart = this.steps[0].dateOfStart;
         const missionEnd = lastStep.dateOfStart + lastStep.duration;
@@ -420,6 +426,7 @@ export class Trajectory {
         if(date < missionStart) date = missionStart;
         else if(date > missionEnd) date = missionEnd;
 
+        // Get the step where the pod is at this date
         let i = 1;
         for(; i < this.steps.length-1; i++){
             const {dateOfStart, duration} = this.steps[i];
