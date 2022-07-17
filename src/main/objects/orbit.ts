@@ -76,8 +76,8 @@ export class Orbit implements IOrbit {
     }
     
     /**
-     * @param meanAnomaly0 The mean anomaly at UT 0
-     * @param date The date (in seconds) from UT at which we want the anomaly
+     * @param meanAnomaly0 The mean anomaly at some known reference date
+     * @param date The elapsed time (in seconds) from the reference date at which we want the anomaly
      * @returns The true anomaly of the body on its orbit at the specified date.
      */
     public solveTrueAnomalyAtDate(meanAnomaly0: number, date: number){
