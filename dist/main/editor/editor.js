@@ -134,6 +134,7 @@ export function initEditor(controls, system, config, canvas) {
             if (trajectory) {
                 trajectory.remove();
             }
+            systemTime.input(updateSystemTime);
         };
         const displayFoundTrajectory = () => {
             trajectory = new Trajectory(solver.bestSteps, system, config);
@@ -142,6 +143,11 @@ export function initEditor(controls, system, config, canvas) {
             detailsSelector.select(0);
             detailsSelector.enable();
             stepSlider.enable();
+            systemTime.input(() => {
+                updateSystemTime();
+                trajectory.updatePodPosition(systemTime);
+            });
+            trajectory.updatePodPosition(systemTime);
             console.log(solver.bestDeltaV);
         };
         const findTrajectory = async () => {

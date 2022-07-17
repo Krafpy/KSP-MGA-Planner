@@ -54,6 +54,7 @@ interface OrbitSettings {
 interface TrajectoryDrawSettings {
     readonly samplePoints:      number;
     readonly spritesSize:       number;
+    readonly podSpriteSize:     number;
 }
 
 interface CameraSettings {

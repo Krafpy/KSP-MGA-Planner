@@ -12,6 +12,7 @@ export class Trajectory {
 
     private _orbitObjects:  THREE.Object3D[] = [];
     private _spriteObjects: THREE.Sprite[][] = [];
+    private _podSpriteIndex: number = 0;
 
     public readonly orbits: Orbit[] = [];
 
@@ -46,6 +47,7 @@ export class Trajectory {
         textureLoader.load("sprites/encounter.png", loaded("encounter"));
         textureLoader.load("sprites/escape.png", loaded("escape"));
         textureLoader.load("sprites/maneuver.png", loaded("maneuver"));
+        textureLoader.load("sprites/pod.png", loaded("pod"));
     }
 
     /**
@@ -183,6 +185,17 @@ export class Trajectory {
         // function which is called once each frame.
         const id = this.system.addCustomUpdate(updateSpritesDisplay);
         this._spritesUpdateFunId = id;
+
+
+        // Create pod sprite
+        const {podSpriteSize} = this.config.trajectoryDraw;
+        const podSpriteMat = <THREE.SpriteMaterial>Trajectory.sprites.get("pod");
+        podSpriteMat.depthTest = false;
+        const podSprite = createSprite(podSpriteMat, 0xFFFFFF, false, podSpriteSize);
+        const group = this.system.objectsOfBody(this.steps[0].attractorId);
+        group.add(podSprite);
+        this._podSpriteIndex = 0;
+        this._spriteObjects[this._podSpriteIndex].push(podSprite);
     }
 
     /**
@@ -266,6 +279,7 @@ export class Trajectory {
             controls.centerOnTarget();
             systemTime.time.dateSeconds = date;
             systemTime.update();
+            this.updatePodPosition(systemTime);
         };
         // set the system time to the departure date time when the span is clicked
         resultItems.depDateSpan.onclick = onDateClick(depDate.dateSeconds);
@@ -395,6 +409,50 @@ export class Trajectory {
             }
             this._displayedSteps[i] = visible;
         }
+    }
+
+    public updatePodPosition(systemTime: TimeSelector){
+        const lastStep = this.steps[this.steps.length-1];
+        const missionStart = this.steps[0].dateOfStart;
+        const missionEnd = lastStep.dateOfStart + lastStep.duration;
+
+        let date = systemTime.dateSeconds;
+        if(date < missionStart) date = missionStart;
+        else if(date > missionEnd) date = missionEnd;
+
+        let i = 1;
+        for(; i < this.steps.length-1; i++){
+            const {dateOfStart, duration} = this.steps[i];
+            if(date >= dateOfStart && date < dateOfStart + duration)
+                break;
+        }
+        i = Math.min(i, this.steps.length-2);
+
+        const step = this.steps[i];
+
+        // Remove the pod sprite from its current group
+        const pod = <THREE.Sprite>this._spriteObjects[this._podSpriteIndex].pop();
+        const curAttrId = this.steps[this._podSpriteIndex].attractorId;
+        const curGroup = this.system.objectsOfBody(curAttrId);
+        curGroup.remove(pod);
+
+        // Add the sprite to the new group
+        this._spriteObjects[i].push(pod);
+        this._podSpriteIndex = i;
+        const newAttrId = step.attractorId;
+        const newGroup = this.system.objectsOfBody(newAttrId);
+        newGroup.add(pod);
+
+        // Compute its position on the leg arc where the pod is
+        const orbit = this.orbits[i];
+        const relDate = date - step.dateOfStart;
+        const {startM} = step;
+        const trueAnom = orbit.solveTrueAnomalyAtDate(startM, relDate);
+        const pos = orbit.positionFromTrueAnomaly(trueAnom);
+
+        const {scale} = this.config.rendering;
+        pod.position.set(pos.x, pos.y, pos.z);
+        pod.position.multiplyScalar(scale);
     }
 
     /**

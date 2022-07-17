@@ -183,6 +183,7 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
             if(trajectory){
                 trajectory.remove();
             }
+            systemTime.input(updateSystemTime);
         }
 
         const displayFoundTrajectory = () => {
@@ -193,6 +194,13 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
             detailsSelector.select(0);
             detailsSelector.enable();
             stepSlider.enable();
+
+            systemTime.input(() => {
+                updateSystemTime();
+                //@ts-ignore
+                trajectory.updatePodPosition(systemTime);
+            });
+            trajectory.updatePodPosition(systemTime);
 
             console.log(solver.bestDeltaV);
         };
