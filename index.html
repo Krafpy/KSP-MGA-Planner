@@ -366,7 +366,7 @@
                     
                     <h3>Trajectory calculation</h3>
                     <p>
-                        Once the planetary sequence is selected, we must specify the departure conditions:
+                        Once the planetary sequence is selected, we must specify the departure and arrival conditions:
                     </p>
                     <ul>
                         <li>
@@ -378,12 +378,12 @@
                         </li>
                     </ul>
                     <p>
-                        The trajectory search step will then try to find <em>an</em> optimal trajectory given the sequence and the
-                        departure conditions.
+                        The trajectory search step will then <em>try</em> to find <em>a possible</em> optimal trajectory given the sequence and the
+                        departure/arrival conditions.
                     </p>
                     <p>
                         The resulting trajectory will be displayed in the interactive 3D window, alongside with
-                        the details of each maneuver (ejection from the departure body and DSMs) and flybys' information.
+                        the details of each maneuver (ejection, DSMs and circularization) and flybys' information.
                     </p>
 
                     <figure id="example-image-container">
@@ -430,8 +430,9 @@
                 <a href="https://github.com/">Github</a>.
             </p>
             <p>
-                Uses <a href="https://threejs.org/">THREE.js</a>, <a href="https://www.chartjs.org/">Chart.js</a> and
-                <a href="https://github.com/nodeca/js-yaml">js-yaml</a>.
+                Uses <a href="https://threejs.org/">THREE.js</a>, <a href="https://www.chartjs.org/">Chart.js</a>,
+                <a href="https://github.com/nodeca/js-yaml">js-yaml</a>, and
+                code from ESA's <a href="https://github.com/esa/pykep">pykep</a> library.
             </p>
             <p>
                 The design of this website was inspired from Olex's 
