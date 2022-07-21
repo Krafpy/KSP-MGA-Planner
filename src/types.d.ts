@@ -323,3 +323,17 @@ type DetailsSelectorOption = {
     type:   "maneuver" | "flyby",
     origin: number
 };
+
+type EditorParameters = {
+    controls: CameraController,
+    system:   SolarSystem,
+    config:   Config,
+    canvas:   HTMLCanvasElement,
+    stopLoop: () => void,
+    systems:  SolarSystemData[]
+};
+
+type SolarSystemData = {
+    name: string;
+    folderName: string;
+};

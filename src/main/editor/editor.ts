@@ -15,8 +15,47 @@ import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
 import { OrbitingBody } from "../objects/body.js";
+import { loadBodiesData, loadConfig } from "../utilities/data.js";
 
-export function initEditor(controls: CameraController, system: SolarSystem, config: Config, canvas: HTMLCanvasElement, stopLoop: () => void){
+
+export async function initEditorWithSystem(systems: SolarSystemData[], systemIndex: number){
+    const canvas = document.getElementById("three-canvas") as HTMLCanvasElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    
+    const config = await loadConfig(systems[systemIndex].folderName);
+
+    const camera = new THREE.PerspectiveCamera(
+        config.rendering.fov,
+        width / height,
+        config.rendering.nearPlane,
+        config.rendering.farPlane
+    );
+    const scene = new THREE.Scene();
+
+    const renderer = new THREE.WebGLRenderer({antialias: true, canvas: canvas});
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    const bodiesData = await loadBodiesData(systems[systemIndex].folderName);
+    const system = new SolarSystem(bodiesData.sun, bodiesData.bodies, config);
+    system.fillSceneObjects(scene, canvas);
+    
+    const controls = new CameraController(camera, canvas, system, config);
+    controls.targetBody = system.sun;
+    
+    let stop = false;
+    let stopLoop = () => stop = true;
+
+    const loop = () => {
+        if(!stop) requestAnimationFrame(loop);
+        controls.update();
+        system.update(controls);
+        renderer.render(scene, camera);
+    }
+    requestAnimationFrame(loop);
+
+    // Setting up solar system time control
     const systemTime = new TimeSelector("system", config);
     const updateSystemTime = () => {
         systemTime.validate();
@@ -40,6 +79,13 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
     originSelector.select(config.editor.defaultOrigin);
     const destSelector = new BodySelector("destination-selector", system);
     destSelector.select(config.editor.defaultDest);
+
+    // Init the solar system selector
+    const systemSelector = new Selector("system-selector");
+    const optionNames = systems.map(s => s.name);
+    systemSelector.fill(optionNames);
+    systemSelector.select(systemIndex);
+    // callback is configured later
     
     {
         // Sequence generation parameters
@@ -53,11 +99,14 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
             maxSwingBys.assertValidity();
             maxResonant.assertValidity();
             maxBackLegs.assertValidity();
-            
-            if(originSelector.body.attractor.id != destSelector.body.attractor.id)
+
+            const depBody = originSelector.body;
+            const destBody = destSelector.body;
+
+            if(depBody.attractor.id != destBody.attractor.id)
                 throw new Error("Origin and destination bodies must orbit the same body.");
-            
-            if(originSelector.body.id == destSelector.body.id)
+
+            if(depBody.id == destBody.id)
                 throw new Error("Same origin and destination bodies.");
         }
 
@@ -73,7 +122,6 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
                 const percent = Math.floor(100 * generator.progression / generator.totalFeasible);
                 progressMsg.setMessage(`Evaluation sequences : ${percent}%`);
             };
-
             const params = {
                 departureId:    originSelector.body.id,
                 destinationId:  destSelector.body.id,
@@ -82,20 +130,19 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
                 maxResonant:    maxResonant.value,
                 maxBackLegs:    maxBackLegs.value,
             };
-
             const sequences = await generator.generateFlybySequences(params, onProgress);
             sequenceSelector.fillFrom(sequences);
         }
 
         const generateSequences = async () => {
             paramsErr.hide();
+            systemSelector.disable();
             try {
                 sequenceSelector.disable();
                 sequenceSelector.clear();
                 progressMsg.enable(1000);
-                
-                assertSequenceInputs();
 
+                assertSequenceInputs();
                 await runSequenceGeneration();
 
                 sequenceSelector.enable();
@@ -107,6 +154,7 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
                 
             } finally {
                 progressMsg.hide();
+                systemSelector.enable();
             }
         }
 
@@ -152,6 +200,7 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
         stepSlider.disable();
 
         const getSpan = (id: string) =>  document.getElementById(id) as HTMLSpanElement;
+        const getDiv = (id: string) => document.getElementById(id) as HTMLDivElement;
 
         const resultItems = {
             dateSpan:         getSpan("maneuvre-date"),
@@ -161,29 +210,24 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
             depDateSpan:      getSpan("result-departure-date") ,
             totalDVSpan:      getSpan("result-total-delta-v"),
             maneuvreNumber:   getSpan("maneuvre-number"),
-
             flybyNumberSpan:  getSpan("flyby-number"),
             startDateSpan:    getSpan("flyby-start-date"),
             endDateSpan:      getSpan("flyby-end-date"),
             periAltitudeSpan: getSpan("flyby-periapsis-altitude"),
             inclinationSpan:  getSpan("flyby-inclination"),
-
             detailsSelector:  detailsSelector,
             stepSlider:       stepSlider,
-
-            maneuverDiv:      document.getElementById("maneuvre-details") as HTMLDivElement,
-            flybyDiv:         document.getElementById("flyby-details")    as HTMLDivElement
+            maneuverDiv:      getDiv("maneuvre-details"),
+            flybyDiv:         getDiv("flyby-details")
         };
 
         const resetFoundTrajectory = () => {
+            systemTime.input(updateSystemTime);
             deltaVPlot.reveal();
             detailsSelector.clear();
             detailsSelector.disable();
             stepSlider.disable();
-            if(trajectory){
-                trajectory.remove();
-            }
-            systemTime.input(updateSystemTime);
+            if(trajectory) trajectory.remove();
         }
 
         const displayFoundTrajectory = () => {
@@ -191,15 +235,14 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
             trajectory.draw(canvas);
             trajectory.fillResultControls(resultItems, systemTime, controls);
 
-            detailsSelector.select(0);
-            detailsSelector.enable();
-            stepSlider.enable();
-
             systemTime.input(() => {
                 updateSystemTime();
                 //@ts-ignore
                 trajectory.updatePodPosition(systemTime);
             });
+            detailsSelector.select(0);
+            detailsSelector.enable();
+            stepSlider.enable();
             trajectory.updatePodPosition(systemTime);
 
             console.log(solver.bestDeltaV);
@@ -207,13 +250,13 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
 
         const findTrajectory = async () => {
             paramsErr.hide();
+            systemSelector.disable();
             try {
                 let sequence: FlybySequence;
-                if(customSequence.value == ""){
-                    sequence = sequenceSelector.sequence;
-                } else {
+                if(customSequence.value != "")
                     sequence = FlybySequence.fromString(customSequence.value, system);
-                }
+                else
+                    sequence = sequenceSelector.sequence;
 
                 updateAltitudeRange(depAltitude, sequence.bodies[0]);
                 const seqLen = sequence.length;
@@ -241,11 +284,41 @@ export function initEditor(controls: CameraController, system: SolarSystem, conf
                 if(err instanceof Error && err.message != "TRAJECTORY FINDER CANCELLED")
                     paramsErr.show(err);
                 console.error(err);
+            } finally {
+
+                systemSelector.enable();
             }
         };
     
         // Trajectory solver buttons
         new SubmitButton("search-btn").click(() => findTrajectory());
         new StopButton("search-stop-btn").click(() => solver.cancel());
+
+        // Configure the system selector callback
+        systemSelector.change((_, index) => {
+            stopLoop();
+            deltaVPlot.destroy();
+            detailsSelector.clear();
+    
+            resultItems.maneuvreNumber.innerHTML = "--";
+            resultItems.endDateSpan.innerHTML = "--";
+            resultItems.dateSpan.innerHTML = "--";
+            resultItems.normalDVSpan.innerHTML = "--";
+            resultItems.radialDVSpan.innerHTML = "--";
+            resultItems.depDateSpan.innerHTML = "--";
+            resultItems.totalDVSpan.innerHTML = "--";
+            resultItems.periAltitudeSpan.innerHTML = "--";
+            resultItems.inclinationSpan.innerHTML = "--";
+    
+            for(let i = scene.children.length - 1; i >= 0; i--){
+                scene.remove(scene.children[i]);
+            }
+            camera.remove();
+            scene.remove();
+            renderer.dispose();
+            controls.dispose();
+    
+            initEditorWithSystem(systems, index);
+        });
     }
 }

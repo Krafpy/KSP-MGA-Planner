@@ -60,18 +60,18 @@ strong
     margin-top: 30px;
 }
 
-#data-update
-{
-    font-weight: bold;
-    color: rgba(255, 255, 255, 0.459);
-}
-
 #canvas-top-bar
 {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-end;
+    margin-bottom: 10px;
+}
+
+#canvas-top-bar .time-selector
+{
+    margin-bottom: 0;
 }
 
 /* Editor forms styles */
@@ -236,10 +236,10 @@ input[type="text"]::placeholder
     margin-top: 25px;
 }
 
-#custom-sequence-group
+/*#custom-sequence-group
 {
     margin-top: 25px;
-}
+}*/
 
 /* Editor forms' action buttons */
 
