@@ -3,6 +3,9 @@
 - name: Stock
   folderName: stock
 
+- name: JNSQ
+  folderName: jnsq
+
 # Template:
 # - name: New Solar System
 #   folderName: new-solar-system
