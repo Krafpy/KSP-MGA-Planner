@@ -118,8 +118,8 @@ export class SolarSystem {
         const camPos = camController.camera.position;
         for (const body of this.orbiting) {
             const { attractor } = body;
+            const bodyGroup = this._objects.get(body.id);
             if (attractor.id != 0) {
-                const bodyGroup = this._objects.get(body.id);
                 const parentPos = new THREE.Vector3();
                 const parentGroup = this._objects.get(attractor.id);
                 parentGroup.getWorldPosition(parentPos);
@@ -129,6 +129,9 @@ export class SolarSystem {
                 const ellipse = this._orbits.get(body.id);
                 ellipse.visible = visible;
                 bodyGroup.visible = visible;
+            }
+            else {
+                bodyGroup.visible = true;
             }
         }
     }

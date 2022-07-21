@@ -4,7 +4,7 @@ rendering:
   scale:              1.0e-9        # scale of the objects compared to real values
   fov:                75            # field of view of the camera
   nearPlane:          0.0000001     # near plane distance
-  farPlane:           1000          # far plane distance
+  farPlane:           10000         # far plane distance
 
 solarSystem:
   planetFarSize:      0.05          # size of planet sprites
@@ -28,7 +28,7 @@ camera:
   rotateSpeed:        0.5           # camera rotation speed
 
 time:
-  hoursPerDay:        12             # number of hours in a day (Kerbal day)
+  hoursPerDay:        12            # number of hours in a day (Kerbal day)
   daysPerYear:        365           # number of days per year (Kerbal year)
 
 flybySequence:
@@ -66,3 +66,4 @@ workers:
 trajectoryDraw:
   samplePoints:       2500          # number sample points for each tarjectory arc draw
   spritesSize:        0.08          # size of the sprites for maneuvers, encounters, escapes
+  podSpriteSize:      0.06          # size of the pod sprite

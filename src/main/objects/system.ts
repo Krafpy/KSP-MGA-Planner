@@ -165,8 +165,9 @@ export class SolarSystem {
 
         for(const body of this.orbiting){
             const {attractor} = body;
+            const bodyGroup  = <THREE.Group>this._objects.get(body.id);
+
             if(attractor.id != 0) {
-                const bodyGroup  = <THREE.Group>this._objects.get(body.id);
                 const parentPos = new THREE.Vector3();
                 const parentGroup = <THREE.Group>this._objects.get(attractor.id);
                 parentGroup.getWorldPosition(parentPos);
@@ -178,6 +179,8 @@ export class SolarSystem {
                 const ellipse = <THREE.Object3D>this._orbits.get(body.id);
                 ellipse.visible = visible;
                 bodyGroup.visible   = visible;
+            } else {
+                bodyGroup.visible = true;
             }
         }
     }
