@@ -16,7 +16,7 @@ import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
 import { OrbitingBody } from "../objects/body.js";
 
-export function initEditor(controls: CameraController, system: SolarSystem, config: Config, canvas: HTMLCanvasElement){
+export function initEditor(controls: CameraController, system: SolarSystem, config: Config, canvas: HTMLCanvasElement, stopLoop: () => void){
     const systemTime = new TimeSelector("system", config);
     const updateSystemTime = () => {
         systemTime.validate();

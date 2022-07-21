@@ -70,7 +70,7 @@ export class WorkerPool {
     
     public progressions:        number[] = [];
 
-    constructor(source: string, public readonly config: Config) {
+    constructor(source: string) {
         const {hardwareConcurrency} = navigator;
         const maxWorkers = hardwareConcurrency ? hardwareConcurrency : 4;
         for(let i = 0; i < maxWorkers; i++) {
@@ -166,5 +166,34 @@ export class WorkerPool {
         }
 
         return worker.run<T>(input, onWorkerProgress);
+    }
+}
+
+export abstract class WorkerManager {
+    private static _pools   = new Map<string, WorkerPool>();
+    private static _workers = new Map<string, ComputeWorker>();
+
+    public static createWorker(source: string, name: string){
+        const worker = new ComputeWorker(source);
+        this._workers.set(name, worker);
+    }
+
+    public static createPool(source: string, name: string){
+        const pool = new WorkerPool(source);
+        this._pools.set(name, pool);
+    }
+
+    public static getWorker(name: string){
+        const worker = this._workers.get(name);
+        if(!worker)
+            throw new Error(`No worker named ${name}`);
+        return worker;
+    }
+
+    public static getPool(name: string){
+        const pool = this._pools.get(name);
+        if(!pool)
+            throw new Error(`No worker pool named ${name}`);
+        return pool;
     }
 }

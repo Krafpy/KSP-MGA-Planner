@@ -1,22 +1,22 @@
 import { OrbitingBody } from "../objects/body.js";
 import { SolarSystem } from "../objects/system.js";
-import { ComputeWorker, WorkerPool } from "../utilities/worker.js";
+import { ComputeWorker, WorkerManager, WorkerPool } from "../utilities/worker.js";
 import { shuffleArray } from "../utilities/array.js";
 import { FlybySequence } from "./sequence.js";
 
 export class FlybySequenceGenerator {
-    private readonly _workerPool!:      WorkerPool;
-    private readonly _sequenceWorker!:  ComputeWorker;
+    private _evaluationPool!: WorkerPool;
+    private _sequenceWorker!: ComputeWorker;
 
     public totalFeasible: number = 0; // The total number of generated sequences, without further evaluation
 
     constructor(public readonly system: SolarSystem, public readonly config: Config) {
         // The sequence evaluation worker pool
-        this._workerPool = new WorkerPool("dist/dedicated-workers/sequence-evaluator.js", this.config);
-        this._workerPool.initialize({system: this.system.data, config: this.config});
-
+        this._evaluationPool = WorkerManager.getPool("sequence-evaluator");
+        this._evaluationPool.initialize({system: this.system.data, config: this.config});
+        
         // The worker used to generate the set of sequences
-        this._sequenceWorker = new ComputeWorker("dist/dedicated-workers/sequence-generator.js");
+        this._sequenceWorker = WorkerManager.getWorker("sequence-generator");
         this._sequenceWorker.initialize(this.config);
     }
 
@@ -24,13 +24,13 @@ export class FlybySequenceGenerator {
      * Cancels the worker pool
      * TODO : isn't responsive enough
      */
-    public cancel() {this._workerPool.cancel();}
+    public cancel() {this._evaluationPool.cancel();}
 
     /**
      * The current progression returned by the worker pool of the sequences evaluator
      */
     public get progression() {
-        return this._workerPool.totalProgress;
+        return this._evaluationPool.totalProgress;
     }
 
     /**
@@ -106,7 +106,7 @@ export class FlybySequenceGenerator {
     private async _evaluateSequences(sequences: number[][], onProgress?: (resultsCount?: number) => void){
         shuffleArray(sequences);
         const {splitLimit} = this.config.flybySequence;
-        const costs = await this._workerPool.runPoolChunked<number>(sequences, splitLimit, onProgress);
+        const costs = await this._evaluationPool.runPoolChunked<number>(sequences, splitLimit, onProgress);
 
         const evaluations: {seq: number, cost: number}[] = [];
         for(let i = 0; i < sequences.length; i++){

@@ -63,8 +63,7 @@ export class ComputeWorker extends Worker {
     }
 }
 export class WorkerPool {
-    constructor(source, config) {
-        this.config = config;
+    constructor(source) {
         this._workers = [];
         this._usedWorkers = 0;
         this.progressions = [];
@@ -150,3 +149,27 @@ export class WorkerPool {
         return worker.run(input, onWorkerProgress);
     }
 }
+export class WorkerManager {
+    static createWorker(source, name) {
+        const worker = new ComputeWorker(source);
+        this._workers.set(name, worker);
+    }
+    static createPool(source, name) {
+        const pool = new WorkerPool(source);
+        this._pools.set(name, pool);
+    }
+    static getWorker(name) {
+        const worker = this._workers.get(name);
+        if (!worker)
+            throw new Error(`No worker named ${name}`);
+        return worker;
+    }
+    static getPool(name) {
+        const pool = this._pools.get(name);
+        if (!pool)
+            throw new Error(`No worker pool named ${name}`);
+        return pool;
+    }
+}
+WorkerManager._pools = new Map();
+WorkerManager._workers = new Map();

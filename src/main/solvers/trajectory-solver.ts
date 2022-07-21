@@ -1,11 +1,11 @@
 import { EvolutionPlot } from "../editor/plot.js";
 import { SolarSystem } from "../objects/system.js";
 import { mergeArrayChunks } from "../utilities/array.js";
-import { WorkerPool } from "../utilities/worker.js";
+import { WorkerManager, WorkerPool } from "../utilities/worker.js";
 import { FlybySequence } from "./sequence.js";
 
 export class TrajectorySolver {
-    private readonly _workerPool!: WorkerPool;
+    private _workerPool: WorkerPool;
 
     public popSize: number = 0;
 
@@ -21,7 +21,7 @@ export class TrajectorySolver {
     public bestDeltaV: number = 0;
 
     constructor(public readonly system: SolarSystem, public readonly config: Config, public readonly plot: EvolutionPlot) {
-        this._workerPool = new WorkerPool("dist/dedicated-workers/trajectory-optimizer.js", this.config);
+        this._workerPool = WorkerManager.getPool("trajectory-optimizer");
         this._workerPool.initialize({system: this.system.data, config: this.config});
     }
 

@@ -1,4 +1,4 @@
-import { ComputeWorker, WorkerPool } from "../utilities/worker.js";
+import { WorkerManager } from "../utilities/worker.js";
 import { shuffleArray } from "../utilities/array.js";
 import { FlybySequence } from "./sequence.js";
 export class FlybySequenceGenerator {
@@ -6,14 +6,14 @@ export class FlybySequenceGenerator {
         this.system = system;
         this.config = config;
         this.totalFeasible = 0;
-        this._workerPool = new WorkerPool("dist/dedicated-workers/sequence-evaluator.js", this.config);
-        this._workerPool.initialize({ system: this.system.data, config: this.config });
-        this._sequenceWorker = new ComputeWorker("dist/dedicated-workers/sequence-generator.js");
+        this._evaluationPool = WorkerManager.getPool("sequence-evaluator");
+        this._evaluationPool.initialize({ system: this.system.data, config: this.config });
+        this._sequenceWorker = WorkerManager.getWorker("sequence-generator");
         this._sequenceWorker.initialize(this.config);
     }
-    cancel() { this._workerPool.cancel(); }
+    cancel() { this._evaluationPool.cancel(); }
     get progression() {
-        return this._workerPool.totalProgress;
+        return this._evaluationPool.totalProgress;
     }
     async generateFlybySequences(params, onProgress) {
         const toHigherOrbit = params.destinationId > params.departureId;
@@ -48,7 +48,7 @@ export class FlybySequenceGenerator {
     async _evaluateSequences(sequences, onProgress) {
         shuffleArray(sequences);
         const { splitLimit } = this.config.flybySequence;
-        const costs = await this._workerPool.runPoolChunked(sequences, splitLimit, onProgress);
+        const costs = await this._evaluationPool.runPoolChunked(sequences, splitLimit, onProgress);
         const evaluations = [];
         for (let i = 0; i < sequences.length; i++) {
             if (costs[i] != undefined) {

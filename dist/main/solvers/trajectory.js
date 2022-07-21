@@ -1,6 +1,7 @@
 import { createOrbitPoints, createLine, createSprite } from "../utilities/geometry.js";
 import { Orbit } from "../objects/orbit.js";
 import { KSPTime } from "../utilities/time.js";
+import { SpriteManager } from "../utilities/sprites.js";
 export class Trajectory {
     constructor(steps, system, config) {
         this.steps = steps;
@@ -19,21 +20,6 @@ export class Trajectory {
             const orbit = Orbit.fromOrbitalElements(orbitElts, attractor, config.orbit);
             this.orbits.push(orbit);
         }
-    }
-    static preloadSpriteMaterials() {
-        const textureLoader = new THREE.TextureLoader();
-        const loaded = (name) => {
-            return (texture) => {
-                const material = new THREE.SpriteMaterial({
-                    map: texture
-                });
-                this.sprites.set(name, material);
-            };
-        };
-        textureLoader.load("sprites/encounter.png", loaded("encounter"));
-        textureLoader.load("sprites/escape.png", loaded("escape"));
-        textureLoader.load("sprites/maneuver.png", loaded("maneuver"));
-        textureLoader.load("sprites/pod.png", loaded("pod"));
     }
     draw(resolution) {
         const numSteps = this.steps.length;
@@ -71,9 +57,9 @@ export class Trajectory {
         }
         const { spritesSize } = this.config.trajectoryDraw;
         const { scale } = this.config.rendering;
-        const encounterSprite = Trajectory.sprites.get("encounter");
-        const escapeSprite = Trajectory.sprites.get("escape");
-        const maneuverSprite = Trajectory.sprites.get("maneuver");
+        const encounterMat = SpriteManager.getMaterial("encounter");
+        const escapeMat = SpriteManager.getMaterial("escape");
+        const maneuverMat = SpriteManager.getMaterial("maneuver");
         const addSprite = (i, sprite, pos) => {
             sprite.position.set(pos.x, pos.y, pos.z);
             sprite.position.multiplyScalar(scale);
@@ -86,26 +72,26 @@ export class Trajectory {
             const orbit = this.orbits[i];
             const { maneuvre, flyby } = step;
             if (maneuvre) {
-                const sprite = createSprite(maneuverSprite, 0xFFFFFF, false, spritesSize);
+                const sprite = createSprite(maneuverMat, 0xFFFFFF, false, spritesSize);
                 const { x, y, z } = maneuvre.position;
                 const pos = new THREE.Vector3(x, y, z);
                 addSprite(i, sprite, pos);
                 if (maneuvre.context.type == "ejection") {
-                    const sprite = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
+                    const sprite = createSprite(escapeMat, 0xFFFFFF, false, spritesSize);
                     const pos = orbit.positionFromTrueAnomaly(step.drawAngles.end);
                     addSprite(i, sprite, pos);
                 }
             }
             else if (flyby) {
-                const sprite1 = createSprite(encounterSprite, 0xFFFFFF, false, spritesSize);
-                const sprite2 = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
+                const sprite1 = createSprite(encounterMat, 0xFFFFFF, false, spritesSize);
+                const sprite2 = createSprite(escapeMat, 0xFFFFFF, false, spritesSize);
                 const pos1 = orbit.positionFromTrueAnomaly(step.drawAngles.begin);
                 const pos2 = orbit.positionFromTrueAnomaly(step.drawAngles.end);
                 addSprite(i, sprite1, pos1);
                 addSprite(i, sprite2, pos2);
             }
             else if (i == this.steps.length - 2) {
-                const sprite = createSprite(encounterSprite, 0xFFFFFF, false, spritesSize);
+                const sprite = createSprite(encounterMat, 0xFFFFFF, false, spritesSize);
                 const pos = orbit.positionFromTrueAnomaly(step.drawAngles.begin);
                 addSprite(i, sprite, pos);
             }
@@ -132,9 +118,9 @@ export class Trajectory {
         const id = this.system.addCustomUpdate(updateSpritesDisplay);
         this._spritesUpdateFunId = id;
         const { podSpriteSize } = this.config.trajectoryDraw;
-        const podSpriteMat = Trajectory.sprites.get("pod");
-        podSpriteMat.depthTest = false;
-        const podSprite = createSprite(podSpriteMat, 0xFFFFFF, false, podSpriteSize);
+        const podMat = SpriteManager.getMaterial("pod");
+        podMat.depthTest = false;
+        const podSprite = createSprite(podMat, 0xFFFFFF, false, podSpriteSize);
         const group = this.system.objectsOfBody(this.steps[0].attractorId);
         group.add(podSprite);
         this._podSpriteIndex = 0;
@@ -351,4 +337,3 @@ export class Trajectory {
         }
     }
 }
-Trajectory.sprites = new Map();

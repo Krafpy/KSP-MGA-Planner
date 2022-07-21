@@ -1,15 +1,12 @@
-import { DiscreteRange } from "../editor/range.js";
-import { Selector } from "../editor/selector.js";
 import { TimeSelector } from "../editor/time-selector.js";
 import { createOrbitPoints, createLine, createSprite } from "../utilities/geometry.js";
 import { Orbit } from "../objects/orbit.js";
 import { SolarSystem } from "../objects/system.js";
 import { KSPTime } from "../utilities/time.js";
 import { CameraController } from "../objects/camera.js";
+import { SpriteManager } from "../utilities/sprites.js";
 
 export class Trajectory {
-    static sprites = new Map<string, THREE.SpriteMaterial>();
-
     private _orbitObjects:  THREE.Object3D[] = [];
     private _spriteObjects: THREE.Sprite[][] = [];
     private _podSpriteIndex: number = 0;
@@ -28,26 +25,6 @@ export class Trajectory {
             const orbit = Orbit.fromOrbitalElements(orbitElts, attractor, config.orbit);
             this.orbits.push(orbit);
         }
-    }
-
-    /**
-     * Preloads all the sprite materials in the `sprites` map.
-     */
-    public static preloadSpriteMaterials(){
-        const textureLoader = new THREE.TextureLoader();
-        const loaded = (name: string) => {
-            return (texture: THREE.Texture) => {
-                const material = new THREE.SpriteMaterial({
-                    map: texture
-                });
-                this.sprites.set(name, material);
-            };
-        };
-
-        textureLoader.load("sprites/encounter.png", loaded("encounter"));
-        textureLoader.load("sprites/escape.png", loaded("escape"));
-        textureLoader.load("sprites/maneuver.png", loaded("maneuver"));
-        textureLoader.load("sprites/pod.png", loaded("pod"));
     }
 
     /**
@@ -107,9 +84,9 @@ export class Trajectory {
         const {spritesSize} = this.config.trajectoryDraw;
         const {scale} = this.config.rendering;
 
-        const encounterSprite = <THREE.SpriteMaterial>Trajectory.sprites.get("encounter");
-        const escapeSprite = <THREE.SpriteMaterial>Trajectory.sprites.get("escape");
-        const maneuverSprite = <THREE.SpriteMaterial>Trajectory.sprites.get("maneuver");
+        const encounterMat = SpriteManager.getMaterial("encounter");
+        const escapeMat = SpriteManager.getMaterial("escape");
+        const maneuverMat = SpriteManager.getMaterial("maneuver");
 
         const addSprite = (i: number, sprite: THREE.Sprite, pos: THREE.Vector3) => {
             // adds a sprite to the sprite collection and the corresponding group
@@ -127,21 +104,21 @@ export class Trajectory {
 
             if(maneuvre){
                 // if there is a maneuver, add the maneuver sprite
-                const sprite = createSprite(maneuverSprite, 0xFFFFFF, false, spritesSize);
+                const sprite = createSprite(maneuverMat, 0xFFFFFF, false, spritesSize);
                 const {x, y, z} = maneuvre.position;
                 const pos = new THREE.Vector3(x, y, z);
                 addSprite(i, sprite, pos);
                 if(maneuvre.context.type == "ejection"){
                     // if the maneuver is an ejection, add the ejection maneuver sprite
-                    const sprite = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
+                    const sprite = createSprite(escapeMat, 0xFFFFFF, false, spritesSize);
                     const pos = orbit.positionFromTrueAnomaly(step.drawAngles.end);
                     addSprite(i, sprite, pos);
                 }
 
             } else if(flyby){
                 // if the maneuver is a flyby, add the encounter and escape sprites
-                const sprite1 = createSprite(encounterSprite, 0xFFFFFF, false, spritesSize);
-                const sprite2 = createSprite(escapeSprite, 0xFFFFFF, false, spritesSize);
+                const sprite1 = createSprite(encounterMat, 0xFFFFFF, false, spritesSize);
+                const sprite2 = createSprite(escapeMat, 0xFFFFFF, false, spritesSize);
                 const pos1 = orbit.positionFromTrueAnomaly(step.drawAngles.begin);
                 const pos2 = orbit.positionFromTrueAnomaly(step.drawAngles.end);
                 addSprite(i, sprite1, pos1);
@@ -149,7 +126,7 @@ export class Trajectory {
 
             } else if(i == this.steps.length - 2){
                 // if it's insertion orbit, add the circularization burn maneuver sprite
-                const sprite = createSprite(encounterSprite, 0xFFFFFF, false, spritesSize);
+                const sprite = createSprite(encounterMat, 0xFFFFFF, false, spritesSize);
                 const pos = orbit.positionFromTrueAnomaly(step.drawAngles.begin);
                 addSprite(i, sprite, pos);
             }
@@ -189,9 +166,9 @@ export class Trajectory {
 
         // Create pod sprite
         const {podSpriteSize} = this.config.trajectoryDraw;
-        const podSpriteMat = <THREE.SpriteMaterial>Trajectory.sprites.get("pod");
-        podSpriteMat.depthTest = false;
-        const podSprite = createSprite(podSpriteMat, 0xFFFFFF, false, podSpriteSize);
+        const podMat = SpriteManager.getMaterial("pod");
+        podMat.depthTest = false;
+        const podSprite = createSprite(podMat, 0xFFFFFF, false, podSpriteSize);
         const group = this.system.objectsOfBody(this.steps[0].attractorId);
         group.add(podSprite);
         this._podSpriteIndex = 0;

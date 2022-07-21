@@ -12,7 +12,7 @@ import { FlybySequence } from "../solvers/sequence.js";
 import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
-export function initEditor(controls, system, config, canvas) {
+export function initEditor(controls, system, config, canvas, stopLoop) {
     const systemTime = new TimeSelector("system", config);
     const updateSystemTime = () => {
         systemTime.validate();
