@@ -58,6 +58,9 @@ export class EvolutionPlot {
         this._chart.data.datasets[0].data = [];
         this._chart.data.datasets[1].data = [];
     }
+    destroy() {
+        this._chart.destroy();
+    }
     reveal() {
         this._container.hidden = false;
     }

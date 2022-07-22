@@ -54,7 +54,7 @@ export class Orbit {
     }
     solveTrueAnomalyAtDate(meanAnomaly0, date) {
         const e = this.eccentricity;
-        const deltaTime = this.sideralPeriod ? (date % this.sideralPeriod) : date;
+        const deltaTime = date;
         const M = meanAnomaly0 + this.meanMotion * deltaTime;
         const newton = (f, df) => {
             let n = 0;

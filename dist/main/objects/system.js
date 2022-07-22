@@ -1,5 +1,6 @@
 import { OrbitingBody, CelestialBody } from "./body.js";
 import * as Geometry from "../utilities/geometry.js";
+import { SpriteManager } from "../utilities/sprites.js";
 export class SolarSystem {
     constructor(sun, bodies, config) {
         this.config = config;
@@ -56,55 +57,46 @@ export class SolarSystem {
         return object;
     }
     fillSceneObjects(scene, canvas) {
-        const textureLoader = new THREE.TextureLoader();
-        return new Promise((resolve, _) => {
-            const loaded = (texture) => {
-                const spriteMaterial = new THREE.SpriteMaterial({
-                    map: texture
-                });
-                const { scale } = this.config.rendering;
-                const { satSampPoints, planetSampPoints, orbitLineWidth } = this.config.orbit;
-                const { planetFarSize, satFarSize } = this.config.solarSystem;
-                const { soiOpacity } = this.config.solarSystem;
-                const sunSize = scale * this.sun.radius * 2;
-                const sunSprite = Geometry.createSprite(spriteMaterial, this.sun.color, true, sunSize);
-                const sunGroup = new THREE.Group();
-                sunGroup.add(sunSprite);
-                this._objects.set(0, sunGroup);
-                for (const body of this.orbiting) {
-                    const { radius, soi, orbit, color, attractor } = body;
-                    const parentGroup = this._objects.get(attractor.id);
-                    const bodyGroup = new THREE.Group();
-                    const samplePts = attractor.id == 0 ? planetSampPoints : satSampPoints;
-                    const spriteSize = attractor.id == 0 ? planetFarSize : satFarSize;
-                    const orbitPoints = Geometry.createOrbitPoints(orbit, samplePts, scale);
-                    const ellipse = Geometry.createLine(orbitPoints, canvas, {
-                        color: color,
-                        linewidth: orbitLineWidth,
-                    });
-                    parentGroup.add(ellipse);
-                    this._orbits.set(body.id, ellipse);
-                    const soiMaterial = new THREE.MeshBasicMaterial({
-                        color: color,
-                        transparent: true,
-                        opacity: soiOpacity
-                    });
-                    const soiLines = Geometry.createWireframeSphere(soi, scale, soiMaterial);
-                    bodyGroup.add(soiLines);
-                    this._sois.set(body.id, soiLines);
-                    const bodyMaterial = new THREE.MeshBasicMaterial({
-                        color: color
-                    });
-                    bodyGroup.add(Geometry.createSphere(radius, scale, bodyMaterial));
-                    bodyGroup.add(Geometry.createSprite(spriteMaterial, color, false, spriteSize));
-                    parentGroup.add(bodyGroup);
-                    this._objects.set(body.id, bodyGroup);
-                }
-                scene.add(sunGroup);
-                resolve(true);
-            };
-            textureLoader.load("sprites/circle-512.png", loaded);
-        });
+        const { scale } = this.config.rendering;
+        const { satSampPoints, planetSampPoints, orbitLineWidth } = this.config.orbit;
+        const { planetFarSize, satFarSize } = this.config.solarSystem;
+        const { soiOpacity } = this.config.solarSystem;
+        const spriteMaterial = SpriteManager.getMaterial("circle");
+        const sunSize = scale * this.sun.radius * 2;
+        const sunSprite = Geometry.createSprite(spriteMaterial, this.sun.color, true, sunSize);
+        const sunGroup = new THREE.Group();
+        sunGroup.add(sunSprite);
+        this._objects.set(0, sunGroup);
+        for (const body of this.orbiting) {
+            const { radius, soi, orbit, color, attractor } = body;
+            const parentGroup = this._objects.get(attractor.id);
+            const bodyGroup = new THREE.Group();
+            const samplePts = attractor.id == 0 ? planetSampPoints : satSampPoints;
+            const spriteSize = attractor.id == 0 ? planetFarSize : satFarSize;
+            const orbitPoints = Geometry.createOrbitPoints(orbit, samplePts, scale);
+            const ellipse = Geometry.createLine(orbitPoints, canvas, {
+                color: color,
+                linewidth: orbitLineWidth,
+            });
+            parentGroup.add(ellipse);
+            this._orbits.set(body.id, ellipse);
+            const soiMaterial = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: soiOpacity
+            });
+            const soiLines = Geometry.createWireframeSphere(soi, scale, soiMaterial);
+            bodyGroup.add(soiLines);
+            this._sois.set(body.id, soiLines);
+            const bodyMaterial = new THREE.MeshBasicMaterial({
+                color: color
+            });
+            bodyGroup.add(Geometry.createSphere(radius, scale, bodyMaterial));
+            bodyGroup.add(Geometry.createSprite(spriteMaterial, color, false, spriteSize));
+            parentGroup.add(bodyGroup);
+            this._objects.set(body.id, bodyGroup);
+        }
+        scene.add(sunGroup);
     }
     set date(date) {
         for (const body of this.orbiting) {
@@ -126,8 +118,8 @@ export class SolarSystem {
         const camPos = camController.camera.position;
         for (const body of this.orbiting) {
             const { attractor } = body;
+            const bodyGroup = this._objects.get(body.id);
             if (attractor.id != 0) {
-                const bodyGroup = this._objects.get(body.id);
                 const parentPos = new THREE.Vector3();
                 const parentGroup = this._objects.get(attractor.id);
                 parentGroup.getWorldPosition(parentPos);
@@ -137,6 +129,9 @@ export class SolarSystem {
                 const ellipse = this._orbits.get(body.id);
                 ellipse.visible = visible;
                 bodyGroup.visible = visible;
+            }
+            else {
+                bodyGroup.visible = true;
             }
         }
     }

@@ -1,6 +1,8 @@
 export class EvolutionPlot {
-    private readonly _chart!:       Chart;
-    private readonly _container!:   HTMLDivElement;
+    private readonly _chart!:     Chart;
+    private readonly _container!: HTMLDivElement;
+
+    private static _instance:     EvolutionPlot;
 
     constructor(canvasId: string){
         const data = {
@@ -73,6 +75,10 @@ export class EvolutionPlot {
         this._chart.data.datasets[0].data = [];
         // @ts-ignore
         this._chart.data.datasets[1].data = [];
+    }
+
+    public destroy(){
+        this._chart.destroy();
     }
 
     public reveal(){

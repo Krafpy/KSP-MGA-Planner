@@ -1,46 +1,20 @@
-import { initEditor } from "./editor/editor.js";
-import { SolarSystem } from "./objects/system.js";
-import { CameraController } from "./objects/camera.js";
-import { loadConfig, loadBodiesData } from "./utilities/data.js";
-import { Trajectory } from "./solvers/trajectory.js";
+
+import { initEditorWithSystem } from "./editor/editor.js";
+import { loadSystemsList } from "./utilities/data.js";
+import { SpriteManager } from "./utilities/sprites.js";
+import { WorkerManager } from "./utilities/worker.js";
 
 window.onload = main;
 
 async function main(){
-    const canvas = document.getElementById("three-canvas") as HTMLCanvasElement;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    
-    const config = await loadConfig();
+    const systems = await loadSystemsList();
 
-    const camera = new THREE.PerspectiveCamera(
-        config.rendering.fov,
-        width / height,
-        config.rendering.nearPlane,
-        config.rendering.farPlane
-    );
-    const scene = new THREE.Scene();
+    await SpriteManager.loadSpriteMaterials();
 
-    const renderer = new THREE.WebGLRenderer({antialias: true, canvas: canvas});
-    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    const path = "dist/dedicated-workers/";
+    WorkerManager.createPool(path + "trajectory-optimizer.js", "trajectory-optimizer");
+    WorkerManager.createPool(path + "sequence-evaluator.js", "sequence-evaluator");
+    WorkerManager.createWorker(path + "sequence-generator.js", "sequence-generator");
 
-    const bodiesData = await loadBodiesData();
-    const system = new SolarSystem(bodiesData.sun, bodiesData.bodies, config);
-    await system.fillSceneObjects(scene, canvas);
-    
-    const controls = new CameraController(camera, canvas, system, config);
-    controls.targetBody = system.sun;
-    
-    Trajectory.preloadSpriteMaterials();
-
-    initEditor(controls, system, config, canvas);
-
-    const loop = () => {
-        requestAnimationFrame(loop);
-        controls.update();
-        system.update(controls);
-        renderer.render(scene, camera);
-    }
-    requestAnimationFrame(loop);
+    initEditorWithSystem(systems, 0);
 }

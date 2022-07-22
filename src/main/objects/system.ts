@@ -1,6 +1,7 @@
 import { OrbitingBody, CelestialBody } from "./body.js";
 import { CameraController } from "./camera.js";
 import * as Geometry from "../utilities/geometry.js";
+import { SpriteManager } from "../utilities/sprites.js";
 
 export class SolarSystem {
     readonly sun!:              CelestialBody;
@@ -73,73 +74,60 @@ export class SolarSystem {
      * @returns The promise to wait for the loading to complete.
      */
     public fillSceneObjects(scene: THREE.Scene, canvas: HTMLCanvasElement) { 
-        const textureLoader = new THREE.TextureLoader();
+        const {scale} = this.config.rendering;
+        const {satSampPoints, planetSampPoints, orbitLineWidth} = this.config.orbit;
+        const {planetFarSize, satFarSize} = this.config.solarSystem;
+        const {soiOpacity} = this.config.solarSystem;
 
-        return new Promise(
-        (resolve, _) => {
-            const loaded = (texture: THREE.Texture) => {
-                const spriteMaterial = new THREE.SpriteMaterial({
-                    map: texture
-                });
+        const spriteMaterial = SpriteManager.getMaterial("circle");
 
-                const {scale} = this.config.rendering;
-                const {satSampPoints, planetSampPoints, orbitLineWidth} = this.config.orbit;
-                const {planetFarSize, satFarSize} = this.config.solarSystem;
-                const {soiOpacity} = this.config.solarSystem;
+        const sunSize = scale * this.sun.radius * 2;
+        const sunSprite = Geometry.createSprite(spriteMaterial, this.sun.color, true, sunSize);
+        const sunGroup = new THREE.Group();
+        sunGroup.add(sunSprite);
 
-                const sunSize = scale * this.sun.radius * 2;
-                const sunSprite = Geometry.createSprite(spriteMaterial, this.sun.color, true, sunSize);
-                const sunGroup = new THREE.Group();
-                sunGroup.add(sunSprite);
+        this._objects.set(0, sunGroup);
 
-                this._objects.set(0, sunGroup);
+        for(const body of this.orbiting){
+            const {radius, soi, orbit, color, attractor} = body;
+            const parentGroup = <THREE.Group>this._objects.get(attractor.id);
+            const bodyGroup = new THREE.Group();
+            
+            const samplePts  = attractor.id == 0 ? planetSampPoints : satSampPoints;
+            const spriteSize = attractor.id == 0 ? planetFarSize : satFarSize;
+            
+            const orbitPoints = Geometry.createOrbitPoints(orbit, samplePts, scale);
+            const ellipse = Geometry.createLine(orbitPoints, canvas, {
+                color: color,
+                linewidth: orbitLineWidth,
+            });
+            parentGroup.add(ellipse);
 
-                for(const body of this.orbiting){
-                    const {radius, soi, orbit, color, attractor} = body;
-                    const parentGroup = <THREE.Group>this._objects.get(attractor.id);
-                    const bodyGroup = new THREE.Group();
-                    
-                    const samplePts  = attractor.id == 0 ? planetSampPoints : satSampPoints;
-                    const spriteSize = attractor.id == 0 ? planetFarSize : satFarSize;
-                    
-                    const orbitPoints = Geometry.createOrbitPoints(orbit, samplePts, scale);
-                    const ellipse = Geometry.createLine(orbitPoints, canvas, {
-                        color: color,
-                        linewidth: orbitLineWidth,
-                    });
-                    parentGroup.add(ellipse);
+            this._orbits.set(body.id, ellipse);
 
-                    this._orbits.set(body.id, ellipse);
+            // Create the SOI sphere
+            const soiMaterial = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: soiOpacity
+            });
+            const soiLines = Geometry.createWireframeSphere(soi, scale, soiMaterial)
+            bodyGroup.add(soiLines);
 
-                    // Create the SOI sphere
-                    const soiMaterial = new THREE.MeshBasicMaterial({
-                        color: color,
-                        transparent: true,
-                        opacity: soiOpacity
-                    });
-                    const soiLines = Geometry.createWireframeSphere(soi, scale, soiMaterial)
-                    bodyGroup.add(soiLines);
+            this._sois.set(body.id, soiLines);
 
-                    this._sois.set(body.id, soiLines);
+            // Create body sphere and sprites
+            const bodyMaterial = new THREE.MeshBasicMaterial({
+                color: color
+            });
+            bodyGroup.add(Geometry.createSphere(radius, scale, bodyMaterial));
+            bodyGroup.add(Geometry.createSprite(spriteMaterial, color, false, spriteSize));
+            parentGroup.add(bodyGroup);
 
-                    // Create body sphere and sprites
-                    const bodyMaterial = new THREE.MeshBasicMaterial({
-                        color: color
-                    });
-                    bodyGroup.add(Geometry.createSphere(radius, scale, bodyMaterial));
-                    bodyGroup.add(Geometry.createSprite(spriteMaterial, color, false, spriteSize));
-                    parentGroup.add(bodyGroup);
+            this._objects.set(body.id, bodyGroup);
+        }
 
-                    this._objects.set(body.id, bodyGroup);
-                }
-
-                scene.add(sunGroup);
-                
-                resolve(true);
-            };
-
-            textureLoader.load("sprites/circle-512.png", loaded);
-        });
+        scene.add(sunGroup);
     }
 
     /**
@@ -177,8 +165,9 @@ export class SolarSystem {
 
         for(const body of this.orbiting){
             const {attractor} = body;
+            const bodyGroup  = <THREE.Group>this._objects.get(body.id);
+
             if(attractor.id != 0) {
-                const bodyGroup  = <THREE.Group>this._objects.get(body.id);
                 const parentPos = new THREE.Vector3();
                 const parentGroup = <THREE.Group>this._objects.get(attractor.id);
                 parentGroup.getWorldPosition(parentPos);
@@ -190,6 +179,8 @@ export class SolarSystem {
                 const ellipse = <THREE.Object3D>this._orbits.get(body.id);
                 ellipse.visible = visible;
                 bodyGroup.visible   = visible;
+            } else {
+                bodyGroup.visible = true;
             }
         }
     }

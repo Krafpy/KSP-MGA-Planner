@@ -1,3 +1,5 @@
+import { SolarSystem } from "../objects/system.js";
+import { CameraController } from "../objects/camera.js";
 import { FlybySequenceGenerator } from "../solvers/sequence-solver.js";
 import { TimeSelector } from "./time-selector.js";
 import { ErrorMessage } from "./error-msg.js";
@@ -12,7 +14,32 @@ import { FlybySequence } from "../solvers/sequence.js";
 import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
-export function initEditor(controls, system, config, canvas) {
+import { loadBodiesData, loadConfig } from "../utilities/data.js";
+export async function initEditorWithSystem(systems, systemIndex) {
+    const canvas = document.getElementById("three-canvas");
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const config = await loadConfig(systems[systemIndex].folderName);
+    const camera = new THREE.PerspectiveCamera(config.rendering.fov, width / height, config.rendering.nearPlane, config.rendering.farPlane);
+    const scene = new THREE.Scene();
+    const renderer = new THREE.WebGLRenderer({ antialias: true, canvas: canvas });
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    const bodiesData = await loadBodiesData(systems[systemIndex].folderName);
+    const system = new SolarSystem(bodiesData.sun, bodiesData.bodies, config);
+    system.fillSceneObjects(scene, canvas);
+    const controls = new CameraController(camera, canvas, system, config);
+    controls.targetBody = system.sun;
+    let stop = false;
+    let stopLoop = () => stop = true;
+    const loop = () => {
+        if (!stop)
+            requestAnimationFrame(loop);
+        controls.update();
+        system.update(controls);
+        renderer.render(scene, camera);
+    };
+    requestAnimationFrame(loop);
     const systemTime = new TimeSelector("system", config);
     const updateSystemTime = () => {
         systemTime.validate();
@@ -30,6 +57,10 @@ export function initEditor(controls, system, config, canvas) {
     originSelector.select(config.editor.defaultOrigin);
     const destSelector = new BodySelector("destination-selector", system);
     destSelector.select(config.editor.defaultDest);
+    const systemSelector = new Selector("system-selector");
+    const optionNames = systems.map(s => s.name);
+    systemSelector.fill(optionNames);
+    systemSelector.select(systemIndex);
     {
         const maxSwingBys = new IntegerInput("max-swingbys");
         const maxResonant = new IntegerInput("max-resonant-swingbys");
@@ -40,9 +71,11 @@ export function initEditor(controls, system, config, canvas) {
             maxSwingBys.assertValidity();
             maxResonant.assertValidity();
             maxBackLegs.assertValidity();
-            if (originSelector.body.attractor.id != destSelector.body.attractor.id)
+            const depBody = originSelector.body;
+            const destBody = destSelector.body;
+            if (depBody.attractor.id != destBody.attractor.id)
                 throw new Error("Origin and destination bodies must orbit the same body.");
-            if (originSelector.body.id == destSelector.body.id)
+            if (depBody.id == destBody.id)
                 throw new Error("Same origin and destination bodies.");
         };
         const generator = new FlybySequenceGenerator(system, config);
@@ -66,6 +99,7 @@ export function initEditor(controls, system, config, canvas) {
         };
         const generateSequences = async () => {
             paramsErr.hide();
+            systemSelector.disable();
             try {
                 sequenceSelector.disable();
                 sequenceSelector.clear();
@@ -81,6 +115,7 @@ export function initEditor(controls, system, config, canvas) {
             }
             finally {
                 progressMsg.hide();
+                systemSelector.enable();
             }
         };
         new SubmitButton("sequence-btn").click(() => generateSequences());
@@ -108,6 +143,7 @@ export function initEditor(controls, system, config, canvas) {
         detailsSelector.disable();
         stepSlider.disable();
         const getSpan = (id) => document.getElementById(id);
+        const getDiv = (id) => document.getElementById(id);
         const resultItems = {
             dateSpan: getSpan("maneuvre-date"),
             progradeDVSpan: getSpan("prograde-delta-v"),
@@ -123,43 +159,41 @@ export function initEditor(controls, system, config, canvas) {
             inclinationSpan: getSpan("flyby-inclination"),
             detailsSelector: detailsSelector,
             stepSlider: stepSlider,
-            maneuverDiv: document.getElementById("maneuvre-details"),
-            flybyDiv: document.getElementById("flyby-details")
+            maneuverDiv: getDiv("maneuvre-details"),
+            flybyDiv: getDiv("flyby-details")
         };
         const resetFoundTrajectory = () => {
+            systemTime.input(updateSystemTime);
             deltaVPlot.reveal();
             detailsSelector.clear();
             detailsSelector.disable();
             stepSlider.disable();
-            if (trajectory) {
+            if (trajectory)
                 trajectory.remove();
-            }
-            systemTime.input(updateSystemTime);
         };
         const displayFoundTrajectory = () => {
             trajectory = new Trajectory(solver.bestSteps, system, config);
             trajectory.draw(canvas);
             trajectory.fillResultControls(resultItems, systemTime, controls);
-            detailsSelector.select(0);
-            detailsSelector.enable();
-            stepSlider.enable();
             systemTime.input(() => {
                 updateSystemTime();
                 trajectory.updatePodPosition(systemTime);
             });
+            detailsSelector.select(0);
+            detailsSelector.enable();
+            stepSlider.enable();
             trajectory.updatePodPosition(systemTime);
             console.log(solver.bestDeltaV);
         };
         const findTrajectory = async () => {
             paramsErr.hide();
+            systemSelector.disable();
             try {
                 let sequence;
-                if (customSequence.value == "") {
-                    sequence = sequenceSelector.sequence;
-                }
-                else {
+                if (customSequence.value != "")
                     sequence = FlybySequence.fromString(customSequence.value, system);
-                }
+                else
+                    sequence = sequenceSelector.sequence;
                 updateAltitudeRange(depAltitude, sequence.bodies[0]);
                 const seqLen = sequence.length;
                 updateAltitudeRange(destAltitude, sequence.bodies[seqLen - 1]);
@@ -180,8 +214,36 @@ export function initEditor(controls, system, config, canvas) {
                     paramsErr.show(err);
                 console.error(err);
             }
+            finally {
+                systemSelector.enable();
+            }
         };
         new SubmitButton("search-btn").click(() => findTrajectory());
         new StopButton("search-stop-btn").click(() => solver.cancel());
+        systemSelector.change((_, index) => {
+            stopLoop();
+            deltaVPlot.destroy();
+            detailsSelector.clear();
+            originSelector.clear();
+            destSelector.clear();
+            sequenceSelector.clear();
+            resultItems.maneuvreNumber.innerHTML = "--";
+            resultItems.endDateSpan.innerHTML = "--";
+            resultItems.dateSpan.innerHTML = "--";
+            resultItems.normalDVSpan.innerHTML = "--";
+            resultItems.radialDVSpan.innerHTML = "--";
+            resultItems.depDateSpan.innerHTML = "--";
+            resultItems.totalDVSpan.innerHTML = "--";
+            resultItems.periAltitudeSpan.innerHTML = "--";
+            resultItems.inclinationSpan.innerHTML = "--";
+            for (let i = scene.children.length - 1; i >= 0; i--) {
+                scene.remove(scene.children[i]);
+            }
+            camera.remove();
+            scene.remove();
+            renderer.dispose();
+            controls.dispose();
+            initEditorWithSystem(systems, index);
+        });
     }
 }

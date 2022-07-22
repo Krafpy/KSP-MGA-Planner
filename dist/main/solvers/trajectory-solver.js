@@ -1,5 +1,5 @@
 import { mergeArrayChunks } from "../utilities/array.js";
-import { WorkerPool } from "../utilities/worker.js";
+import { WorkerManager } from "../utilities/worker.js";
 export class TrajectorySolver {
     constructor(system, config, plot) {
         this.system = system;
@@ -15,7 +15,7 @@ export class TrajectorySolver {
         this._chunkIndices = [];
         this.bestSteps = [];
         this.bestDeltaV = 0;
-        this._workerPool = new WorkerPool("dist/dedicated-workers/trajectory-optimizer.js", this.config);
+        this._workerPool = WorkerManager.getPool("trajectory-optimizer");
         this._workerPool.initialize({ system: this.system.data, config: this.config });
     }
     _updatePlot(iteration) {

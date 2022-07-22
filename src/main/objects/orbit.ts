@@ -82,7 +82,8 @@ export class Orbit implements IOrbit {
      */
     public solveTrueAnomalyAtDate(meanAnomaly0: number, date: number){
         const e = this.eccentricity;
-        const deltaTime = this.sideralPeriod ? (date % this.sideralPeriod) : date;
+        //const deltaTime = this.sideralPeriod ? (date % this.sideralPeriod) : date;
+        const deltaTime = date;
         const M = meanAnomaly0 + this.meanMotion * deltaTime;
 
         const newton = (
