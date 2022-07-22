@@ -299,6 +299,10 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             stopLoop();
             deltaVPlot.destroy();
             detailsSelector.clear();
+            
+            originSelector.clear();
+            destSelector.clear();
+            sequenceSelector.clear();
     
             resultItems.maneuvreNumber.innerHTML = "--";
             resultItems.endDateSpan.innerHTML = "--";

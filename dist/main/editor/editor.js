@@ -224,6 +224,9 @@ export async function initEditorWithSystem(systems, systemIndex) {
             stopLoop();
             deltaVPlot.destroy();
             detailsSelector.clear();
+            originSelector.clear();
+            destSelector.clear();
+            sequenceSelector.clear();
             resultItems.maneuvreNumber.innerHTML = "--";
             resultItems.endDateSpan.innerHTML = "--";
             resultItems.dateSpan.innerHTML = "--";
