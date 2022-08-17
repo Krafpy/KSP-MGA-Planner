@@ -12,7 +12,8 @@
 # inclination:        ° (degrees)
 # argOfPeriapsis:     °
 # ascNodeLongitude:   °
-# meanAnomaly:        rad, at 0s UT
+# meanAnomaly0:       rad, mean anomaly at UT = epoch
+# epoch:              s
 # sideralPeriod:      s
 
 
@@ -59,6 +60,7 @@
     ascNodeLongitude: 70
     sideralPeriod:    3_796_156.8
   meanAnomaly0:       0
+  epoch:              0
   orbiting:           0
   color:              0xa88161
 
@@ -79,6 +81,7 @@
     ascNodeLongitude: 15
     sideralPeriod:    9_693_648
   meanAnomaly0:       5.7
+  epoch:              0
   orbiting:           0
   color:              0x6c20e4
 
@@ -99,6 +102,7 @@
     ascNodeLongitude: 80
     sideralPeriod:    670_334.4
   meanAnomaly0:       0
+  epoch:              0
   orbiting:           2
   color:              0x6f5248
 
@@ -119,6 +123,7 @@
     ascNodeLongitude: 0
     sideralPeriod:    15_768_000
   meanAnomaly0:       0
+  epoch:              0
   orbiting:           0
   color:              0x8acac2
 
@@ -139,6 +144,7 @@
     ascNodeLongitude: 45
     sideralPeriod:    1_087_862.4
   meanAnomaly0:       0
+  epoch:              0
   orbiting:           4
   color:              0x6b6a76
 
@@ -159,6 +165,7 @@
     ascNodeLongitude: 75
     sideralPeriod:    2_234_304
   meanAnomaly0:       30
+  epoch:              0
   orbiting:           4
   color:              0x5b4c68
 
@@ -179,6 +186,7 @@
     ascNodeLongitude: 135.5
     sideralPeriod:    29_665_872
   meanAnomaly0:       0.9
+  epoch:              0
   orbiting:           0
   color:              0xa23e28
 
@@ -199,6 +207,7 @@
     ascNodeLongitude: 90
     sideralPeriod:    955_497.6
   meanAnomaly0:       180
+  epoch:              0
   orbiting:           7
   color:              0x5d5d5f
 
@@ -219,6 +228,7 @@
     ascNodeLongitude: 30
     sideralPeriod:    62_594_229.6
   meanAnomaly0:       0
+  epoch:              0
   orbiting:           0
   color:              0x8c5926
 
@@ -239,6 +249,7 @@
     ascNodeLongitude: 120
     sideralPeriod:    284_234.4
   meanAnomaly0:       0
+  epoch:              0
   orbiting:           9
   color:              0x808080
 
@@ -259,6 +270,7 @@
     ascNodeLongitude: 280
     sideralPeriod:    82_053_518.4
   meanAnomaly0:       3.9
+  epoch:              0
   orbiting:           0
   color:              0x5a4432
 
@@ -279,6 +291,7 @@
     ascNodeLongitude:	52
     sideralPeriod:    179_313_696
   meanAnomaly0:       0.6
+  epoch:              0
   orbiting:           0
   color:              0x548412
 
@@ -299,6 +312,7 @@
     ascNodeLongitude: 120
     sideralPeriod:    115_300.8
   meanAnomaly0:       180
+  epoch:              0
   orbiting:           12
   color:              0x2c306a
 
@@ -319,6 +333,7 @@
     ascNodeLongitude: 90
     sideralPeriod:    285029.28
   meanAnomaly0:       180
+  epoch:              0
   orbiting:           12
   color:              0x476c7c
 
@@ -339,6 +354,7 @@
     ascNodeLongitude: 150
     sideralPeriod:    704_635.2
   meanAnomaly0:       270
+  epoch:              0
   orbiting:           12
   color:              0x937575
 
@@ -359,6 +375,7 @@
     ascNodeLongitude: 10
     sideralPeriod:    1_978_084.8
   meanAnomaly0:       270
+  epoch:              0
   orbiting:           12
   color:              0x7f6d51
 
@@ -379,6 +396,7 @@
     ascNodeLongitude: 2
     sideralPeriod:    2_825_841.6
   meanAnomaly0:       1.8
+  epoch:              0
   orbiting:           12
   color:              0x9ba078
 
@@ -399,6 +417,7 @@
     ascNodeLongitude:	80
     sideralPeriod:    467_694_648
   meanAnomaly0:       3.3
+  epoch:              0
   orbiting:           0
   color:              0x4d8dcc
 
@@ -419,6 +438,7 @@
     ascNodeLongitude: 60
     sideralPeriod:    116_039.52
   meanAnomaly0:       3.14
+  epoch:              0
   orbiting:           18
   color:              0x2c306a
 
@@ -439,6 +459,7 @@
     ascNodeLongitude: 120
     sideralPeriod:    286_873.92
   meanAnomaly0:       0
+  epoch:              0
   orbiting:           18
   color:              0xb39980
 
@@ -459,6 +480,7 @@
     ascNodeLongitude: 150
     sideralPeriod:    664_156.8
   meanAnomaly0:       90
+  epoch:              0
   orbiting:           18
   color:              0xcc7f33
 
@@ -480,6 +502,7 @@
     meanAnomaly:      0.9
     sideralPeriod:    1_407_672
   meanAnomaly0:       180
+  epoch:              0
   orbiting:           18
   color:              0x7f99b3
 
@@ -500,6 +523,7 @@
     ascNodeLongitude: 180
     sideralPeriod:    3_573_028.8
   meanAnomaly0:       90
+  epoch:              0
   orbiting:           12
   color:              0xb37f99
 
@@ -520,6 +544,7 @@
     ascNodeLongitude: 50
     sideralPeriod:    701_534_088
   meanAnomaly0:       3.54
+  epoch:              0
   orbiting:           0
   color:              0x686a6a
 
@@ -540,6 +565,7 @@
     ascNodeLongitude: 100
     sideralPeriod:    1_548_331.2
   meanAnomaly0:       0
+  epoch:              0
   orbiting:           24
   color:              0xb3997f
 
@@ -560,6 +586,7 @@
     ascNodeLongitude: 105
     sideralPeriod:    4_490_208
   meanAnomaly0:       180
+  epoch:              0
   orbiting:           24
   color:              0x664d33
 
@@ -580,6 +607,7 @@
     ascNodeLongitude: 165
     sideralPeriod:    830_153_664
   meanAnomaly0:       4.7
+  epoch:              0
   orbiting:           0
   color:              0x8c5973
 
@@ -600,6 +628,7 @@
     ascNodeLongitude: 90
     sideralPeriod:    4_858_909_200
   meanAnomaly0:       2.5
+  epoch:              0
   orbiting:           0
   color:              0x4d7f7f
 
@@ -620,6 +649,7 @@
     ascNodeLongitude: 180
     sideralPeriod:    232_809.12
   meanAnomaly0:       180
+  epoch:              0
   orbiting:           28
   color:              0x99b27f
 
@@ -640,6 +670,7 @@
     ascNodeLongitude: 270
     sideralPeriod:    788_097.6
   meanAnomaly0:       180
+  epoch:              0
   orbiting:           28
   color:              0x7f99b2
 
@@ -660,5 +691,6 @@
     ascNodeLongitude: 95
     sideralPeriod:    11_490_768
   meanAnomaly0:       0
+  epoch:              0
   orbiting:           28
   color:              0xb2997f

@@ -35,6 +35,7 @@ export class CelestialBody implements ICelestialBody {
 
 export class OrbitingBody extends CelestialBody implements IOrbitingBody {
     readonly meanAnomaly0!: number;
+    readonly epoch!:        number;
     readonly orbiting!:     number;
     readonly orbit!:        Orbit;
     readonly circularVel!:  number;
@@ -44,6 +45,7 @@ export class OrbitingBody extends CelestialBody implements IOrbitingBody {
         
         this.orbit        = new Orbit(data.orbit, this.attractor, config);
         this.meanAnomaly0 = data.meanAnomaly0;
+        this.epoch        = data.epoch;
         this.orbiting     = data.orbiting;
         
         // Calculate orbital velocity considering a circular orbit
@@ -56,6 +58,7 @@ export class OrbitingBody extends CelestialBody implements IOrbitingBody {
         return {
             ...super.data,
             meanAnomaly0:   this.meanAnomaly0,
+            epoch:          this.epoch,
             orbiting:       this.orbiting,
             circularVel:    this.circularVel,
             orbit:          this.orbit.data
@@ -67,7 +70,7 @@ export class OrbitingBody extends CelestialBody implements IOrbitingBody {
      * @returns The true anomaly of the body at the specified date.
      */
     public trueAnomalyAtDate(date: number){
-        return this.orbit.solveTrueAnomalyAtDate(this.meanAnomaly0, date);
+        return this.orbit.solveTrueAnomalyAtDate(this.meanAnomaly0, this.epoch, date);
     }
 
     /**

@@ -77,13 +77,14 @@ export class Orbit implements IOrbit {
     
     /**
      * @param meanAnomaly0 The mean anomaly at some known reference date
+     * @param epoch The epoch at which the meanAnomaly0 corresponds
      * @param date The elapsed time (in seconds) from the reference date at which we want the anomaly
      * @returns The true anomaly of the body on its orbit at the specified date.
      */
-    public solveTrueAnomalyAtDate(meanAnomaly0: number, date: number){
+    public solveTrueAnomalyAtDate(meanAnomaly0: number, epoch: number, date: number){
         const e = this.eccentricity;
         //const deltaTime = this.sideralPeriod ? (date % this.sideralPeriod) : date;
-        const deltaTime = date;
+        const deltaTime = date - epoch;
         const M = meanAnomaly0 + this.meanMotion * deltaTime;
 
         const newton = (

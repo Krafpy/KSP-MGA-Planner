@@ -13,7 +13,8 @@
 # inclination:        ° (degrees)
 # argOfPeriapsis:     °
 # ascNodeLongitude:   °
-# meanAnomaly:        rad, at 0s UT
+# meanAnomaly0:       rad, mean anomaly at UT = epoch
+# epoch:              s
 # sideralPeriod:      s
 
 
@@ -60,6 +61,7 @@
     ascNodeLongitude: 70
     sideralPeriod:    2_215_754
   meanAnomaly0:       3.14
+  epoch:              0
   orbiting:           0
   color:              0xa88161
 
@@ -80,6 +82,7 @@
     ascNodeLongitude: 15
     sideralPeriod:    5_657_995
   meanAnomaly0:       3.14
+  epoch:              0
   orbiting:           0
   color:              0x6c20e4
   
@@ -100,6 +103,7 @@
     ascNodeLongitude: 80
     sideralPeriod:    388_587
   meanAnomaly0:       0.9
+  epoch:              0
   orbiting:           2
   color:              0x6f5248
 
@@ -120,6 +124,7 @@
     ascNodeLongitude: 0
     sideralPeriod:    9_203_545
   meanAnomaly0:       3.14
+  epoch:              0
   orbiting:           0
   color:              0x8acac2
   
@@ -140,6 +145,7 @@
     ascNodeLongitude: 0
     sideralPeriod:    138_984
   meanAnomaly0:       1.7
+  epoch:              0
   orbiting:           4
   color:              0x6b6a76
   
@@ -160,6 +166,7 @@
     ascNodeLongitude: 78
     sideralPeriod:    1_077_311
   meanAnomaly0:       0.9
+  epoch:              0
   orbiting:           4
   color:              0x5b4c68
 
@@ -180,6 +187,7 @@
     ascNodeLongitude: 135.5
     sideralPeriod:    17_315_400
   meanAnomaly0:       3.14
+  epoch:              0
   orbiting:           0
   color:              0xa23e28
   
@@ -200,6 +208,7 @@
     ascNodeLongitude: 0
     sideralPeriod:    65_518
   meanAnomaly0:       1.7
+  epoch:              0
   orbiting:           7
   color:              0x5d5d5f
   
@@ -220,6 +229,7 @@
     ascNodeLongitude: 280
     sideralPeriod:    47_893_063
   meanAnomaly0:       3.14
+  epoch:              0
   orbiting:           0
   color:              0x5a4432
   
@@ -240,6 +250,7 @@
     ascNodeLongitude:	52
     sideralPeriod:    104_661_432
   meanAnomaly0:       0.1
+  epoch:              0
   orbiting:           0
   color:              0x548412
   
@@ -260,6 +271,7 @@
     ascNodeLongitude: 0
     sideralPeriod:    52_981
   meanAnomaly0:       3.14
+  epoch:              0
   orbiting:           10
   color:              0x2c306a
   
@@ -280,6 +292,7 @@
     ascNodeLongitude: 0
     sideralPeriod:    105_962
   meanAnomaly0:       0.9
+  epoch:              0
   orbiting:           10
   color:              0x476c7c
   
@@ -300,6 +313,7 @@
     ascNodeLongitude: 0
     sideralPeriod:    211_926
   meanAnomaly0:       3.14
+  epoch:              0
   orbiting:           10
   color:              0x937575
   
@@ -321,6 +335,7 @@
     meanAnomaly:      0.9
     sideralPeriod:    544_507
   meanAnomaly0:       0.9
+  epoch:              0
   orbiting:           10
   color:              0x7f6d51
   
@@ -341,6 +356,7 @@
     ascNodeLongitude: 2
     sideralPeriod:    901_903
   meanAnomaly0:       0.9
+  epoch:              0
   orbiting:           10
   color:              0x9ba078
   
@@ -361,5 +377,6 @@
     ascNodeLongitude: 50
     sideralPeriod:    156_992_048
   meanAnomaly0:       3.14
+  epoch:              0
   orbiting:           0
   color:              0x686a6a

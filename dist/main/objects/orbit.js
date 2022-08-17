@@ -52,9 +52,9 @@ export class Orbit {
         };
         return new Orbit(data, attractor, config, false);
     }
-    solveTrueAnomalyAtDate(meanAnomaly0, date) {
+    solveTrueAnomalyAtDate(meanAnomaly0, epoch, date) {
         const e = this.eccentricity;
-        const deltaTime = date;
+        const deltaTime = date - epoch;
         const M = meanAnomaly0 + this.meanMotion * deltaTime;
         const newton = (f, df) => {
             let n = 0;
