@@ -304,7 +304,7 @@ export class Trajectory {
         const orbit = this.orbits[i];
         const relDate = date - step.dateOfStart;
         const { startM } = step;
-        const trueAnom = orbit.solveTrueAnomalyAtDate(startM, relDate);
+        const trueAnom = orbit.solveTrueAnomalyAtDate(startM, 0, relDate);
         const pos = orbit.positionFromTrueAnomaly(trueAnom);
         const { scale } = this.config.rendering;
         pod.position.set(pos.x, pos.y, pos.z);

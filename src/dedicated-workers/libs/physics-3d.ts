@@ -55,7 +55,7 @@ namespace Physics3D
      */
     export function bodyStateAtDate(body: IOrbitingBody, orbit: OrbitalElements3D, attractor: ICelestialBody, date: number) {
         const n = body.orbit.meanMotion as number;
-        const M = body.meanAnomaly0 + n * date;
+        const M = body.meanAnomaly0 + n * (date - body.epoch);
         const nu = trueAnomalyFromMeanAnomaly(orbit.eccentricity, M);
         return orbitElementsToState(orbit, attractor, nu);
     }

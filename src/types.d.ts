@@ -10,6 +10,7 @@ interface ICelestialBody {
 
 interface IOrbitingBody extends ICelestialBody {
     readonly meanAnomaly0:  number;
+    readonly epoch:         number;
     readonly orbiting:      number;
     readonly orbit:         IOrbit;
     readonly circularVel:   number;

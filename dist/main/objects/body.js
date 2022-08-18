@@ -28,6 +28,7 @@ export class OrbitingBody extends CelestialBody {
         this.attractor = attractor;
         this.orbit = new Orbit(data.orbit, this.attractor, config);
         this.meanAnomaly0 = data.meanAnomaly0;
+        this.epoch = data.epoch;
         this.orbiting = data.orbiting;
         const { stdGravParam } = this.attractor;
         const { semiMajorAxis } = this.orbit;
@@ -37,13 +38,14 @@ export class OrbitingBody extends CelestialBody {
         return {
             ...super.data,
             meanAnomaly0: this.meanAnomaly0,
+            epoch: this.epoch,
             orbiting: this.orbiting,
             circularVel: this.circularVel,
             orbit: this.orbit.data
         };
     }
     trueAnomalyAtDate(date) {
-        return this.orbit.solveTrueAnomalyAtDate(this.meanAnomaly0, date);
+        return this.orbit.solveTrueAnomalyAtDate(this.meanAnomaly0, this.epoch, date);
     }
     positionAtDate(date) {
         const anomaly = this.trueAnomalyAtDate(date);
