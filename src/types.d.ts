@@ -24,7 +24,7 @@ interface IOrbit {
     readonly inclination:       number;
     readonly argOfPeriapsis:    number;
     readonly ascNodeLongitude:  number;
-    readonly sideralPeriod?:    number;
+    //readonly sideralPeriod?:    number;
     readonly orbitalParam?:     number;
     readonly meanMotion?:       number;
 }
@@ -337,4 +337,29 @@ type EditorParameters = {
 type SolarSystemData = {
     name: string;
     folderName: string;
+};
+
+
+// Types for tools/cfg-to-yml
+
+interface ICelestialBody_Unordered {
+    readonly name:          string;
+    readonly radius:        number;
+    readonly mass:          number;
+    readonly stdGravParam:  number;
+    readonly soi:           number;
+    readonly color:         number;
+};
+
+interface IOrbitingBody_Unordered extends ICelestialBody_Unordered {
+    readonly meanAnomaly0:  number;
+    readonly epoch:         number;
+    readonly orbit:         IOrbit;
+};
+
+type ParsedUnorderedSunData = ICelestialBody_Unordered;
+
+type ParsedUnorderedOrbitingData = {
+    readonly referenceBody: string;
+    readonly data:          IOrbitingBody_Unordered
 };

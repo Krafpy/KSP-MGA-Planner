@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>CFG converter for MGA Planner</title>
+</head>
+<body>
+    <div id="container">
+        <section>
+            <h2>Kopernicus .CFG converter for <a href="https://krafpy.github.io/KSP-MGA-Planner/">KSP MGA Planner</a></h2>
+            <p>
+                Use this page to quickly convert Kopernicus' configuration files (.cfg) of solar systems to the `bodies.yml`
+                file used by the MGA planner tool.
+            </p>
+            <p>
+                Select all .cfg files describing the solar system's bodies <em>only</em>, including the sun.
+            <p>
+                Follow then <strong><a href="https://github.com/Krafpy/KSP-MGA-Planner">these steps</a></strong> to
+                add the new solar system to the tool by contributing to the repository.
+            </p>
+            <div id="inputs">
+                <input id="files-input" type="file" multiple>
+                <div id="btns-div">
+                    <button id="convert-btn">Convert</button>
+                    <button id="download-btn">Download</button>
+                </div>
+            </div>
+            <textarea name="log-box" id="log-box" rows="7" readonly></textarea>
+        </section>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="/dist/tools/cfg-to-yml/main.js" type="module"></script>
+</body>
+</html>
