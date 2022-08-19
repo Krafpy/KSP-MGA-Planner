@@ -6,7 +6,7 @@ export class Orbit implements IOrbit {
     readonly inclination!:      number;
     readonly argOfPeriapsis!:   number;
     readonly ascNodeLongitude!: number;
-    readonly sideralPeriod?:    number;
+    //readonly sideralPeriod?:    number;
     readonly orbitalParam!:     number;
     readonly meanMotion!:       number;
     readonly ascNodeDir!:       THREE.Vector3;
@@ -16,7 +16,7 @@ export class Orbit implements IOrbit {
     constructor(data: IOrbit, public readonly attractor: ICelestialBody, public readonly config: OrbitSettings, anglesToRad: boolean = true){
         this.semiMajorAxis = data.semiMajorAxis;
         this.eccentricity  = data.eccentricity;
-        this.sideralPeriod = data.sideralPeriod ? data.sideralPeriod : undefined;
+        //this.sideralPeriod = data.sideralPeriod ? data.sideralPeriod : undefined;
         
         this.orbitalParam = this.semiMajorAxis * (1 - this.eccentricity**2);
         this.meanMotion = Math.sqrt(
@@ -57,7 +57,7 @@ export class Orbit implements IOrbit {
             inclination:      this.inclination,
             argOfPeriapsis:   this.argOfPeriapsis,
             ascNodeLongitude: this.ascNodeLongitude,
-            sideralPeriod:    this.sideralPeriod,
+            //sideralPeriod:    this.sideralPeriod,
             orbitalParam:     this.orbitalParam,
             meanMotion:       this.meanMotion
         };
@@ -83,7 +83,6 @@ export class Orbit implements IOrbit {
      */
     public solveTrueAnomalyAtDate(meanAnomaly0: number, epoch: number, date: number){
         const e = this.eccentricity;
-        //const deltaTime = this.sideralPeriod ? (date % this.sideralPeriod) : date;
         const deltaTime = date - epoch;
         const M = meanAnomaly0 + this.meanMotion * deltaTime;
 

@@ -1,0 +1,46 @@
+#container
+{
+    width: 570px;
+}
+
+#inputs
+{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#files-input
+{
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+#log-box
+{
+    width: 100%;
+    resize: none;
+    color: white;
+    background-color: rgb(34, 36, 38);
+    border-color: rgb(58, 62, 65);
+    border-style: solid;
+    border-width: 1px;
+
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+
+    -moz-box-sizing: border-box; 
+    -webkit-box-sizing: border-box; 
+    box-sizing: border-box; 
+}
+
+button
+{
+    width: 6em;
+}
+
+/*p, button, input
+{
+    font-size: 0.85em;
+}*/

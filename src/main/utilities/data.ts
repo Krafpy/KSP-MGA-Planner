@@ -5,7 +5,7 @@ async function readTextFile(path: string){
 }
 
 export async function loadBodiesData(systemFolder: string){
-    const content = await readTextFile(`./data/${systemFolder}/bodies.yml`);
+    const content = await readTextFile(`/data/${systemFolder}/bodies.yml`);
     const data = jsyaml.load(content) as object[];
     return {
         sun:    data[0]       as ICelestialBody,
@@ -14,13 +14,13 @@ export async function loadBodiesData(systemFolder: string){
 }
 
 export async function loadConfig(systemFolder: string){
-    const content = await readTextFile(`./data/${systemFolder}/config.yml`);
+    const content = await readTextFile(`/data/${systemFolder}/config.yml`);
     const config = jsyaml.load(content) as Config;
     return config;
 }
 
 export async function loadSystemsList(){
-    const content = await readTextFile("./data/systems.yml");
+    const content = await readTextFile("/data/systems.yml");
     const systems = jsyaml.load(content) as SolarSystemData[];
     return systems;
 }

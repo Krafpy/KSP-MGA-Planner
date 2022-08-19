@@ -4,7 +4,6 @@ export class Orbit {
         this.config = config;
         this.semiMajorAxis = data.semiMajorAxis;
         this.eccentricity = data.eccentricity;
-        this.sideralPeriod = data.sideralPeriod ? data.sideralPeriod : undefined;
         this.orbitalParam = this.semiMajorAxis * (1 - this.eccentricity ** 2);
         this.meanMotion = Math.sqrt(this.attractor.stdGravParam / (Math.abs(this.semiMajorAxis) ** 3));
         if (this.eccentricity < 1) {
@@ -37,7 +36,6 @@ export class Orbit {
             inclination: this.inclination,
             argOfPeriapsis: this.argOfPeriapsis,
             ascNodeLongitude: this.ascNodeLongitude,
-            sideralPeriod: this.sideralPeriod,
             orbitalParam: this.orbitalParam,
             meanMotion: this.meanMotion
         };
