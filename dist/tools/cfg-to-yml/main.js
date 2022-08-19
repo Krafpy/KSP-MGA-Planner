@@ -6,7 +6,7 @@ import { readFilesFromInput } from "./file-reader.js";
 import { TextareaLogger } from "./textarea-logger.js";
 window.onload = main;
 async function main() {
-    const stockBodies = await loadBodiesData("stock");
+    const stockBodies = await loadBodiesData("stock", "./../../");
     const template = new Map();
     template.set(stockBodies.sun.name, stockBodies.sun);
     for (const body of stockBodies.bodies) {

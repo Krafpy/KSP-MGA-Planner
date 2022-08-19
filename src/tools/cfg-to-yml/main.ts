@@ -8,7 +8,7 @@ import { TextareaLogger } from "./textarea-logger.js";
 window.onload = main;
 
 async function main(){
-    const stockBodies = await loadBodiesData("stock");
+    const stockBodies = await loadBodiesData("stock", "./../../");
     const template = new Map<string, ICelestialBody | IOrbitingBody>();
 
     template.set(stockBodies.sun.name, stockBodies.sun);
