@@ -11,6 +11,7 @@ class TrajectoryCalculator {
     private _destAltitude!: number;
     private _startDateMin!: number;
     private _startDateMax!: number;
+    private _noInsertion!:  boolean;
     private _params!:       Agent;
 
     private _bodiesOrbits!: OrbitalElements3D[];
@@ -49,17 +50,12 @@ class TrajectoryCalculator {
         this._bodiesOrbits = bodiesOrbits;
     }
 
-    public setParameters(
-        depAltitude:  number,
-        destAltitude: number,
-        startDateMin: number,
-        startDateMax: number,
-        params:       Agent
-    ){
-        this._depAltitude  = depAltitude;
-        this._destAltitude = destAltitude;
-        this._startDateMin = startDateMin;
-        this._startDateMax = startDateMax;
+    public setParameters(settings: TrajectoryUserSettings, params: Agent){
+        this._depAltitude  = settings.depAltitude;
+        this._destAltitude = settings.destAltitude;
+        this._startDateMin = settings.startDate;
+        this._startDateMax = settings.endDate;
+        this._noInsertion  = settings.noInsertion;
         this._params = params;
 
         this._getDepartureSettings();
@@ -146,7 +142,9 @@ class TrajectoryCalculator {
         // Compute the insertion and circularization around
         // the destination body
         this._computeInsertion();
-        this._computeCircularization();
+        if(!this._noInsertion) {
+            this._computeCircularization();
+        }
     }
 
     public get totalDeltaV(){
@@ -195,7 +193,8 @@ class TrajectoryCalculator {
     }
 
     public computeStartingMeanAnomalies(){
-        for(let i = 1; i < this.steps.length-1; i++){ // ignore begin and end circular orbits
+        const k = this._noInsertion ? 0 : 1;
+        for(let i = 1; i < this.steps.length-k; i++){ // ignore begin and end circular (if insertion burn) orbits
             const step = this.steps[i];
             const {orbitElts, angles} = step;
             const e = orbitElts.eccentricity;
@@ -296,7 +295,7 @@ class TrajectoryCalculator {
 
         // Compute the SOI enter and exit angles
         const enterAngle = Physics3D.trueAnomalyAtRadius(t_flybyOrbit, body.soi);
-        const angles = {begin: -enterAngle, end: 0};
+        const angles = {begin: -enterAngle, end: this._noInsertion ? enterAngle : 0};
         const drawAngles = {begin: angles.begin, end: angles.end};
 
         // Compute the angle between the incoming velocity vector and the velocity vector
@@ -319,6 +318,15 @@ class TrajectoryCalculator {
 
         // Compute the duration of the flyby
         const tof = Physics3D.tofBetweenAnomalies(insertionOrbit, body, angles.begin, angles.end);
+
+        // Flyby details in the case of no circularization
+        const flybyDetails: FlybyInfo = {
+            bodyId:       body.id,
+            soiEnterDate: this._lastStepEndDate,
+            soiExitDate:  this._lastStepEndDate + tof,
+            periRadius:   periRadius,
+            inclination:  insertionOrbit.inclination,
+        };
         
         // Append the insertion orbit
         this.steps.push({
@@ -328,7 +336,8 @@ class TrajectoryCalculator {
             drawAngles:  drawAngles,
             duration:    tof,
             dateOfStart: this._lastStepEndDate,
-            startM:      0
+            startM:      0,
+            flyby:       this._noInsertion ? flybyDetails : undefined
         });
 
         // Store the state of the vessel at periapsis for further

@@ -13,11 +13,8 @@ class TrajectoryOptimizer extends WorkerEnvironment {
     private _system!:         IOrbitingBody[];
     private _bodiesOrbits!:   OrbitalElements3D[];
 
-    private _depAltitude!:    number;
-    private _destAltitude!:   number;
     private _sequence!:       number[];
-    private _startDateMin!:   number;
-    private _startDateMax!:   number;
+    private _settings!:       TrajectoryUserSettings;
 
     private _bestTrajectory!: TrajectoryCalculator;
     private _bestDeltaV!:     number;
@@ -41,11 +38,8 @@ class TrajectoryOptimizer extends WorkerEnvironment {
     }
 
     override onWorkerDataPass(data: any){
-        this._depAltitude = data.depAltitude;
-        this._destAltitude = data.destAltitude;
         this._sequence = data.sequence;
-        this._startDateMin = data.startDateMin;
-        this._startDateMax = data.startDateMax;
+        this._settings = data.settings;
     }
 
     override onWorkerRun(input: any){
@@ -67,17 +61,31 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                 
                 // Get the circular final orbit
                 const lastIdx = trajectory.steps.length-1;
-                const finalOrbit = trajectory.steps[lastIdx].orbitElts;
+                const lastStep = trajectory.steps[lastIdx];
+                const finalOrbit = lastStep.orbitElts;
 
                 const totDV = trajectory.totalDeltaV;
                 this._newDeltaVs.push(totDV);
 
                 const lastInc = Math.abs(finalOrbit.inclination);
+
+                // If there is no circularization burn, try to minimize the velocity at the periapsis
+                // of the arrival body by actually considering a circularization
+                let periVelCost = 0;
+                if(this._settings.noInsertion) {
+                    const finalBody = this._system[lastStep.attractorId];
+                    const periapsis = this._settings.destAltitude + finalBody.radius;
+                    const periVel = Physics3D.velocityAtRadius(finalOrbit, finalBody, periapsis);
+                    const circDV = periVel - Physics3D.circularVelocity(finalBody, periapsis);
+                    periVelCost = circDV;
+                }
+                
                 // Attempt to force a minimal inclination of the
                 // circular orbit around the destination body
                 // FIX : doesn't work so well...
-                return totDV + totDV*lastInc*0.1;
+                return totDV + totDV*lastInc*0.1 + periVelCost;
             };
+
             const trajConfig = this._config.trajectorySearch;
             const {diffWeight} = trajConfig;
             const {minCrossProba, maxCrossProba} = trajConfig;
@@ -138,13 +146,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         // If an error occurs, the agent is randomized.
         let attempts = 0;
         while(attempts < maxAttempts){
-            trajectory.setParameters(
-                this._depAltitude,
-                this._destAltitude,
-                this._startDateMin,
-                this._startDateMax,
-                agent
-            );
+            trajectory.setParameters(this._settings, agent);
             let failed = false;
             // FIX: "This radius is never reached" error thrown... why ?
             try {

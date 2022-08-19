@@ -206,7 +206,7 @@ input[type="text"]::placeholder
 
 .control-group .control-label
 {
-    width: 190px;
+    width: 140px;
     text-align: right;
     padding-right: 17px;
 }
@@ -223,7 +223,7 @@ input[type="text"]::placeholder
 
 .controls
 {
-    width: 310px;
+    width: auto;
 }
 
 .error-msg, .progress-msg
@@ -449,6 +449,22 @@ input[type="range"]
 #result-controls
 {
     width: 413px;
+}
+
+#insertion-checkbox-container
+{
+    margin-top: 15px;
+}
+
+#insertion-checkbox-container .controls
+{
+    margin-left: 157px;
+}
+
+#insertion-checkbox
+{
+    margin: 0;
+    padding: 0;
 }
 
 /* Paragraphs */

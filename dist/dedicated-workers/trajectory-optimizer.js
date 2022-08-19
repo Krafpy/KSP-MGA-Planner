@@ -17,11 +17,8 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         }
     }
     onWorkerDataPass(data) {
-        this._depAltitude = data.depAltitude;
-        this._destAltitude = data.destAltitude;
         this._sequence = data.sequence;
-        this._startDateMin = data.startDateMin;
-        this._startDateMax = data.startDateMax;
+        this._settings = data.settings;
     }
     onWorkerRun(input) {
         this._newDeltaVs = [];
@@ -35,11 +32,20 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                     this._bestTrajectory = trajectory;
                 }
                 const lastIdx = trajectory.steps.length - 1;
-                const finalOrbit = trajectory.steps[lastIdx].orbitElts;
+                const lastStep = trajectory.steps[lastIdx];
+                const finalOrbit = lastStep.orbitElts;
                 const totDV = trajectory.totalDeltaV;
                 this._newDeltaVs.push(totDV);
                 const lastInc = Math.abs(finalOrbit.inclination);
-                return totDV + totDV * lastInc * 0.1;
+                let periVelCost = 0;
+                if (this._settings.noInsertion) {
+                    const finalBody = this._system[lastStep.attractorId];
+                    const periapsis = this._settings.destAltitude + finalBody.radius;
+                    const periVel = Physics3D.velocityAtRadius(finalOrbit, finalBody, periapsis);
+                    const circDV = periVel - Physics3D.circularVelocity(finalBody, periapsis);
+                    periVelCost = circDV;
+                }
+                return totDV + totDV * lastInc * 0.1 + periVelCost;
             };
             const trajConfig = this._config.trajectorySearch;
             const { diffWeight } = trajConfig;
@@ -82,7 +88,7 @@ class TrajectoryOptimizer extends WorkerEnvironment {
         trajectory.addPrecomputedOrbits(this._bodiesOrbits);
         let attempts = 0;
         while (attempts < maxAttempts) {
-            trajectory.setParameters(this._depAltitude, this._destAltitude, this._startDateMin, this._startDateMax, agent);
+            trajectory.setParameters(this._settings, agent);
             let failed = false;
             try {
                 trajectory.compute();

@@ -29,11 +29,12 @@ class TrajectoryCalculator {
     addPrecomputedOrbits(bodiesOrbits) {
         this._bodiesOrbits = bodiesOrbits;
     }
-    setParameters(depAltitude, destAltitude, startDateMin, startDateMax, params) {
-        this._depAltitude = depAltitude;
-        this._destAltitude = destAltitude;
-        this._startDateMin = startDateMin;
-        this._startDateMax = startDateMax;
+    setParameters(settings, params) {
+        this._depAltitude = settings.depAltitude;
+        this._destAltitude = settings.destAltitude;
+        this._startDateMin = settings.startDate;
+        this._startDateMax = settings.endDate;
+        this._noInsertion = settings.noInsertion;
         this._params = params;
         this._getDepartureSettings();
         this._getLegsSettings();
@@ -93,7 +94,9 @@ class TrajectoryCalculator {
         this._computeFirstLegArc(last);
         this._computeLegSecondArcSimple(last);
         this._computeInsertion();
-        this._computeCircularization();
+        if (!this._noInsertion) {
+            this._computeCircularization();
+        }
     }
     get totalDeltaV() {
         let total = 0;
@@ -128,7 +131,8 @@ class TrajectoryCalculator {
         infos.duration = Math.max(minLegDuration, infos.duration);
     }
     computeStartingMeanAnomalies() {
-        for (let i = 1; i < this.steps.length - 1; i++) {
+        const k = this._noInsertion ? 0 : 1;
+        for (let i = 1; i < this.steps.length - k; i++) {
             const step = this.steps[i];
             const { orbitElts, angles } = step;
             const e = orbitElts.eccentricity;
@@ -189,7 +193,7 @@ class TrajectoryCalculator {
         const t_periapsisState = { pos: t_periPos, vel: t_periVel };
         const t_flybyOrbit = Physics3D.stateToOrbitElements(t_periapsisState, body);
         const enterAngle = Physics3D.trueAnomalyAtRadius(t_flybyOrbit, body.soi);
-        const angles = { begin: -enterAngle, end: 0 };
+        const angles = { begin: -enterAngle, end: this._noInsertion ? enterAngle : 0 };
         const drawAngles = { begin: angles.begin, end: angles.end };
         const t_incomingVel = Physics3D.orbitElementsToState(t_flybyOrbit, body, angles.begin).vel;
         const t_incomingVelDir = normalize3(t_incomingVel);
@@ -201,6 +205,13 @@ class TrajectoryCalculator {
         const periapsisState = { pos: periPos, vel: periVel };
         const insertionOrbit = Physics3D.stateToOrbitElements(periapsisState, body);
         const tof = Physics3D.tofBetweenAnomalies(insertionOrbit, body, angles.begin, angles.end);
+        const flybyDetails = {
+            bodyId: body.id,
+            soiEnterDate: this._lastStepEndDate,
+            soiExitDate: this._lastStepEndDate + tof,
+            periRadius: periRadius,
+            inclination: insertionOrbit.inclination,
+        };
         this.steps.push({
             orbitElts: insertionOrbit,
             attractorId: body.id,
@@ -208,7 +219,8 @@ class TrajectoryCalculator {
             drawAngles: drawAngles,
             duration: tof,
             dateOfStart: this._lastStepEndDate,
-            startM: 0
+            startM: 0,
+            flyby: this._noInsertion ? flybyDetails : undefined
         });
         this._vesselState = periapsisState;
         this._secondArcsData.push({

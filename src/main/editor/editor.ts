@@ -180,6 +180,10 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         depAltitude.value = config.editor.defaultAltitude;
         destAltitude.value = config.editor.defaultAltitude;
 
+        // No insertion burn checkbox
+        const noInsertionBox = document.getElementById("insertion-checkbox") as HTMLInputElement;
+        noInsertionBox.checked = false;
+
         // Custom sequence input
         const customSequence = document.getElementById("custom-sequence") as HTMLInputElement;
     
@@ -200,7 +204,7 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         stepSlider.disable();
 
         const getSpan = (id: string) =>  document.getElementById(id) as HTMLSpanElement;
-        const getDiv = (id: string) => document.getElementById(id) as HTMLDivElement;
+        const getDiv =  (id: string) =>  document.getElementById(id) as HTMLDivElement;
 
         const resultItems = {
             dateSpan:         getSpan("maneuvre-date"),
@@ -259,8 +263,8 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
                     sequence = sequenceSelector.sequence;
 
                 updateAltitudeRange(depAltitude, sequence.bodies[0]);
-                const seqLen = sequence.length;
-                updateAltitudeRange(destAltitude, sequence.bodies[seqLen-1]);
+                const slen = sequence.length;
+                updateAltitudeRange(destAltitude, sequence.bodies[slen-1]);
 
                 const startDate = timeRangeStart.dateSeconds;
                 const endDate = timeRangeEnd.dateSeconds;
@@ -272,10 +276,16 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
                 
                 resetFoundTrajectory();
 
+                const userSettings: TrajectoryUserSettings = {
+                    startDate:    startDate,
+                    endDate:      endDate,
+                    depAltitude:  depAltitudeVal,
+                    destAltitude: destAltitudeVal,
+                    noInsertion:  noInsertionBox.checked
+                };
+
                 const perfStart = performance.now();
-                await solver.searchOptimalTrajectory(
-                    sequence, startDate, endDate, depAltitudeVal, destAltitudeVal
-                );
+                await solver.searchOptimalTrajectory(sequence, userSettings);
                 console.log(`Search time: ${performance.now() - perfStart} ms`);
                 
                 displayFoundTrajectory();
@@ -284,6 +294,7 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
                 if(err instanceof Error && err.message != "TRAJECTORY FINDER CANCELLED")
                     paramsErr.show(err);
                 console.error(err);
+                
             } finally {
 
                 systemSelector.enable();

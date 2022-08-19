@@ -404,13 +404,14 @@ export class Trajectory {
         else if(date > missionEnd) date = missionEnd;
 
         // Get the step where the pod is at this date
+        const k = lastStep.flyby ? 0 : 1; // ignore circular orbit if insertion burn occured
         let i = 1;
-        for(; i < this.steps.length-1; i++){
+        for(; i < this.steps.length-k; i++){
             const {dateOfStart, duration} = this.steps[i];
             if(date >= dateOfStart && date < dateOfStart + duration)
                 break;
         }
-        i = Math.min(i, this.steps.length-2);
+        i = Math.min(i, this.steps.length-k-1);
 
         const step = this.steps[i];
 
@@ -427,11 +428,10 @@ export class Trajectory {
         const newGroup = this.system.objectsOfBody(newAttrId);
         newGroup.add(pod);
 
-        // Compute its position on the leg arc where the pod is
+        // Compute the position on the arc where the pod is
         const orbit = this.orbits[i];
-        const relDate = date - step.dateOfStart;
         const {startM} = step;
-        const trueAnom = orbit.solveTrueAnomalyAtDate(startM, 0, relDate);
+        const trueAnom = orbit.solveTrueAnomalyAtDate(startM, step.dateOfStart, date);
         const pos = orbit.positionFromTrueAnomaly(trueAnom);
 
         const {scale} = this.config.rendering;

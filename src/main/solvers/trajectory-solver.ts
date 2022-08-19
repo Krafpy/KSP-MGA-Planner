@@ -38,13 +38,7 @@ export class TrajectorySolver {
         if(this._running) this._cancelled = true;
     }
 
-    public async searchOptimalTrajectory(
-        sequence:     FlybySequence,
-        startDateMin: number,
-        startDateMax: number,
-        depAltitude:  number,
-        destAltitude: number
-    ){
+    public async searchOptimalTrajectory(sequence: FlybySequence, settings: TrajectoryUserSettings){
         this._running = true;
         
         this.plot.clearPlot()
@@ -52,10 +46,7 @@ export class TrajectorySolver {
         this._calculatePopulationSize(sequence);
         this._calculatePopulationChunks();
 
-        await this._passSettingsData(
-            sequence.ids, startDateMin, startDateMax, depAltitude, destAltitude
-        );
-        
+        await this._passSettingsData(sequence, settings);
         await this._createStartPopulation();
         this._updatePlot(0);
 
@@ -73,16 +64,8 @@ export class TrajectorySolver {
         this._running = false;
     }
 
-    private async _passSettingsData(
-        sequence:     number[], 
-        startDateMin: number, 
-        startDateMax: number, 
-        depAltitude:  number,
-        destAltitude: number
-    ){
-        return this._workerPool.passData({
-            depAltitude, destAltitude, sequence, startDateMin, startDateMax
-        });
+    private async _passSettingsData(sequence: FlybySequence, settings: TrajectoryUserSettings){
+        return this._workerPool.passData({sequence: sequence.ids, settings});
     }
 
     private _calculatePopulationChunks(){

@@ -284,13 +284,14 @@ export class Trajectory {
             date = missionStart;
         else if (date > missionEnd)
             date = missionEnd;
+        const k = lastStep.flyby ? 0 : 1;
         let i = 1;
-        for (; i < this.steps.length - 1; i++) {
+        for (; i < this.steps.length - k; i++) {
             const { dateOfStart, duration } = this.steps[i];
             if (date >= dateOfStart && date < dateOfStart + duration)
                 break;
         }
-        i = Math.min(i, this.steps.length - 2);
+        i = Math.min(i, this.steps.length - k - 1);
         const step = this.steps[i];
         const pod = this._spriteObjects[this._podSpriteIndex].pop();
         const curAttrId = this.steps[this._podSpriteIndex].attractorId;
@@ -302,9 +303,8 @@ export class Trajectory {
         const newGroup = this.system.objectsOfBody(newAttrId);
         newGroup.add(pod);
         const orbit = this.orbits[i];
-        const relDate = date - step.dateOfStart;
         const { startM } = step;
-        const trueAnom = orbit.solveTrueAnomalyAtDate(startM, 0, relDate);
+        const trueAnom = orbit.solveTrueAnomalyAtDate(startM, step.dateOfStart, date);
         const pos = orbit.positionFromTrueAnomaly(trueAnom);
         const { scale } = this.config.rendering;
         pod.position.set(pos.x, pos.y, pos.z);
