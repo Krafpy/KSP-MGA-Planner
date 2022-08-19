@@ -132,6 +132,8 @@ export async function initEditorWithSystem(systems, systemIndex) {
         };
         depAltitude.value = config.editor.defaultAltitude;
         destAltitude.value = config.editor.defaultAltitude;
+        const noInsertionBox = document.getElementById("insertion-checkbox");
+        noInsertionBox.checked = false;
         const customSequence = document.getElementById("custom-sequence");
         const deltaVPlot = new EvolutionPlot("evolution-plot");
         deltaVPlot.hide();
@@ -195,8 +197,8 @@ export async function initEditorWithSystem(systems, systemIndex) {
                 else
                     sequence = sequenceSelector.sequence;
                 updateAltitudeRange(depAltitude, sequence.bodies[0]);
-                const seqLen = sequence.length;
-                updateAltitudeRange(destAltitude, sequence.bodies[seqLen - 1]);
+                const slen = sequence.length;
+                updateAltitudeRange(destAltitude, sequence.bodies[slen - 1]);
                 const startDate = timeRangeStart.dateSeconds;
                 const endDate = timeRangeEnd.dateSeconds;
                 if (endDate < startDate)
@@ -204,8 +206,15 @@ export async function initEditorWithSystem(systems, systemIndex) {
                 const depAltitudeVal = depAltitude.value * 1000;
                 const destAltitudeVal = destAltitude.value * 1000;
                 resetFoundTrajectory();
+                const userSettings = {
+                    startDate: startDate,
+                    endDate: endDate,
+                    depAltitude: depAltitudeVal,
+                    destAltitude: destAltitudeVal,
+                    noInsertion: noInsertionBox.checked
+                };
                 const perfStart = performance.now();
-                await solver.searchOptimalTrajectory(sequence, startDate, endDate, depAltitudeVal, destAltitudeVal);
+                await solver.searchOptimalTrajectory(sequence, userSettings);
                 console.log(`Search time: ${performance.now() - perfStart} ms`);
                 displayFoundTrajectory();
             }

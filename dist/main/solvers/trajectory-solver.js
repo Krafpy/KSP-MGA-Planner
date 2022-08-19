@@ -30,12 +30,12 @@ export class TrajectorySolver {
         if (this._running)
             this._cancelled = true;
     }
-    async searchOptimalTrajectory(sequence, startDateMin, startDateMax, depAltitude, destAltitude) {
+    async searchOptimalTrajectory(sequence, settings) {
         this._running = true;
         this.plot.clearPlot();
         this._calculatePopulationSize(sequence);
         this._calculatePopulationChunks();
-        await this._passSettingsData(sequence.ids, startDateMin, startDateMax, depAltitude, destAltitude);
+        await this._passSettingsData(sequence, settings);
         await this._createStartPopulation();
         this._updatePlot(0);
         const { maxGenerations } = this.config.trajectorySearch;
@@ -50,10 +50,8 @@ export class TrajectorySolver {
         }
         this._running = false;
     }
-    async _passSettingsData(sequence, startDateMin, startDateMax, depAltitude, destAltitude) {
-        return this._workerPool.passData({
-            depAltitude, destAltitude, sequence, startDateMin, startDateMax
-        });
+    async _passSettingsData(sequence, settings) {
+        return this._workerPool.passData({ sequence: sequence.ids, settings });
     }
     _calculatePopulationChunks() {
         const { splitLimit } = this.config.trajectorySearch;

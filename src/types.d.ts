@@ -296,6 +296,14 @@ type FlybyDetails = {
     inclinationDeg:  number
 };
 
+type TrajectoryUserSettings = {
+    startDate:    number,
+    endDate:      number,
+    depAltitude:  number,
+    destAltitude: number,
+    noInsertion:  boolean
+};
+
 type ResultPannelItems = {
     dateSpan:         HTMLSpanElement,
     progradeDVSpan:   HTMLSpanElement,
