@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="shortcut icon" href="#">
-    <link rel="stylesheet" type="text/css" href="./../../style.css">
+    <!--<link rel="stylesheet" type="text/css" href="./../../style.css">-->
     <link rel="stylesheet" type="text/css" href="style.css">
     <title>CFG converter for MGA Planner</title>
 </head>
@@ -15,21 +15,30 @@
             <h2>Kopernicus .CFG converter for <a href="https://krafpy.github.io/KSP-MGA-Planner/">KSP MGA Planner</a></h2>
             <p>
                 Use this page to quickly convert Kopernicus' configuration files (.cfg) of solar systems to the `bodies.yml`
-                file used by the MGA planner tool.
+                file used by MGA planner.
             </p>
             <p>
-                Select all .cfg files describing the solar system's bodies <em>only</em>, including the sun.
+                Select all .cfg files describing the solar system's bodies <em>only</em>.
+                Check the "Combine with stock" checkbox if the solar system is an extension to the stock one: missing configuration
+                files for stock bodies will be added automatically.
             <p>
-                Follow then <strong><a href="https://github.com/Krafpy/KSP-MGA-Planner#solar-systems-support">these steps</a></strong> to
-                add the new solar system to the tool by contributing to the repository.
+                Follow then <strong><a href="https://github.com/Krafpy/KSP-MGA-Planner#solar-systems-support">these steps</a></strong>
+                to add the new solar system to the tool by contributing to the repository.
             </p>
-            <div id="inputs">
-                <input id="files-input" type="file" multiple>
-                <div id="btns-div">
+            <div id="controls">
+                <div id="inputs">
+                    <input id="files-input" type="file" multiple>
+                    <div id="checkbox-container">
+                        <input id="combine-checkbox" name="combine-checkbox" type="checkbox">
+                        <label for="combine-checkbox">Combine with stock</label>
+                    </div>
+                </div>
+                <div id="buttons">
                     <button id="convert-btn">Convert</button>
                     <button id="download-btn">Download</button>
                 </div>
             </div>
+
             <textarea name="log-box" id="log-box" rows="7" readonly></textarea>
         </section>
     </div>

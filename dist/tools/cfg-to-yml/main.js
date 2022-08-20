@@ -1,5 +1,5 @@
 import { loadBodiesData } from "../../main/utilities/data.js";
-import { orderOrbitingBodies, parseToBodyConfig, parseToSunConfig, recomputeSOIs } from "./body-data.js";
+import { completeBodytoUnorderedData, orderOrbitingBodies, parseToBodyConfig, parseToSunConfig, recomputeSOIs } from "./body-data.js";
 import { parseConfigNodes } from "./cfg-parser.js";
 import { dumpBodyToYaml, dumpSunToYaml, joinYamlBlocks } from "./dump.js";
 import { readFilesFromInput } from "./file-reader.js";
@@ -16,6 +16,7 @@ async function main() {
     const convertBtn = document.getElementById("convert-btn");
     const downloadBtn = document.getElementById("download-btn");
     const filesInput = document.getElementById("files-input");
+    const combineChkBox = document.getElementById("combine-checkbox");
     const convert = async () => {
         var _a;
         if (!((_a = filesInput.files) === null || _a === void 0 ? void 0 : _a.length))
@@ -30,12 +31,18 @@ async function main() {
             configs.push(parseConfigNodes(content));
         }
         const sunConfig = configs.find(c => { var _a; return ((_a = c.Orbit) === null || _a === void 0 ? void 0 : _a.referenceBody) === undefined; });
-        if (sunConfig === undefined) {
-            throw new Error("Sun configuration not found.");
+        let sun;
+        if (sunConfig !== undefined) {
+            const unorderedSun = parseToSunConfig(sunConfig, template);
+            sun = { id: 0, ...unorderedSun };
         }
-        const unorderedSun = parseToSunConfig(sunConfig, template);
-        const sun = { id: 0, ...unorderedSun };
-        TextareaLogger.log(`Ordering...`);
+        else {
+            if (!combineChkBox.checked) {
+                throw new Error("Sun configuration not found.");
+            }
+            TextareaLogger.log("Using stock Sun");
+            sun = template.get("Sun");
+        }
         const orbitingUnordered = [];
         for (const config of configs) {
             if (config.Orbit) {
@@ -43,6 +50,10 @@ async function main() {
                 orbitingUnordered.push(orbiting);
             }
         }
+        if (combineChkBox.checked) {
+            completeWithStock(orbitingUnordered, stockBodies.bodies, sun.name);
+        }
+        TextareaLogger.log(`Ordering...`);
         const orbiting = orderOrbitingBodies(orbitingUnordered, sun.name);
         TextareaLogger.log("Recomputing SOIs...");
         recomputeSOIs(orbiting, sun);
@@ -50,13 +61,33 @@ async function main() {
         const sunYml = dumpSunToYaml(sun);
         const orbitingYml = orbiting.map(body => dumpBodyToYaml(body));
         const yml = joinYamlBlocks([sunYml, ...orbitingYml]);
-        TextareaLogger.log(`\nSuccessfully converted solar system data.`);
         downloadBtn.onclick = () => download("bodies.yml", yml);
+        TextareaLogger.log(`\nSuccessfully converted solar system data.`);
         TextareaLogger.log(`Click to download \`bodies.yml\``);
     };
     convertBtn.onclick = () => {
         convert().catch(reason => TextareaLogger.error(reason));
     };
+}
+function completeWithStock(unorderedOrbiting, stockOrbiting, sunName) {
+    const definedOrbiting = new Set();
+    for (const { data } of unorderedOrbiting) {
+        definedOrbiting.add(data.name);
+    }
+    for (const body of stockOrbiting) {
+        if (definedOrbiting.has(body.name))
+            continue;
+        TextareaLogger.log(`Using stock ${body.name}`);
+        let referenceBody = sunName;
+        if (body.orbiting != 0) {
+            const idx = body.orbiting - 1;
+            referenceBody = stockOrbiting[idx].name;
+        }
+        unorderedOrbiting.push({
+            referenceBody,
+            data: completeBodytoUnorderedData(body)
+        });
+    }
 }
 function download(filename, text) {
     const element = document.createElement('a');

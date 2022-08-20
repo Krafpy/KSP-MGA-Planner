@@ -76,6 +76,27 @@ export function parseToBodyConfig(bodyConfig: any, templateBodies: Map<string, I
     };
 }
 
+export function completeBodytoUnorderedData(body: IOrbitingBody): IOrbitingBody_Unordered {
+    return {
+        name: body.name,
+        radius: body.radius,
+        mass: body.mass,
+        stdGravParam: body.stdGravParam,
+        soi: body.soi,
+        orbit:
+        {
+            semiMajorAxis: body.orbit.semiMajorAxis,
+            eccentricity: body.orbit.eccentricity,
+            inclination: body.orbit.inclination,
+            argOfPeriapsis: body.orbit.argOfPeriapsis,
+            ascNodeLongitude: body.orbit.ascNodeLongitude,
+        },
+        meanAnomaly0: body.meanAnomaly0,
+        epoch: body.epoch,
+        color: body.color,
+    };
+}
+
 function deduceStdGravParamAndMass(bodyConfig: any, radius: number, template?: ICelestialBody){
     let stdGravParam = 0, mass = 0;
 
@@ -93,7 +114,6 @@ function deduceStdGravParamAndMass(bodyConfig: any, radius: number, template?: I
     } else {
         stdGravParam = template?.stdGravParam as number;
     }
-
     return {stdGravParam, mass: mass != 0 ? mass : stdGravParam / GRAVITY_CONSTANT};
 }
 

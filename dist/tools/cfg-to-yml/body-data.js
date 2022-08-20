@@ -58,6 +58,25 @@ export function parseToBodyConfig(bodyConfig, templateBodies) {
         },
     };
 }
+export function completeBodytoUnorderedData(body) {
+    return {
+        name: body.name,
+        radius: body.radius,
+        mass: body.mass,
+        stdGravParam: body.stdGravParam,
+        soi: body.soi,
+        orbit: {
+            semiMajorAxis: body.orbit.semiMajorAxis,
+            eccentricity: body.orbit.eccentricity,
+            inclination: body.orbit.inclination,
+            argOfPeriapsis: body.orbit.argOfPeriapsis,
+            ascNodeLongitude: body.orbit.ascNodeLongitude,
+        },
+        meanAnomaly0: body.meanAnomaly0,
+        epoch: body.epoch,
+        color: body.color,
+    };
+}
 function deduceStdGravParamAndMass(bodyConfig, radius, template) {
     let stdGravParam = 0, mass = 0;
     if (bodyConfig.Properties.gravParameter !== undefined) {
