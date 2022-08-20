@@ -351,18 +351,19 @@ type SolarSystemData = {
 // Types for tools/cfg-to-yml
 
 interface ICelestialBody_Unordered {
-    readonly name:          string;
-    readonly radius:        number;
-    readonly mass:          number;
-    readonly stdGravParam:  number;
-    readonly soi:           number;
-    readonly color:         number;
+    name:           string;
+    radius:         number;
+    mass:           number;
+    atmosphereAlt?: number;
+    stdGravParam:   number;
+    soi:            number;
+    color:          number;
 };
 
 interface IOrbitingBody_Unordered extends ICelestialBody_Unordered {
-    readonly meanAnomaly0:  number;
-    readonly epoch:         number;
-    readonly orbit:         IOrbit;
+    meanAnomaly0:  number;
+    epoch:         number;
+    orbit:         IOrbit;
 };
 
 type ParsedUnorderedSunData = ICelestialBody_Unordered;

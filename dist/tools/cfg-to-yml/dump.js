@@ -3,6 +3,7 @@ export function dumpBodyToYaml(body) {
         `  id:                 ${body.id}\n` +
         `  name:               ${body.name}\n` +
         `  radius:             ${body.radius}\n` +
+        (body.atmosphereAlt ? `  atmosphereAlt:      ${body.atmosphereAlt}\n` : "") +
         `  mass:               ${body.mass}\n` +
         `  stdGravParam:       ${body.stdGravParam}\n` +
         `  soi:                ${body.soi}\n` +
@@ -21,6 +22,7 @@ export function dumpBodyToYaml(body) {
 export function dumpSunToYaml(sun) {
     const text = `- !!map\n` +
         `  id:                 ${sun.id}\n` +
+        (sun.atmosphereAlt ? `  atmosphereAlt:      ${sun.atmosphereAlt}\n` : "") +
         `  name:               ${sun.name}\n` +
         `  radius:             ${sun.radius}\n` +
         `  mass:               ${sun.mass}\n` +
