@@ -1,11 +1,12 @@
 interface ICelestialBody {
-    readonly id:            number;
-    readonly name:          string;
-    readonly radius:        number;
-    readonly mass:          number;
-    readonly stdGravParam:  number;
-    readonly soi:           number;
-    readonly color:         number;
+    readonly id:             number;
+    readonly name:           string;
+    readonly radius:         number;
+    readonly atmosphereAlt?: number;
+    readonly mass:           number;
+    readonly stdGravParam:   number;
+    readonly soi:            number;
+    readonly color:          number;
 }
 
 interface IOrbitingBody extends ICelestialBody {
@@ -24,7 +25,6 @@ interface IOrbit {
     readonly inclination:       number;
     readonly argOfPeriapsis:    number;
     readonly ascNodeLongitude:  number;
-    //readonly sideralPeriod?:    number;
     readonly orbitalParam?:     number;
     readonly meanMotion?:       number;
 }

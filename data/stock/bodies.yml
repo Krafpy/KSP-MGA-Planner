@@ -4,6 +4,7 @@
 
 #             Units
 # radius:             m
+# atmosphereAlt:      m - optional
 # mass:               kg
 # stdGravParam:       m^3/s^2
 # soi:                m
@@ -42,6 +43,7 @@
   id:                 0
   name:               Sun
   radius:             261_600_000
+  atmosphereAlt:      600_000
   mass:               1.7565459e+28
   stdGravParam:       1.1723328e+18
   soi:                .inf
@@ -71,6 +73,7 @@
   id:                 2
   name:               Eve
   radius:             700_000
+  atmosphereAlt:      90_000
   mass:               1.2243980e+23
   stdGravParam:       8.1717302e+12
   soi:                85_109_365
@@ -111,6 +114,7 @@
   id:                 4
   name:               Kerbin
   radius:             600_000
+  atmosphereAlt:      70_000
   mass:               5.2915158e+22
   stdGravParam:       3.5316000e+12
   soi:                84_159_286
@@ -171,6 +175,7 @@
   id:                 7
   name:               Duna
   radius:             320_000
+  atmosphereAlt:      50_000
   mass:               4.5154270e+21
   stdGravParam:       3.0136321e+11
   soi:                47_921_949
@@ -231,6 +236,7 @@
   id:                 10
   name:               Jool
   radius:             6_000_000
+  atmosphereAlt:      200_000
   mass:               4.2332127e+24
   stdGravParam:       2.8252800e+14
   soi:                2.4559852e+9
@@ -251,6 +257,7 @@
   id:                 11
   name:               Laythe
   radius:             500_000
+  atmosphereAlt:      50_000
   mass:               2.9397311e+22
   stdGravParam:       1.9620000e+12
   soi:                3_723_645.8
