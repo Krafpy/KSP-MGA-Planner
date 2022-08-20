@@ -1,8 +1,11 @@
 import { parseColor } from "./cfg-parser.js";
 const GRAVITY_CONSTANT = 6.67430e-11;
 const EARTH_ACCELERATION = 9.80665;
-function choose(a, b) {
-    return a === undefined ? b : a;
+function choose(...args) {
+    for (const arg of args) {
+        if (arg !== undefined)
+            return arg;
+    }
 }
 export function parseToSunConfig(sunConfig, templateBodies) {
     var _a;
@@ -11,10 +14,12 @@ export function parseToSunConfig(sunConfig, templateBodies) {
     const radius = parseFloat(choose(sunConfig.Properties.radius, template === null || template === void 0 ? void 0 : template.radius));
     const soi = Infinity;
     const color = 0xffff00;
+    const atmosphereAlt = deduceAtmosphereAltitude(sunConfig, template);
     const { stdGravParam, mass } = deduceStdGravParamAndMass(sunConfig, radius, template);
     return {
         name,
         radius,
+        atmosphereAlt,
         mass,
         stdGravParam,
         soi,
@@ -27,6 +32,7 @@ export function parseToBodyConfig(bodyConfig, templateBodies) {
     const name = bodyConfig.name;
     const radius = parseFloat(choose(bodyConfig.Properties.radius, template === null || template === void 0 ? void 0 : template.radius));
     const soi = parseFloat(bodyConfig.Properties.sphereOfInfluence || undefined);
+    const atmosphereAlt = deduceAtmosphereAltitude(bodyConfig, template);
     const { stdGravParam, mass } = deduceStdGravParamAndMass(bodyConfig, radius, template);
     const semiMajorAxis = parseFloat(choose(bodyConfig.Orbit.semiMajorAxis, template === null || template === void 0 ? void 0 : template.orbit.semiMajorAxis));
     const eccentricity = parseFloat(choose(bodyConfig.Orbit.eccentricity, template === null || template === void 0 ? void 0 : template.orbit.eccentricity));
@@ -42,6 +48,7 @@ export function parseToBodyConfig(bodyConfig, templateBodies) {
         data: {
             name,
             radius,
+            atmosphereAlt,
             mass,
             stdGravParam,
             soi,
@@ -76,6 +83,11 @@ export function completeBodytoUnorderedData(body) {
         epoch: body.epoch,
         color: body.color,
     };
+}
+function deduceAtmosphereAltitude(config, template) {
+    if (!config.Atmosphere)
+        return;
+    return choose(config.Atmosphere.atmosphereDepth, config.Atmosphere.altitude, config.Atmosphere.maxAltitude, template === null || template === void 0 ? void 0 : template.atmosphereAlt);
 }
 function deduceStdGravParamAndMass(bodyConfig, radius, template) {
     let stdGravParam = 0, mass = 0;

@@ -6,6 +6,7 @@ export function dumpBodyToYaml(body: IOrbitingBody){
     `  id:                 ${body.id}\n` +
     `  name:               ${body.name}\n` +
     `  radius:             ${body.radius}\n` +
+    (body.atmosphereAlt ? `  atmosphereAlt:      ${body.atmosphereAlt}\n` : "") +
     `  mass:               ${body.mass}\n` +
     `  stdGravParam:       ${body.stdGravParam}\n` +
     `  soi:                ${body.soi}\n` +
@@ -29,6 +30,7 @@ export function dumpSunToYaml(sun: ICelestialBody){
     `  id:                 ${sun.id}\n` +
     `  name:               ${sun.name}\n` +
     `  radius:             ${sun.radius}\n` +
+    (sun.atmosphereAlt ? `  atmosphereAlt:      ${sun.atmosphereAlt}\n` : "") +
     `  mass:               ${sun.mass}\n` +
     `  stdGravParam:       ${sun.stdGravParam}\n` +
     `  soi:                .inf\n` +

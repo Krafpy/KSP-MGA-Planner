@@ -5,6 +5,7 @@ export class CelestialBody {
         this.id = data.id;
         this.name = data.name;
         this.radius = data.radius;
+        this.atmosphereAlt = data.atmosphereAlt;
         this.mass = data.mass;
         this.stdGravParam = data.stdGravParam;
         this.soi = data.soi;
@@ -15,6 +16,7 @@ export class CelestialBody {
             id: this.id,
             name: this.name,
             radius: this.radius,
+            atmosphereAlt: this.atmosphereAlt,
             mass: this.mass,
             stdGravParam: this.stdGravParam,
             soi: this.soi,

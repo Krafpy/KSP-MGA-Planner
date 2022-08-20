@@ -422,7 +422,9 @@ class TrajectoryCalculator {
         // vector
         const t_periDir = incomingVelDir;
         const {fbRadiusMaxScale} = this.config;
-        const periRadius = lerp(body.radius, fbRadiusMaxScale * body.radius, flybyInfo.periRadiParam);
+        const minPeriAlt = body.radius + (body.atmosphereAlt || 0);
+        const maxPeriAlt = Math.max(minPeriAlt, fbRadiusMaxScale * body.radius);
+        const periRadius = lerp(minPeriAlt, maxPeriAlt, flybyInfo.periRadiParam);
         const t_periPos = mult3(t_periDir, periRadius);
 
         // Compute the temporary periapsis velocity, at this point on the orbit,

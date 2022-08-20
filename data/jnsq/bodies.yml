@@ -4,6 +4,7 @@
   id:                 0
   name:               Sun
   radius:             175750000
+  atmosphereAlt:      800000
   mass:               1.2571450461925315e+29
   stdGravParam:       8390563181802812000
   soi:                .inf
@@ -31,6 +32,7 @@
   id:                 2
   name:               Eve
   radius:             2050000
+  atmosphereAlt:      60000
   mass:               8.644715591897279e+23
   stdGravParam:       57697425275000
   soi:                233567240.5801821
@@ -67,6 +69,7 @@
   id:                 4
   name:               Kerbin
   radius:             1600000
+  atmosphereAlt:      80000
   mass:               3.761446743478717e+23
   stdGravParam:       25105024000000
   soi:                231587977.95636657
@@ -121,6 +124,7 @@
   id:                 7
   name:               Duna
   radius:             800000
+  atmosphereAlt:      70000
   mass:               3.197229731956909e+22
   stdGravParam:       2133927039999.9998
   soi:                131664484.71863492
@@ -211,6 +215,7 @@
   id:                 12
   name:               Jool
   radius:             14000000
+  atmosphereAlt:      500000
   mass:               2.9950519694949285e+25
   stdGravParam:       1998987536000000
   soi:                6745648454.989384
@@ -229,6 +234,7 @@
   id:                 13
   name:               Laythe
   radius:             1100000
+  atmosphereAlt:      75000
   mass:               1.0311653611614702e+23
   stdGravParam:       6882306970000
   soi:                9067174.004441231
@@ -265,6 +271,7 @@
   id:                 15
   name:               Tylo
   radius:             900000
+  atmosphereAlt:      85000
   mass:               3.808464827772201e+22
   stdGravParam:       2541883680000
   soi:                20348468.910313632
@@ -319,6 +326,7 @@
   id:                 18
   name:               Lindor
   radius:             8000000
+  atmosphereAlt:      420000
   mass:               8.839399847174986e+24
   stdGravParam:       589968064000000
   soi:                7845120421.877267
@@ -373,6 +381,7 @@
   id:                 21
   name:               Huygen
   radius:             670000
+  atmosphereAlt:      180000
   mass:               9.893633455942946e+21
   stdGravParam:       660330777750
   soi:                12375834.324228296
@@ -391,6 +400,7 @@
   id:                 22
   name:               Riga
   radius:             750000
+  atmosphereAlt:      90000
   mass:               1.4876815733485161e+22
   stdGravParam:       992923312500
   soi:                24039593.344883334
@@ -427,6 +437,7 @@
   id:                 24
   name:               Eeloo
   radius:             600000
+  atmosphereAlt:      75000
   mass:               7.934301724525419e+21
   stdGravParam:       529559099999.99994
   soi:                621195295.7160125
@@ -499,6 +510,7 @@
   id:                 28
   name:               Nara
   radius:             3600000
+  atmosphereAlt:      170000
   mass:               1.9042324138861007e+24
   stdGravParam:       127094184000000
   soi:                20213316972.17062

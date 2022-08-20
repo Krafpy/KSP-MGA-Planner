@@ -272,7 +272,9 @@ class TrajectoryCalculator {
         const normal = rotate3(t_normal, incomingVelDir, normAngle);
         const t_periDir = incomingVelDir;
         const { fbRadiusMaxScale } = this.config;
-        const periRadius = lerp(body.radius, fbRadiusMaxScale * body.radius, flybyInfo.periRadiParam);
+        const minPeriAlt = body.radius + (body.atmosphereAlt || 0);
+        const maxPeriAlt = Math.max(minPeriAlt, fbRadiusMaxScale * body.radius);
+        const periRadius = lerp(minPeriAlt, maxPeriAlt, flybyInfo.periRadiParam);
         const t_periPos = mult3(t_periDir, periRadius);
         const periVelMag = Physics3D.deduceVelocityAtRadius(body, body.soi, incomingVelMag, periRadius);
         const t_periVelDir = rotate3(t_periDir, normal, HALF_PI);

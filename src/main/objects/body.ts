@@ -1,19 +1,21 @@
 import { Orbit } from "./orbit.js";
 
 export class CelestialBody implements ICelestialBody {
-    readonly id!:           number;
-    readonly name!:         string;
-    readonly radius!:       number;
-    readonly mass!:         number;
-    readonly stdGravParam!: number;
-    readonly soi!:          number;
-    readonly color!:        number;
-    readonly orbiters:      OrbitingBody[] = [];
+    readonly id!:            number;
+    readonly name!:          string;
+    readonly radius!:        number;
+    readonly atmosphereAlt?: number;
+    readonly mass!:          number;
+    readonly stdGravParam!:  number;
+    readonly soi!:           number;
+    readonly color!:         number;
+    readonly orbiters:       OrbitingBody[] = [];
 
     constructor(data: ICelestialBody){
         this.id             = data.id;
         this.name           = data.name;
         this.radius         = data.radius;
+        this.atmosphereAlt  = data.atmosphereAlt;
         this.mass           = data.mass;
         this.stdGravParam   = data.stdGravParam;
         this.soi            = data.soi;
@@ -25,6 +27,7 @@ export class CelestialBody implements ICelestialBody {
             id:             this.id,
             name:           this.name,
             radius:         this.radius,
+            atmosphereAlt:  this.atmosphereAlt,
             mass:           this.mass,
             stdGravParam:   this.stdGravParam,
             soi:            this.soi,

@@ -3,8 +3,10 @@ import { parseColor } from "./cfg-parser.js";
 const GRAVITY_CONSTANT = 6.67430e-11;
 const EARTH_ACCELERATION = 9.80665;
 
-function choose(a: any, b: any){
-    return a === undefined ? b : a;
+function choose(...args: any[]){
+    for(const arg of args){
+        if(arg !== undefined) return arg;
+    }
 }
 
 export function parseToSunConfig(sunConfig: any, templateBodies: Map<string, ICelestialBody | IOrbitingBody>)
@@ -16,11 +18,14 @@ export function parseToSunConfig(sunConfig: any, templateBodies: Map<string, ICe
     const soi    = Infinity;
     const color  = 0xffff00;
 
+    const atmosphereAlt = deduceAtmosphereAltitude(sunConfig, template);
+
     const {stdGravParam, mass} = deduceStdGravParamAndMass(sunConfig, radius, template);
 
     return {
         name,
         radius,
+        atmosphereAlt,
         mass,
         stdGravParam,
         soi,
@@ -35,6 +40,8 @@ export function parseToBodyConfig(bodyConfig: any, templateBodies: Map<string, I
     const name   = bodyConfig.name;
     const radius = parseFloat(choose(bodyConfig.Properties.radius, template?.radius));
     const soi    = parseFloat(bodyConfig.Properties.sphereOfInfluence || undefined);
+    
+    const atmosphereAlt = deduceAtmosphereAltitude(bodyConfig, template);
     
     const {stdGravParam, mass} = deduceStdGravParamAndMass(bodyConfig, radius, template);
     
@@ -58,6 +65,7 @@ export function parseToBodyConfig(bodyConfig: any, templateBodies: Map<string, I
         {
             name,
             radius,
+            atmosphereAlt,
             mass,
             stdGravParam,
             soi,
@@ -95,6 +103,16 @@ export function completeBodytoUnorderedData(body: IOrbitingBody): IOrbitingBody_
         epoch: body.epoch,
         color: body.color,
     };
+}
+
+function deduceAtmosphereAltitude(config: any, template?: ICelestialBody){
+    if(!config.Atmosphere) return;
+    return choose(
+        config.Atmosphere.atmosphereDepth,
+        config.Atmosphere.altitude,
+        config.Atmosphere.maxAltitude,
+        template?.atmosphereAlt
+    );
 }
 
 function deduceStdGravParamAndMass(bodyConfig: any, radius: number, template?: ICelestialBody){
