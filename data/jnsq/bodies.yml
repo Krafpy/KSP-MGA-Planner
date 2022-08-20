@@ -2,9 +2,9 @@
 
 - !!map
   id:                 0
-  atmosphereAlt:      800000
   name:               Sun
   radius:             175750000
+  atmosphereAlt:      800000
   mass:               1.2571450461925315e+29
   stdGravParam:       8390563181802812000
   soi:                .inf
