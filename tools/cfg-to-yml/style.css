@@ -24,6 +24,12 @@ a:hover
     color: rgb(116, 190, 240);
 }
 
+a:visited
+{
+    color: rgb(161, 70, 221);
+}
+
+
 #container
 {
     display: inline-block;
