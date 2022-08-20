@@ -1,19 +1,56 @@
+body
+{
+    font-family: "Helvetica Neue", Helvetica;
+    /*background-color: #222425;*/
+    background: #1c1e1f;
+    color: rgb(200, 195, 188);
+    display: flex;
+    align-items: center;
+}
+
+p
+{
+    font-size: 0.8em;
+}
+
+a:link
+{
+    color: rgb(86, 169, 224);
+    text-decoration: none;
+}
+
+a:hover
+{
+    color: rgb(116, 190, 240);
+}
+
 #container
 {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50px;
     width: 570px;
 }
 
-#inputs
+#controls
 {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-}
 
-#files-input
-{
     margin-top: 30px;
     margin-bottom: 30px;
+}
+
+#combine-checkbox
+{
+    margin-top: 20px;
+}
+
+#checkbox-container label
+{
+    font-size: 0.8em;
 }
 
 #log-box
@@ -39,8 +76,3 @@ button
 {
     width: 6em;
 }
-
-/*p, button, input
-{
-    font-size: 0.85em;
-}*/

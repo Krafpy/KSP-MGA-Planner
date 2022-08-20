@@ -7,8 +7,8 @@
 # mass:               kg
 # stdGravParam:       m^3/s^2
 # soi:                m
-# apoapsis:           m
-# periapsis:          m
+# apoapsis:           m - optional
+# periapsis:          m - optional
 # eccentricity:       None
 # inclination:        ° (degrees)
 # argOfPeriapsis:     °
@@ -19,6 +19,10 @@
 
 # EDIT NOTES FOR CUSTOM SOLAR SYSTEMS
 
+# If your solar system uses Kopernicus' configuration files, you can directly convert them
+# into a `bodies.yml` file on this page : https://krafpy.github.io/KSP-MGA-Planner/tools/cfg-to-yml/
+
+# For custom solar systems, the following rules apply to all `bodies.yml`:
 # - Follow the exact same format (names, indentations) as used in this file
 # - Numerical data must follow the units described above
 # - Each body has a unique ID, it must be an integer between 0 and N-1, where N is the number of bodies 
