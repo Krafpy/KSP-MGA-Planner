@@ -25,6 +25,10 @@ export class TrajectorySolver {
         this._workerPool.initialize({system: this.system.data, config: this.config});
     }
 
+    /**
+     * Adds delta-V data to the evolution plot.
+     * @param iteration The iteration number of the new plot sample
+     */
     private _updatePlot(iteration: number){
         let mean = 0;
         for(const dv of this._deltaVs)
@@ -34,10 +38,18 @@ export class TrajectorySolver {
         this.plot.addIterationData(iteration, mean, best);
     }
 
+    /**
+     * Cancels trajectory search.
+     */
     public cancel(){
         if(this._running) this._cancelled = true;
     }
 
+    /**
+     * Runs the trajectory search given the settings and flyby sequence.
+     * @param sequence The sequence of flyby bodies
+     * @param settings The user settings for the trajectory
+     */
     public async searchOptimalTrajectory(sequence: FlybySequence, settings: TrajectoryUserSettings){
         this._running = true;
         
@@ -64,10 +76,20 @@ export class TrajectorySolver {
         this._running = false;
     }
 
+    /**
+     * Passes settings data to the trajectory search workers.
+     * @param sequence The flyby sequence
+     * @param settings The user settings for the trajectory
+     * @returns A promise to wait for the data to be sent
+     */
     private async _passSettingsData(sequence: FlybySequence, settings: TrajectoryUserSettings){
         return this._workerPool.passData({sequence: sequence.ids, settings});
     }
 
+    /**
+     * Computes the amount of parallel workers to be used and defines the beginning
+     * and end of each chunk of the evolved population.
+     */
     private _calculatePopulationChunks(){
         const {splitLimit} = this.config.trajectorySearch;
         const numChunks = this._workerPool.optimizeUsedWorkersCount(this.popSize, splitLimit);
@@ -86,6 +108,9 @@ export class TrajectorySolver {
         this._chunkIndices = chunkIndices;
     }
 
+    /**
+     * Creates the start population chunks in the workers, and merges them.
+     */
     private async _createStartPopulation(){
         const inputs = [];
         for(let i = 0; i < this._numChunks; i++) {
@@ -101,6 +126,10 @@ export class TrajectorySolver {
         this._mergeResultsChunks(results);
     }
 
+    /**
+     * Runs the trajectory search workers for one evolution iteration, generating
+     * a new child population.
+     */
     private async _generateNextPopulation(){
         const inputs = [];
         for(let i = 0; i < this._numChunks; i++) {
@@ -113,11 +142,20 @@ export class TrajectorySolver {
         this._mergeResultsChunks(results);
     }
 
+    /**
+     * Computes the size of the population for the given sequence length.
+     * @param sequence The flyby sequence
+     */
     private _calculatePopulationSize(sequence: FlybySequence){
         const {popSizeDimScale} = this.config.trajectorySearch;
         this.popSize = popSizeDimScale * sequence.length;
     }
 
+    /**
+     * Merges the chunked results from the workers (population, fitnesses, delta-V...)
+     * and merges them.
+     * @param results Chunked results of the last generation returned by the workers.
+     */
     private _mergeResultsChunks(results: GenerationResult[]){
         const popChunks: Agent[][]  = [];
         const fitChunks: number[][] = [];
