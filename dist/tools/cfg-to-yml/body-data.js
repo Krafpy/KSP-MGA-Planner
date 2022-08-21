@@ -69,6 +69,7 @@ export function completeBodytoUnorderedData(body) {
     return {
         name: body.name,
         radius: body.radius,
+        atmosphereAlt: body.atmosphereAlt,
         mass: body.mass,
         stdGravParam: body.stdGravParam,
         soi: body.soi,

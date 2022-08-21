@@ -88,6 +88,7 @@ export function completeBodytoUnorderedData(body: IOrbitingBody): IOrbitingBody_
     return {
         name: body.name,
         radius: body.radius,
+        atmosphereAlt: body.atmosphereAlt,
         mass: body.mass,
         stdGravParam: body.stdGravParam,
         soi: body.soi,
