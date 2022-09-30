@@ -6,6 +6,8 @@
 - name: JNSQ
   folderName: jnsq
 
+- name: RSS
+  folderName: rss
 # Template:
 # - name: New Solar System
 #   folderName: new-solar-system
