@@ -206,12 +206,13 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         const getSpan = (id: string) =>  document.getElementById(id) as HTMLSpanElement;
         const getDiv =  (id: string) =>  document.getElementById(id) as HTMLDivElement;
 
-        const resultItems = {
+        const resultItems: ResultPannelItems = {
             dateSpan:         getSpan("maneuvre-date"),
             progradeDVSpan:   getSpan("prograde-delta-v"),
             normalDVSpan:     getSpan("normal-delta-v"),
             radialDVSpan:     getSpan("radial-delta-v"),
-            depDateSpan:      getSpan("result-departure-date") ,
+            depDateSpan:      getSpan("result-departure-date"),
+            arrDateSpan:      getSpan("result-arrival-date"),
             totalDVSpan:      getSpan("result-total-delta-v"),
             maneuvreNumber:   getSpan("maneuvre-number"),
             flybyNumberSpan:  getSpan("flyby-number"),
@@ -317,13 +318,21 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
     
             resultItems.maneuvreNumber.innerHTML = "--";
             resultItems.endDateSpan.innerHTML = "--";
+            resultItems.startDateSpan.innerHTML = "--";
             resultItems.dateSpan.innerHTML = "--";
             resultItems.normalDVSpan.innerHTML = "--";
             resultItems.radialDVSpan.innerHTML = "--";
             resultItems.depDateSpan.innerHTML = "--";
+            resultItems.arrDateSpan.innerHTML = "--";
             resultItems.totalDVSpan.innerHTML = "--";
             resultItems.periAltitudeSpan.innerHTML = "--";
             resultItems.inclinationSpan.innerHTML = "--";
+
+            resultItems.endDateSpan.onclick = null;
+            resultItems.startDateSpan.onclick = null;
+            resultItems.dateSpan.onclick = null;
+            resultItems.depDateSpan.onclick = null;
+            resultItems.arrDateSpan.onclick = null;
     
             for(let i = scene.children.length - 1; i >= 0; i--){
                 scene.remove(scene.children[i]);

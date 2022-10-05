@@ -245,11 +245,14 @@ export class Trajectory {
      */
     public fillResultControls(resultItems: ResultPannelItems, systemTime: TimeSelector, controls: CameraController){
         const depDate = new KSPTime(this.steps[0].dateOfStart, this.config.time);
+        const arrDate = new KSPTime(this.steps[this.steps.length-1].dateOfStart, this.config.time);
 
         // total delta-V
         resultItems.totalDVSpan.innerHTML = this._totalDeltaV.toFixed(1);
         // departure date
         resultItems.depDateSpan.innerHTML = depDate.stringYDHMS("hms", "ut");
+        // arrival date
+        resultItems.arrDateSpan.innerHTML = arrDate.stringYDHMS("hms", "ut");
 
         const onDateClick = (date: number) => () => {
             this.system.date = date;
@@ -260,6 +263,7 @@ export class Trajectory {
         };
         // set the system time to the departure date time when the span is clicked
         resultItems.depDateSpan.onclick = onDateClick(depDate.dateSeconds);
+        resultItems.arrDateSpan.onclick = onDateClick(arrDate.dateSeconds);
 
         // configure the step slider
         const {stepSlider} = resultItems;

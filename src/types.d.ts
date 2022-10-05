@@ -310,6 +310,7 @@ type ResultPannelItems = {
     normalDVSpan:     HTMLSpanElement,
     radialDVSpan:     HTMLSpanElement,
     depDateSpan:      HTMLSpanElement,
+    arrDateSpan:      HTMLSpanElement,
     totalDVSpan:      HTMLSpanElement,
     maneuvreNumber:   HTMLSpanElement,
 
