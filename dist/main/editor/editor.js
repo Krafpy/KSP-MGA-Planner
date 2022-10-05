@@ -239,13 +239,20 @@ export async function initEditorWithSystem(systems, systemIndex) {
             sequenceSelector.clear();
             resultItems.maneuvreNumber.innerHTML = "--";
             resultItems.endDateSpan.innerHTML = "--";
+            resultItems.startDateSpan.innerHTML = "--";
             resultItems.dateSpan.innerHTML = "--";
             resultItems.normalDVSpan.innerHTML = "--";
             resultItems.radialDVSpan.innerHTML = "--";
             resultItems.depDateSpan.innerHTML = "--";
+            resultItems.arrDateSpan.innerHTML = "--";
             resultItems.totalDVSpan.innerHTML = "--";
             resultItems.periAltitudeSpan.innerHTML = "--";
             resultItems.inclinationSpan.innerHTML = "--";
+            resultItems.endDateSpan.onclick = null;
+            resultItems.startDateSpan.onclick = null;
+            resultItems.dateSpan.onclick = null;
+            resultItems.depDateSpan.onclick = null;
+            resultItems.arrDateSpan.onclick = null;
             for (let i = scene.children.length - 1; i >= 0; i--) {
                 scene.remove(scene.children[i]);
             }
