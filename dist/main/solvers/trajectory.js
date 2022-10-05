@@ -169,8 +169,10 @@ export class Trajectory {
     }
     fillResultControls(resultItems, systemTime, controls) {
         const depDate = new KSPTime(this.steps[0].dateOfStart, this.config.time);
+        const arrDate = new KSPTime(this.steps[this.steps.length - 1].dateOfStart, this.config.time);
         resultItems.totalDVSpan.innerHTML = this._totalDeltaV.toFixed(1);
         resultItems.depDateSpan.innerHTML = depDate.stringYDHMS("hms", "ut");
+        resultItems.arrDateSpan.innerHTML = arrDate.stringYDHMS("hms", "ut");
         const onDateClick = (date) => () => {
             this.system.date = date;
             controls.centerOnTarget();
@@ -179,6 +181,7 @@ export class Trajectory {
             this.updatePodPosition(systemTime);
         };
         resultItems.depDateSpan.onclick = onDateClick(depDate.dateSeconds);
+        resultItems.arrDateSpan.onclick = onDateClick(arrDate.dateSeconds);
         const { stepSlider } = resultItems;
         stepSlider.setMinMax(0, this.steps.length - 1);
         stepSlider.input((index) => this._displayStepsUpTo(index));

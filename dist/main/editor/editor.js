@@ -152,6 +152,7 @@ export async function initEditorWithSystem(systems, systemIndex) {
             normalDVSpan: getSpan("normal-delta-v"),
             radialDVSpan: getSpan("radial-delta-v"),
             depDateSpan: getSpan("result-departure-date"),
+            arrDateSpan: getSpan("result-arrival-date"),
             totalDVSpan: getSpan("result-total-delta-v"),
             maneuvreNumber: getSpan("maneuvre-number"),
             flybyNumberSpan: getSpan("flyby-number"),
