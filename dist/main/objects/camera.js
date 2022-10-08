@@ -6,7 +6,7 @@ export class CameraController extends THREE.OrbitControls {
         this.system = system;
         this.config = config;
         this._lastTargetPos = new THREE.Vector3();
-        this.camera.position.set(0, 0, this.config.camera.startDist);
+        this.camera.position.set(0, this.config.camera.startDist, 0);
         this.maxDistance = this.config.camera.maxDist;
         this.enableDamping = true;
         this.dampingFactor = this.config.camera.dampingFactor;

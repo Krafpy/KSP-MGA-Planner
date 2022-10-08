@@ -11,7 +11,7 @@ export class CameraController extends THREE.OrbitControls {
         public readonly config: Config
     ){
         super(camera, canvas);
-        this.camera.position.set(0, 0, this.config.camera.startDist);
+        this.camera.position.set(0, this.config.camera.startDist, 0);
 
         this.maxDistance    = this.config.camera.maxDist;
         this.enableDamping  = true;
