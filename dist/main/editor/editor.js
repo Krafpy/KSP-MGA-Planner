@@ -151,6 +151,7 @@ export async function initEditorWithSystem(systems, systemIndex) {
             progradeDVSpan: getSpan("prograde-delta-v"),
             normalDVSpan: getSpan("normal-delta-v"),
             radialDVSpan: getSpan("radial-delta-v"),
+            ejAngleSpan: getSpan("ejection-angle"),
             depDateSpan: getSpan("result-departure-date"),
             arrDateSpan: getSpan("result-arrival-date"),
             totalDVSpan: getSpan("result-total-delta-v"),
@@ -160,10 +161,10 @@ export async function initEditorWithSystem(systems, systemIndex) {
             endDateSpan: getSpan("flyby-end-date"),
             periAltitudeSpan: getSpan("flyby-periapsis-altitude"),
             inclinationSpan: getSpan("flyby-inclination"),
+            maneuverDiv: getDiv("maneuvre-details"),
+            flybyDiv: getDiv("flyby-details"),
             detailsSelector: detailsSelector,
             stepSlider: stepSlider,
-            maneuverDiv: getDiv("maneuvre-details"),
-            flybyDiv: getDiv("flyby-details")
         };
         const resetFoundTrajectory = () => {
             systemTime.input(updateSystemTime);
@@ -243,6 +244,7 @@ export async function initEditorWithSystem(systems, systemIndex) {
             resultItems.dateSpan.innerHTML = "--";
             resultItems.normalDVSpan.innerHTML = "--";
             resultItems.radialDVSpan.innerHTML = "--";
+            resultItems.ejAngleSpan.innerHTML = "--";
             resultItems.depDateSpan.innerHTML = "--";
             resultItems.arrDateSpan.innerHTML = "--";
             resultItems.totalDVSpan.innerHTML = "--";

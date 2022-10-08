@@ -203,14 +203,15 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         detailsSelector.disable();
         stepSlider.disable();
 
-        const getSpan = (id: string) =>  document.getElementById(id) as HTMLSpanElement;
-        const getDiv =  (id: string) =>  document.getElementById(id) as HTMLDivElement;
+        const getSpan = (id: string) => document.getElementById(id) as HTMLSpanElement;
+        const getDiv  = (id: string) => document.getElementById(id) as HTMLDivElement;
 
         const resultItems: ResultPannelItems = {
             dateSpan:         getSpan("maneuvre-date"),
             progradeDVSpan:   getSpan("prograde-delta-v"),
             normalDVSpan:     getSpan("normal-delta-v"),
             radialDVSpan:     getSpan("radial-delta-v"),
+            ejAngleSpan:      getSpan("ejection-angle"),
             depDateSpan:      getSpan("result-departure-date"),
             arrDateSpan:      getSpan("result-arrival-date"),
             totalDVSpan:      getSpan("result-total-delta-v"),
@@ -220,10 +221,10 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             endDateSpan:      getSpan("flyby-end-date"),
             periAltitudeSpan: getSpan("flyby-periapsis-altitude"),
             inclinationSpan:  getSpan("flyby-inclination"),
+            maneuverDiv:      getDiv("maneuvre-details"),
+            flybyDiv:         getDiv("flyby-details"),
             detailsSelector:  detailsSelector,
             stepSlider:       stepSlider,
-            maneuverDiv:      getDiv("maneuvre-details"),
-            flybyDiv:         getDiv("flyby-details")
         };
 
         const resetFoundTrajectory = () => {
@@ -322,6 +323,7 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             resultItems.dateSpan.innerHTML = "--";
             resultItems.normalDVSpan.innerHTML = "--";
             resultItems.radialDVSpan.innerHTML = "--";
+            resultItems.ejAngleSpan.innerHTML = "--";
             resultItems.depDateSpan.innerHTML = "--";
             resultItems.arrDateSpan.innerHTML = "--";
             resultItems.totalDVSpan.innerHTML = "--";

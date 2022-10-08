@@ -138,12 +138,27 @@ export class Trajectory {
                 const radialDir = progradeDir.clone();
                 radialDir.cross(normalDir);
                 const deltaV = new THREE.Vector3(maneuvre.deltaVToPrevStep.x, maneuvre.deltaVToPrevStep.y, maneuvre.deltaVToPrevStep.z);
+                let ejectAngle = undefined;
+                if (maneuvre.context.type == "ejection") {
+                    const nodePos = maneuvre.position;
+                    const body = this.system.bodyFromId(step.attractorId);
+                    const bodyNu = body.trueAnomalyAtDate(departureDate);
+                    const bodyVel = body.orbit.velocityFromTrueAnomaly(bodyNu);
+                    const u = new THREE.Vector2(nodePos.x, nodePos.z);
+                    const v = new THREE.Vector2(bodyVel.x, bodyVel.z);
+                    u.normalize();
+                    v.normalize();
+                    const cosA = Math.min(Math.max(u.dot(v), -1), 1);
+                    ejectAngle = Math.acos(cosA) * 180 / Math.PI;
+                    ejectAngle *= Math.sign(u.x * v.y - u.y * v.x);
+                }
                 const details = {
                     stepIndex: i,
                     dateMET: step.dateOfStart - departureDate,
                     progradeDV: progradeDir.dot(deltaV),
                     normalDV: normalDir.dot(deltaV),
                     radialDV: radialDir.dot(deltaV),
+                    ejectAngle: ejectAngle
                 };
                 this._maneuvres.push(details);
             }
@@ -243,6 +258,14 @@ export class Trajectory {
                 resultItems.normalDVSpan.innerHTML = details.normalDV.toFixed(1);
                 resultItems.radialDVSpan.innerHTML = details.radialDV.toFixed(1);
                 resultItems.maneuvreNumber.innerHTML = (option.origin + 1).toString();
+                const ejAngleLI = resultItems.ejAngleSpan.parentElement;
+                if (details.ejectAngle !== undefined) {
+                    ejAngleLI.hidden = false;
+                    resultItems.ejAngleSpan.innerHTML = details.ejectAngle.toFixed(1);
+                }
+                else {
+                    ejAngleLI.hidden = true;
+                }
                 const date = depDate.dateSeconds + dateEMT.dateSeconds;
                 resultItems.dateSpan.onclick = onDateClick(date);
                 resultItems.flybyDiv.hidden = true;
