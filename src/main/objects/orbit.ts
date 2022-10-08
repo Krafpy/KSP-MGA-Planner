@@ -128,6 +128,36 @@ export class Orbit implements IOrbit {
         return pos;
     }
 
+    public velocityFromTrueAnomaly(trueAnomaly: number){
+        const e = this.eccentricity;
+        const mu = this.attractor.stdGravParam;
+        const nu = trueAnomaly;
+        const a = this.semiMajorAxis;
+
+        const r = this.radius(nu);
+        const vel = new THREE.Vector3();
+
+        if(e < 1) { // Elliptical orbit
+            const v = Math.sqrt(mu * a) / r;
+            const E = 2 * Math.atan( Math.tan(nu*0.5) * Math.sqrt((1-e)/(1+e)) );
+            vel.set(-v * Math.sin(E), 0, -v * Math.sqrt(1 - e*e) * Math.cos(E));
+        } else { // Hyperbolic orbit (the case e = 1, parabolic orbit, will never be reached)
+            const v = Math.sqrt(-mu * a) / r;
+            const H = 2 * Math.atanh( Math.tan(nu*0.5) * Math.sqrt((e-1)/(e+1)) );
+            vel.set(-v * Math.sinh(H), 0, -v * Math.sqrt(e*e - 1) * Math.cosh(H));
+        }
+
+        const right = new THREE.Vector3(1, 0, 0), up = new THREE.Vector3(0, 1, 0);
+        const ascNodeDir = right.clone();
+        ascNodeDir.applyAxisAngle(up, this.ascNodeLongitude);
+
+        vel.applyAxisAngle(up, this.ascNodeLongitude);
+        vel.applyAxisAngle(up, this.argOfPeriapsis);
+        vel.applyAxisAngle(ascNodeDir, this.inclination);
+
+        return vel;
+    }
+
     /**
      * @param trueAnomaly The true anomaly
      * @returns The real radius of the orbit for the specified anomaly.

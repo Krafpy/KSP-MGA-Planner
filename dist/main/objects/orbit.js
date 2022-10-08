@@ -80,6 +80,31 @@ export class Orbit {
         pos.multiplyScalar(this.radius(trueAnomaly));
         return pos;
     }
+    velocityFromTrueAnomaly(trueAnomaly) {
+        const e = this.eccentricity;
+        const mu = this.attractor.stdGravParam;
+        const nu = trueAnomaly;
+        const a = this.semiMajorAxis;
+        const r = this.radius(nu);
+        const vel = new THREE.Vector3();
+        if (e < 1) {
+            const v = Math.sqrt(mu * a) / r;
+            const E = 2 * Math.atan(Math.tan(nu * 0.5) * Math.sqrt((1 - e) / (1 + e)));
+            vel.set(-v * Math.sin(E), 0, -v * Math.sqrt(1 - e * e) * Math.cos(E));
+        }
+        else {
+            const v = Math.sqrt(-mu * a) / r;
+            const H = 2 * Math.atanh(Math.tan(nu * 0.5) * Math.sqrt((e - 1) / (e + 1)));
+            vel.set(-v * Math.sinh(H), 0, -v * Math.sqrt(e * e - 1) * Math.cosh(H));
+        }
+        const right = new THREE.Vector3(1, 0, 0), up = new THREE.Vector3(0, 1, 0);
+        const ascNodeDir = right.clone();
+        ascNodeDir.applyAxisAngle(up, this.ascNodeLongitude);
+        vel.applyAxisAngle(up, this.ascNodeLongitude);
+        vel.applyAxisAngle(up, this.argOfPeriapsis);
+        vel.applyAxisAngle(ascNodeDir, this.inclination);
+        return vel;
+    }
     radius(trueAnomaly) {
         return this.orbitalParam / (1 + this.eccentricity * Math.cos(trueAnomaly));
     }

@@ -286,6 +286,7 @@ type ManeuvreDetails = {
     progradeDV:  number,
     normalDV:    number,
     radialDV:    number,
+    ejectAngle?: number
 };
 
 type FlybyDetails = {
@@ -309,6 +310,7 @@ type ResultPannelItems = {
     progradeDVSpan:   HTMLSpanElement,
     normalDVSpan:     HTMLSpanElement,
     radialDVSpan:     HTMLSpanElement,
+    ejAngleSpan:      HTMLSpanElement,
     depDateSpan:      HTMLSpanElement,
     arrDateSpan:      HTMLSpanElement,
     totalDVSpan:      HTMLSpanElement,

@@ -5,6 +5,7 @@ import { SolarSystem } from "../objects/system.js";
 import { KSPTime } from "../utilities/time.js";
 import { CameraController } from "../objects/camera.js";
 import { SpriteManager } from "../utilities/sprites.js";
+import { OrbitingBody } from "../objects/body.js";
 
 export class Trajectory {
     private _orbitObjects:  THREE.Object3D[] = [];
@@ -186,7 +187,8 @@ export class Trajectory {
             const {maneuvre} = step;
             if(maneuvre){
                 const orbit = this.orbits[i];
-
+            
+                // compute the maneuver delta-V vectors
                 const progradeDir = new THREE.Vector3(
                     maneuvre.progradeDir.x,
                     maneuvre.progradeDir.y,
@@ -202,12 +204,34 @@ export class Trajectory {
                     maneuvre.deltaVToPrevStep.z,
                 );
 
+                
+                // compute the ejection angle if it's the ejection maneuver
+                let ejectAngle: (undefined | number) = undefined;
+                if(maneuvre.context.type == "ejection"){
+                    const nodePos = maneuvre.position;
+
+                    const body = this.system.bodyFromId(step.attractorId) as OrbitingBody;
+                    const bodyNu = body.trueAnomalyAtDate(departureDate);
+                    const bodyVel = body.orbit.velocityFromTrueAnomaly(bodyNu);
+                    
+                    // the parking orbit is always in the xz plane
+                    const u = new THREE.Vector2(nodePos.x, nodePos.z);
+                    const v = new THREE.Vector2(bodyVel.x, bodyVel.z); // project planet velocity in xz plane
+                    u.normalize();
+                    v.normalize();
+                    
+                    const cosA = Math.min(Math.max(u.dot(v), -1), 1);
+                    ejectAngle = Math.acos(cosA) * 180 / Math.PI;
+                    ejectAngle *= Math.sign(u.x*v.y - u.y*v.x); // counter clockwise direction of the angle
+                }
+
                 const details = {
                     stepIndex:   i,
                     dateMET:     step.dateOfStart - departureDate,
                     progradeDV:  progradeDir.dot(deltaV),
                     normalDV:    normalDir.dot(deltaV),
                     radialDV:    radialDir.dot(deltaV),
+                    ejectAngle:  ejectAngle
                 };
                 this._maneuvres.push(details);
             }
@@ -342,6 +366,14 @@ export class Trajectory {
                 resultItems.normalDVSpan.innerHTML = details.normalDV.toFixed(1);
                 resultItems.radialDVSpan.innerHTML = details.radialDV.toFixed(1);
                 resultItems.maneuvreNumber.innerHTML = (option.origin + 1).toString();
+
+                const ejAngleLI = resultItems.ejAngleSpan.parentElement as HTMLLIElement;
+                if(details.ejectAngle !== undefined){
+                    ejAngleLI.hidden  = false;
+                    resultItems.ejAngleSpan.innerHTML = details.ejectAngle.toFixed(1);
+                } else {
+                    ejAngleLI.hidden  = true;
+                }
 
                 const date = depDate.dateSeconds + dateEMT.dateSeconds;
                 resultItems.dateSpan.onclick = onDateClick(date);
