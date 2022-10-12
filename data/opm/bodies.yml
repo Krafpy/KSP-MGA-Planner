@@ -304,24 +304,6 @@
 
 - !!map
   id:                 17
-  name:               Eeloo
-  radius:             210000
-  mass:               1.1149224e+21
-  stdGravParam:       74410815000
-  soi:                119082940
-  orbit:
-    semiMajorAxis:    19105978
-    eccentricity:     0.0034
-    inclination:      2.3
-    argOfPeriapsis:   260
-    ascNodeLongitude: 55
-  meanAnomaly0:       3.14
-  epoch:              0
-  orbiting:           16
-  color:              0x686a6a
-
-- !!map
-  id:                 18
   name:               Hale
   radius:             6000
   mass:               12165929310938976
@@ -339,7 +321,7 @@
   color:              0xefe68c
 
 - !!map
-  id:                 19
+  id:                 18
   name:               Ovok
   radius:             26000
   mass:               198651406139969730
@@ -355,6 +337,24 @@
   epoch:              751.7
   orbiting:           16
   color:              0xafc3dd
+
+- !!map
+  id:                 19
+  name:               Eeloo
+  radius:             210000
+  mass:               1.1149224e+21
+  stdGravParam:       74410815000
+  soi:                1159081.4292819728
+  orbit:
+    semiMajorAxis:    19105978
+    eccentricity:     0.0034
+    inclination:      2.3
+    argOfPeriapsis:   260
+    ascNodeLongitude: 55
+  meanAnomaly0:       3.14
+  epoch:              0
+  orbiting:           16
+  color:              0x686a6a
 
 - !!map
   id:                 20

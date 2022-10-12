@@ -358,24 +358,6 @@
 
 - !!map
   id:                 20
-  name:               Eeloo
-  radius:             210000
-  mass:               1.1149224e+21
-  stdGravParam:       74410815000
-  soi:                119082940
-  orbit:
-    semiMajorAxis:    218144858.574506
-    eccentricity:     0.03682044688871
-    inclination:      3
-    argOfPeriapsis:   25
-    ascNodeLongitude: 10
-  meanAnomaly0:       1
-  epoch:              0
-  orbiting:           19
-  color:              0x686a6a
-
-- !!map
-  id:                 21
   name:               Daphy
   radius:             12000
   atmosphereAlt:      2100.0
@@ -394,7 +376,7 @@
   color:              0xbfccd1
 
 - !!map
-  id:                 22
+  id:                 21
   name:               Potatus
   radius:             120000
   mass:               634744137962033500000
@@ -412,7 +394,7 @@
   color:              0xbfccd1
 
 - !!map
-  id:                 23
+  id:                 22
   name:               Fonso
   radius:             260000
   atmosphereAlt:      8500.0
@@ -429,6 +411,24 @@
   epoch:              1343.91
   orbiting:           19
   color:              0xa87c7a
+
+- !!map
+  id:                 23
+  name:               Eeloo
+  radius:             210000
+  mass:               1.1149224e+21
+  stdGravParam:       74410815000
+  soi:                8999268.709760906
+  orbit:
+    semiMajorAxis:    218144858.574506
+    eccentricity:     0.03682044688871
+    inclination:      3
+    argOfPeriapsis:   25
+    ascNodeLongitude: 10
+  meanAnomaly0:       1
+  epoch:              0
+  orbiting:           19
+  color:              0x686a6a
 
 - !!map
   id:                 24
