@@ -1,0 +1,577 @@
+- !!map
+  id:                 0
+  name:               Sun
+  radius:             261600000
+  atmosphereAlt:      600000
+  mass:               1.7565459e+28
+  stdGravParam:       1172332800000000000
+  soi:                .inf
+  color:              0xffff00
+
+- !!map
+  id:                 1
+  name:               Moho
+  radius:             250000
+  mass:               2.5263314e+21
+  stdGravParam:       168609380000
+  soi:                9646663
+  orbit:
+    semiMajorAxis:    5263138304
+    eccentricity:     0.2
+    inclination:      7
+    argOfPeriapsis:   15
+    ascNodeLongitude: 70
+  meanAnomaly0:       3.14
+  epoch:              0
+  orbiting:           0
+  color:              0xa88161
+
+- !!map
+  id:                 2
+  name:               Eve
+  radius:             700000
+  atmosphereAlt:      90000
+  mass:               1.224398e+23
+  stdGravParam:       8171730200000
+  soi:                85109365
+  orbit:
+    semiMajorAxis:    9832684544
+    eccentricity:     0.01
+    inclination:      2.1
+    argOfPeriapsis:   0
+    ascNodeLongitude: 15
+  meanAnomaly0:       3.14
+  epoch:              0
+  orbiting:           0
+  color:              0x6c20e4
+
+- !!map
+  id:                 3
+  name:               Gilly
+  radius:             13000
+  mass:               124203630000000000
+  stdGravParam:       8289449.8
+  soi:                126123.27
+  orbit:
+    semiMajorAxis:    31500000
+    eccentricity:     0.55
+    inclination:      12
+    argOfPeriapsis:   10
+    ascNodeLongitude: 80
+  meanAnomaly0:       0.9
+  epoch:              0
+  orbiting:           2
+  color:              0x6f5248
+
+- !!map
+  id:                 4
+  name:               Kerbin
+  radius:             600000
+  atmosphereAlt:      70000
+  mass:               5.2915158e+22
+  stdGravParam:       3531600000000
+  soi:                84159286
+  orbit:
+    semiMajorAxis:    13599840256
+    eccentricity:     0
+    inclination:      0
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+  meanAnomaly0:       3.14
+  epoch:              0
+  orbiting:           0
+  color:              0x8acac2
+
+- !!map
+  id:                 5
+  name:               Mun
+  radius:             200000
+  mass:               975990660000000000000
+  stdGravParam:       65138398000
+  soi:                2429559.1
+  orbit:
+    semiMajorAxis:    12000000
+    eccentricity:     0
+    inclination:      0
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+  meanAnomaly0:       1.7
+  epoch:              0
+  orbiting:           4
+  color:              0x6b6a76
+
+- !!map
+  id:                 6
+  name:               Minmus
+  radius:             60000
+  mass:               26457580000000000000
+  stdGravParam:       1765800000
+  soi:                2247428.4
+  orbit:
+    semiMajorAxis:    47000000
+    eccentricity:     0
+    inclination:      6
+    argOfPeriapsis:   38
+    ascNodeLongitude: 78
+  meanAnomaly0:       0.9
+  epoch:              0
+  orbiting:           4
+  color:              0x5b4c68
+
+- !!map
+  id:                 7
+  name:               Duna
+  radius:             320000
+  atmosphereAlt:      50000
+  mass:               4.515427e+21
+  stdGravParam:       301363210000
+  soi:                47921949
+  orbit:
+    semiMajorAxis:    20726155264
+    eccentricity:     0.051
+    inclination:      0.06
+    argOfPeriapsis:   0
+    ascNodeLongitude: 135.5
+  meanAnomaly0:       3.14
+  epoch:              0
+  orbiting:           0
+  color:              0xa23e28
+
+- !!map
+  id:                 8
+  name:               Ike
+  radius:             130000
+  mass:               278216150000000000000
+  stdGravParam:       18568369000
+  soi:                1049598.9
+  orbit:
+    semiMajorAxis:    3200000
+    eccentricity:     0.03
+    inclination:      0.2
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+  meanAnomaly0:       1.7
+  epoch:              0
+  orbiting:           7
+  color:              0x5d5d5f
+
+- !!map
+  id:                 9
+  name:               Dres
+  radius:             138000
+  mass:               321909370000000000000
+  stdGravParam:       21484489000
+  soi:                32832840
+  orbit:
+    semiMajorAxis:    40839348203
+    eccentricity:     0.145
+    inclination:      5
+    argOfPeriapsis:   90
+    ascNodeLongitude: 280
+  meanAnomaly0:       3.14
+  epoch:              0
+  orbiting:           0
+  color:              0x5a4432
+
+- !!map
+  id:                 10
+  name:               Jool
+  radius:             6000000
+  atmosphereAlt:      200000
+  mass:               4.2332127e+24
+  stdGravParam:       282528000000000
+  soi:                2455985200
+  orbit:
+    semiMajorAxis:    68773560320
+    eccentricity:     0.05
+    inclination:      1.304
+    argOfPeriapsis:   0
+    ascNodeLongitude: 52
+  meanAnomaly0:       0.1
+  epoch:              0
+  orbiting:           0
+  color:              0x548412
+
+- !!map
+  id:                 11
+  name:               Laythe
+  radius:             500000
+  atmosphereAlt:      50000
+  mass:               2.9397311e+22
+  stdGravParam:       1962000000000
+  soi:                3723645.8
+  orbit:
+    semiMajorAxis:    27184000
+    eccentricity:     0
+    inclination:      0
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+  meanAnomaly0:       3.14
+  epoch:              0
+  orbiting:           10
+  color:              0x2c306a
+
+- !!map
+  id:                 12
+  name:               Vall
+  radius:             300000
+  mass:               3.1087655e+21
+  stdGravParam:       207481500000
+  soi:                2406401.4
+  orbit:
+    semiMajorAxis:    43152000
+    eccentricity:     0
+    inclination:      0
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+  meanAnomaly0:       0.9
+  epoch:              0
+  orbiting:           10
+  color:              0x476c7c
+
+- !!map
+  id:                 13
+  name:               Tylo
+  radius:             600000
+  mass:               4.2332127e+22
+  stdGravParam:       2825280000000
+  soi:                10856518
+  orbit:
+    semiMajorAxis:    68500000
+    eccentricity:     0
+    inclination:      0.025
+    argOfPeriapsis:   0
+    ascNodeLongitude: 0
+  meanAnomaly0:       3.14
+  epoch:              0
+  orbiting:           10
+  color:              0x937575
+
+- !!map
+  id:                 14
+  name:               Bop
+  radius:             65000
+  mass:               37261090000000000000
+  stdGravParam:       2486834900
+  soi:                1221060.9
+  orbit:
+    semiMajorAxis:    128500000
+    eccentricity:     0.235
+    inclination:      15
+    argOfPeriapsis:   25
+    ascNodeLongitude: 10
+  meanAnomaly0:       0.9
+  epoch:              0
+  orbiting:           10
+  color:              0x7f6d51
+
+- !!map
+  id:                 15
+  name:               Pol
+  radius:             44000
+  mass:               10813507000000000000
+  stdGravParam:       721702080
+  soi:                1042138.9
+  orbit:
+    semiMajorAxis:    179890000
+    eccentricity:     0.171
+    inclination:      4.25
+    argOfPeriapsis:   15
+    ascNodeLongitude: 2
+  meanAnomaly0:       0.9
+  epoch:              0
+  orbiting:           10
+  color:              0x9ba078
+
+- !!map
+  id:                 16
+  name:               Sarnus
+  radius:             5300000
+  atmosphereAlt:      580000.0
+  mass:               1.229937251142442e+24
+  stdGravParam:       82089701953000
+  soi:                2740090587.726858
+  orbit:
+    semiMajorAxis:    125798522368
+    eccentricity:     0.0534
+    inclination:      2.02
+    argOfPeriapsis:   0
+    ascNodeLongitude: 184
+  meanAnomaly0:       2.88114666938782
+  epoch:              359.279999999964
+  orbiting:           0
+  color:              0xddb887
+
+- !!map
+  id:                 17
+  name:               Hale
+  radius:             6000
+  mass:               12165929310938976
+  stdGravParam:       811990.62
+  soi:                41000
+  orbit:
+    semiMajorAxis:    10488231
+    eccentricity:     0
+    inclination:      1
+    argOfPeriapsis:   0
+    ascNodeLongitude: 55
+  meanAnomaly0:       0
+  epoch:              0
+  orbiting:           16
+  color:              0xefe68c
+
+- !!map
+  id:                 18
+  name:               Ovok
+  radius:             26000
+  mass:               198651406139969730
+  stdGravParam:       13258590.799999999
+  soi:                94000
+  orbit:
+    semiMajorAxis:    12169413
+    eccentricity:     0.01
+    inclination:      1.5
+    argOfPeriapsis:   0
+    ascNodeLongitude: 55
+  meanAnomaly0:       1.72
+  epoch:              751.7
+  orbiting:           16
+  color:              0xafc3dd
+
+- !!map
+  id:                 19
+  name:               Eeloo
+  radius:             210000
+  mass:               1.1149224e+21
+  stdGravParam:       74410815000
+  soi:                1159081.4292819728
+  orbit:
+    semiMajorAxis:    19105978
+    eccentricity:     0.0034
+    inclination:      2.3
+    argOfPeriapsis:   260
+    ascNodeLongitude: 55
+  meanAnomaly0:       3.14
+  epoch:              0
+  orbiting:           16
+  color:              0x686a6a
+
+- !!map
+  id:                 20
+  name:               Slate
+  radius:             540000
+  mass:               2.9648898684206585e+22
+  stdGravParam:       1978856444880
+  soi:                9598158.646011835
+  orbit:
+    semiMajorAxis:    42592946
+    eccentricity:     0.04
+    inclination:      2.3
+    argOfPeriapsis:   0
+    ascNodeLongitude: 55
+  meanAnomaly0:       1.1
+  epoch:              1343.91
+  orbiting:           16
+  color:              0xd1b38c
+
+- !!map
+  id:                 21
+  name:               Tekto
+  radius:             280000
+  atmosphereAlt:      95000.0
+  mass:               2.883313492171464e+21
+  stdGravParam:       192440992408
+  soi:                8637005.195444612
+  orbit:
+    semiMajorAxis:    97355304
+    eccentricity:     0.028
+    inclination:      9.4
+    argOfPeriapsis:   0
+    ascNodeLongitude: 55
+  meanAnomaly0:       2.1
+  epoch:              1275.12
+  orbiting:           16
+  color:              0x4ce5a5
+
+- !!map
+  id:                 22
+  name:               Urlum
+  radius:             2177000
+  atmosphereAlt:      325000.0
+  mass:               1.7896369311579417e+23
+  stdGravParam:       11944573769627.45
+  soi:                2562226897.2821903
+  orbit:
+    semiMajorAxis:    254317012787
+    eccentricity:     0.045214674
+    inclination:      0.64
+    argOfPeriapsis:   0
+    ascNodeLongitude: 61
+  meanAnomaly0:       5.59607362747192
+  epoch:              422.539999999906
+  orbiting:           0
+  color:              0x48d1cc
+
+- !!map
+  id:                 23
+  name:               Polta
+  radius:             220000
+  mass:               1.3511821973839953e+21
+  stdGravParam:       90181953400
+  soi:                1661114.8530520673
+  orbit:
+    semiMajorAxis:    11727895
+    eccentricity:     0.0015
+    inclination:      2.45
+    argOfPeriapsis:   60
+    ascNodeLongitude: 40
+  meanAnomaly0:       1.5209
+  epoch:              878.1399
+  orbiting:           22
+  color:              0x7a9f93
+
+- !!map
+  id:                 24
+  name:               Priax
+  radius:             74000
+  mass:               50689608950751390000
+  stdGravParam:       3383176570.2
+  soi:                446767.6019786148
+  orbit:
+    semiMajorAxis:    11727895
+    eccentricity:     0.0015
+    inclination:      2.5
+    argOfPeriapsis:   0
+    ascNodeLongitude: 40
+  meanAnomaly0:       1.5209
+  epoch:              878.1399
+  orbiting:           22
+  color:              0x6b6a66
+
+- !!map
+  id:                 25
+  name:               Wal
+  radius:             370000
+  mass:               7.44252194911826e+21
+  stdGravParam:       496736242450
+  soi:                18933504.68477647
+  orbit:
+    semiMajorAxis:    67553668
+    eccentricity:     0.023
+    inclination:      1.9
+    argOfPeriapsis:   0
+    ascNodeLongitude: 40
+  meanAnomaly0:       2.9615
+  epoch:              1078.179
+  orbiting:           22
+  color:              0xb89963
+
+- !!map
+  id:                 26
+  name:               Tal
+  radius:             22000
+  mass:               3200168362225252400
+  stdGravParam:       213588837
+  soi:                139966.65125981288
+  orbit:
+    semiMajorAxis:    3109163
+    eccentricity:     0
+    inclination:      1.9
+    argOfPeriapsis:   0
+    ascNodeLongitude: 40
+  meanAnomaly0:       0
+  epoch:              1179.579
+  orbiting:           25
+  color:              0x665b4a
+
+- !!map
+  id:                 27
+  name:               Neidon
+  radius:             2145000
+  atmosphereAlt:      260000.0
+  mass:               2.1227516788730655e+23
+  stdGravParam:       14167881530302.5
+  soi:                4415665622.289967
+  orbit:
+    semiMajorAxis:    409355191706
+    eccentricity:     0.0127567
+    inclination:      1.27
+    argOfPeriapsis:   0
+    ascNodeLongitude: 259
+  meanAnomaly0:       2.27167344093323
+  epoch:              99.6799999999973
+  orbiting:           0
+  color:              0x6959cd
+
+- !!map
+  id:                 28
+  name:               Thatmo
+  radius:             286000
+  atmosphereAlt:      35000.0
+  mass:               2.7882711365806153e+21
+  stdGravParam:       186097580468.8
+  soi:                5709379.088531882
+  orbit:
+    semiMajorAxis:    32300895
+    eccentricity:     0.00043
+    inclination:      161.1
+    argOfPeriapsis:   0
+    ascNodeLongitude: 66
+  meanAnomaly0:       2.04731106758118
+  epoch:              1953406.32967385
+  orbiting:           27
+  color:              0xe6e6f9
+
+- !!map
+  id:                 29
+  name:               Nissee
+  radius:             30000
+  mass:               5950726293394064000
+  stdGravParam:       397169325
+  soi:                7366476.635255131
+  orbit:
+    semiMajorAxis:    487743514
+    eccentricity:     0.72
+    inclination:      29.56
+    argOfPeriapsis:   0
+    ascNodeLongitude: 66
+  meanAnomaly0:       2.04731106758118
+  epoch:              1953406.32967385
+  orbiting:           27
+  color:              0xd1b38c
+
+- !!map
+  id:                 30
+  name:               Plock
+  radius:             189000
+  mass:               776784007434487600000
+  stdGravParam:       51844895008.2
+  soi:                612754258.4676156
+  orbit:
+    semiMajorAxis:    535833706086
+    eccentricity:     0.26
+    inclination:      6.15
+    argOfPeriapsis:   50
+    ascNodeLongitude: 260
+  meanAnomaly0:       0
+  epoch:              213
+  orbiting:           0
+  color:              0xNaN
+
+- !!map
+  id:                 31
+  name:               Karen
+  radius:             85050
+  mass:               70146744995688686000
+  stdGravParam:       4681804201.24725
+  soi:                939354.3242775212
+  orbit:
+    semiMajorAxis:    2457800
+    eccentricity:     0
+    inclination:      0
+    argOfPeriapsis:   50
+    ascNodeLongitude: 260
+  meanAnomaly0:       0
+  epoch:              213
+  orbiting:           30
+  color:              0xNaN

@@ -6,6 +6,12 @@
 - name: JNSQ
   folderName: jnsq
 
+- name: Outer Planets
+  folderName: opm
+
+- name: Kerbol Origins
+  folderName: ko
+
 # Template:
 # - name: New Solar System
 #   folderName: new-solar-system
