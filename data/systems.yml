@@ -12,6 +12,9 @@
 - name: Kerbol Origins
   folderName: ko
 
+- name: Real Solar System
+  folderName: rss
+
 # Template:
 # - name: New Solar System
 #   folderName: new-solar-system
