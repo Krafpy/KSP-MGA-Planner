@@ -1,4 +1,4 @@
-import { KSPTime } from "../utilities/time.js";
+import { KSPTime } from "../time/time.js";
 export class TimeSelector {
     constructor(namePrefix, config, autoValidate = false) {
         this.config = config;
@@ -9,7 +9,7 @@ export class TimeSelector {
         if (autoValidate) {
             this.selector.oninput = () => this.validate();
         }
-        this.time = new KSPTime(0, this.config.time);
+        this.time = KSPTime(0, this.config.time);
         this.validate();
     }
     get dateSeconds() {
@@ -33,12 +33,12 @@ export class TimeSelector {
         let day = parseInt(this.dayInput.value);
         let hour = parseInt(this.hourInput.value);
         if (isNaN(year) || isNaN(day) || isNaN(hour)) {
-            this.yearInput.value = "1";
-            this.dayInput.value = "1";
-            this.hourInput.value = "0";
-            year = 1;
-            day = 1;
-            hour = 0;
+            this.time.dateSeconds = this.time.defaultDate;
+            const { years, days, hours } = this.time.elapsedYDHMS;
+            this.yearInput.value = `${years + 1}`;
+            this.dayInput.value = `${days + 1}`;
+            this.hourInput.value = `${hours}`;
+            return;
         }
         this.time.elapsedYDHMS = { years: year - 1, days: day - 1, hours: hour, minutes: 0, seconds: 0 };
         this.update();
