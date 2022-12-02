@@ -2,7 +2,7 @@ import { TimeSelector } from "../editor/time-selector.js";
 import { createOrbitPoints, createLine, createSprite } from "../utilities/geometry.js";
 import { Orbit } from "../objects/orbit.js";
 import { SolarSystem } from "../objects/system.js";
-import { KSPTime } from "../utilities/time.js";
+import { KSPTime } from "../time/time.js";
 import { CameraController } from "../objects/camera.js";
 import { SpriteManager } from "../utilities/sprites.js";
 import { OrbitingBody } from "../objects/body.js";
@@ -268,8 +268,8 @@ export class Trajectory {
      * @param controls The camera controller
      */
     public fillResultControls(resultItems: ResultPannelItems, systemTime: TimeSelector, controls: CameraController){
-        const depDate = new KSPTime(this.steps[0].dateOfStart, this.config.time);
-        const arrDate = new KSPTime(this.steps[this.steps.length-1].dateOfStart, this.config.time);
+        const depDate = KSPTime(this.steps[0].dateOfStart, this.config.time);
+        const arrDate = KSPTime(this.steps[this.steps.length-1].dateOfStart, this.config.time);
 
         // total delta-V
         resultItems.totalDVSpan.innerHTML = this._totalDeltaV.toFixed(1);
@@ -359,7 +359,7 @@ export class Trajectory {
             
             if(option.type == "maneuver"){
                 const details = this._maneuvres[option.origin];
-                const dateEMT = new KSPTime(details.dateMET, this.config.time);
+                const dateEMT = KSPTime(details.dateMET, this.config.time);
                 
                 resultItems.dateSpan.innerHTML = dateEMT.stringYDHMS("hm", "emt");
                 resultItems.progradeDVSpan.innerHTML = details.progradeDV.toFixed(1);
@@ -383,8 +383,8 @@ export class Trajectory {
 
             } else if(option.type == "flyby"){
                 const details = this._flybys[option.origin];
-                const startDateEMT = new KSPTime(details.soiEnterDateMET, this.config.time);
-                const endDateEMT = new KSPTime(details.soiExitDateMET, this.config.time);
+                const startDateEMT = KSPTime(details.soiEnterDateMET, this.config.time);
+                const endDateEMT = KSPTime(details.soiExitDateMET, this.config.time);
 
                 resultItems.startDateSpan.innerHTML = startDateEMT.stringYDHMS("hm", "emt");
                 resultItems.endDateSpan.innerHTML = endDateEMT.stringYDHMS("hm", "emt");

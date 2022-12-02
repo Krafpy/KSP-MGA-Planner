@@ -1,7 +1,9 @@
-export class KSPTime {
+import { stringYDHMS } from "./time.js";
+
+export class BaseKSPTime implements IKSPTime {
     private _exactDate: number = 0;
 
-    constructor(date: number | ElapsedYDHMS, public readonly config: TimeSettings){
+    constructor(date: number | ElapsedYDHMS, public readonly config: BaseTimeSettings){
         if(typeof date == "number") {
             this.dateSeconds = date;
         } else {
@@ -9,26 +11,8 @@ export class KSPTime {
         }
     }
 
-    public stringYDHMS(precision: "h" | "hm" | "hms", display: "emt" | "ut"){
-        let {years, days, hours, minutes, seconds} = this.elapsedYDHMS;
-        
-        let hmsStr = "";
-        switch(precision){
-            case "hms": hmsStr = `:${(seconds >= 10 ? "" : "0")}${seconds.toFixed(0)}${hmsStr}`;
-            case "hm":  hmsStr = `:${(minutes >= 10 ? "" : "0")}${minutes}${hmsStr}`;
-        }
-        hmsStr = `${(hours >= 10 ? "" : "0")}${hours}${hmsStr}`;
-        if(precision == "h"){
-            hmsStr += "h";
-        }
-
-        if(display == "ut"){
-            years++;
-            days++;
-            return `Year ${years} - Day ${days} - ${hmsStr}`;
-        } else {
-            return `T+ ${years}y - ${days}d - ${hmsStr}`;
-        }
+    public stringYDHMS(precision: "h" | "hm" | "hms", display: "emt" | "ut"): string {
+        return stringYDHMS(this, precision, display);
     }
 
     public get dateSeconds(){
@@ -49,8 +33,8 @@ export class KSPTime {
         return {years, days, hours, minutes, seconds};
     }
 
-    public set elapsedYDHMS(date: ElapsedYDHMS) {
-        let {years, days, hours, minutes, seconds} = date;
+    public set elapsedYDHMS(dateYDHMS: ElapsedYDHMS) {
+        let {years, days, hours, minutes, seconds} = dateYDHMS;
 
         let t = this._secondsPerYear * years;
         t += this._secondsPerDay * days;
@@ -69,5 +53,9 @@ export class KSPTime {
     private get _secondsPerYear(){
         const {daysPerYear} = this.config;
         return daysPerYear * this._secondsPerDay;
+    }
+
+    public get defaultDate() {
+        return 0;
     }
 }
