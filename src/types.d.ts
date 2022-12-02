@@ -135,12 +135,11 @@ interface SequenceParameters {
     readonly maxBackSpacing:    number,
 }
 
-type ElapsedYDHMS = {years: number, days: number, hours: number, minutes: number, seconds: number};
-type DateYDH = {year: number, day: number, hour: number};
+type DateYDHMS = {year: number, day: number, hour: number, minute: number, second: number};
 
 interface IKSPTime {
     public dateSeconds:  number;
-    public elapsedYDHMS: ElapsedYDHMS;
+    public displayYDHMS:   DateYDH;
     public readonly defaultDate: number;
     public stringYDHMS(precision: "h" | "hm" | "hms", display: "emt" | "ut"): string;
 }

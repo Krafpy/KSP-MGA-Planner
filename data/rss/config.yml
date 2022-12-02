@@ -28,7 +28,8 @@ camera:
   rotateSpeed:        0.5           # camera rotation speed
 
 time:
-  type:               real
+  type:               real          # type of the time system: either base or real
+  initialDate:        0             # the initial date, in seconds, from January 1st 1970 (real only)
 
 flybySequence:
   radiusSamples:      10            # number of samples radius samples to test when evaluating a sequence feasability

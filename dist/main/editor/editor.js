@@ -47,6 +47,7 @@ export async function initEditorWithSystem(systems, systemIndex) {
         controls.centerOnTarget();
     };
     systemTime.input(updateSystemTime);
+    systemTime.setToDefault();
     updateSystemTime();
     const soiCheckbox = document.getElementById("soi-checkbox");
     soiCheckbox.onchange = () => system.showSOIs = soiCheckbox.checked;
@@ -122,8 +123,10 @@ export async function initEditorWithSystem(systems, systemIndex) {
         new StopButton("sequence-stop-btn").click(() => generator.cancel());
     }
     {
-        const timeRangeStart = new TimeSelector("start", config, true);
-        const timeRangeEnd = new TimeSelector("end", config, true);
+        const timeRangeStart = new TimeSelector("start", config, false);
+        const timeRangeEnd = new TimeSelector("end", config, false);
+        timeRangeStart.setToDefault();
+        timeRangeEnd.setToDefault();
         const depAltitude = new IntegerInput("start-altitude");
         const destAltitude = new IntegerInput("end-altitude");
         const updateAltitudeRange = (input, body) => {
@@ -201,6 +204,9 @@ export async function initEditorWithSystem(systems, systemIndex) {
                 updateAltitudeRange(depAltitude, sequence.bodies[0]);
                 const slen = sequence.length;
                 updateAltitudeRange(destAltitude, sequence.bodies[slen - 1]);
+                if (!timeRangeStart.validate() || !timeRangeEnd.validate()) {
+                    throw new Error("Invalid departure and arrival date values.");
+                }
                 const startDate = timeRangeStart.dateSeconds;
                 const endDate = timeRangeEnd.dateSeconds;
                 if (endDate < startDate)

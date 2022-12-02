@@ -9,16 +9,17 @@ export class TimeSelector {
     readonly hourInput!: HTMLInputElement;
     readonly selector!:  HTMLDivElement;
     
-    constructor(namePrefix: string, public readonly config: Config, autoValidate: boolean = false) {
+    constructor(namePrefix: string, public readonly config: Config, private readonly autoValidate: boolean = false) {
         this.yearInput = document.getElementById(`${namePrefix}-year`) as HTMLInputElement;
         this.dayInput  = document.getElementById(`${namePrefix}-day`)  as HTMLInputElement;
         this.hourInput = document.getElementById(`${namePrefix}-hour`) as HTMLInputElement;
 
         this.selector = document.getElementById(`${namePrefix}-time`) as HTMLDivElement;
 
-        if(autoValidate) {
+        /*if(this.autoValidate) {
             this.selector.oninput = () => this.validate();
-        }
+        }*/
+        this.selector.oninput = () => this.validate();
         this.time = KSPTime(0, this.config.time);
         this.validate();
     }
@@ -33,31 +34,30 @@ export class TimeSelector {
     }
 
     public update(){
-        const {years, days, hours} = this.time.elapsedYDHMS;
-        const year = years+1;
-        const day = days+1;
-        const hour = hours;
+        const {year, day, hour} = this.time.displayYDHMS;
         this.yearInput.value = year.toString();
         this.dayInput.value  = day.toString();
         this.hourInput.value = hour.toString();
     }
 
-    public validate() {
+    public validate(): boolean {
         let year = parseInt(this.yearInput.value);
         let day  = parseInt(this.dayInput.value);
         let hour = parseInt(this.hourInput.value);
 
         if(isNaN(year) || isNaN(day) || isNaN(hour)){
-            this.time.dateSeconds = this.time.defaultDate;
-            const {years, days, hours} = this.time.elapsedYDHMS;
-            this.yearInput.value = `${years+1}`;
-            this.dayInput.value  = `${days+1}`;
-            this.hourInput.value = `${hours}`;
-            return;
+            if(!this.autoValidate)
+                return false;
+            this.setToDefault();
+        } else {
+            this.time.displayYDHMS = {year, day, hour, minute: 0, second: 0};
+            this.update();
         }
+        return true;
+    }
 
-        this.time.elapsedYDHMS = {years: year-1, days: day-1, hours: hour, minutes:0, seconds:0};
-
+    public setToDefault(){
+        this.time.dateSeconds = this.time.defaultDate;
         this.update();
     }
 }
