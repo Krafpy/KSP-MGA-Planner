@@ -49,7 +49,8 @@ interface OrbitSettings {
     readonly planetSampPoints:  number;
     readonly satSampPoints:     number;
     readonly orbitLineWidth:    number;
-    readonly arcLineWidth:      number; 
+    readonly arcLineWidth:      number;
+    readonly epochOffset:       number;
 }
 
 interface TrajectoryDrawSettings {

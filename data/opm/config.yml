@@ -19,6 +19,7 @@ orbit:
   planetSampPoints:   10000         # sample points for planets' orbits
   orbitLineWidth:     1.5           # width of the rendered orbit lines
   arcLineWidth:       2.25          # width of the rendered trajectory arc lines
+  epochOffset:        0             # offset for bodies' epochs (reference for epoch 0), in seconds
 
 camera:
   startDist:          100           # distance from sun of start
