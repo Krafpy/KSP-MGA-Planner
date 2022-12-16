@@ -61,7 +61,9 @@ export class RealKSPTime {
     }
     set displayYDHMS(dateYDHMS) {
         let { year, day, hour, minute, second } = dateYDHMS;
-        const date = new Date(year, 0, day);
+        let date = new Date(year, 0);
+        date.setFullYear(year);
+        date = new Date(date.setDate(day));
         date.setHours(hour);
         date.setMinutes(minute);
         date.setSeconds(second);

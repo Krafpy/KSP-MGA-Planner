@@ -42,9 +42,10 @@ export async function initEditorWithSystem(systems, systemIndex) {
     requestAnimationFrame(loop);
     const systemTime = new TimeSelector("system", config);
     const updateSystemTime = () => {
-        systemTime.validate();
-        system.date = systemTime.dateSeconds;
-        controls.centerOnTarget();
+        if (systemTime.validate()) {
+            system.date = systemTime.dateSeconds;
+            controls.centerOnTarget();
+        }
     };
     systemTime.input(updateSystemTime);
     systemTime.setToDefault();
@@ -123,8 +124,8 @@ export async function initEditorWithSystem(systems, systemIndex) {
         new StopButton("sequence-stop-btn").click(() => generator.cancel());
     }
     {
-        const timeRangeStart = new TimeSelector("start", config, false);
-        const timeRangeEnd = new TimeSelector("end", config, false);
+        const timeRangeStart = new TimeSelector("start", config);
+        const timeRangeEnd = new TimeSelector("end", config);
         timeRangeStart.setToDefault();
         timeRangeEnd.setToDefault();
         const depAltitude = new IntegerInput("start-altitude");

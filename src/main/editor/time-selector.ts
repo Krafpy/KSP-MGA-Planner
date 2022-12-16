@@ -9,16 +9,13 @@ export class TimeSelector {
     readonly hourInput!: HTMLInputElement;
     readonly selector!:  HTMLDivElement;
     
-    constructor(namePrefix: string, public readonly config: Config, private readonly autoValidate: boolean = false) {
+    constructor(namePrefix: string, public readonly config: Config) {
         this.yearInput = document.getElementById(`${namePrefix}-year`) as HTMLInputElement;
         this.dayInput  = document.getElementById(`${namePrefix}-day`)  as HTMLInputElement;
         this.hourInput = document.getElementById(`${namePrefix}-hour`) as HTMLInputElement;
 
         this.selector = document.getElementById(`${namePrefix}-time`) as HTMLDivElement;
 
-        /*if(this.autoValidate) {
-            this.selector.oninput = () => this.validate();
-        }*/
         this.selector.oninput = () => this.validate();
         this.time = KSPTime(0, this.config.time);
         this.validate();
@@ -46,9 +43,7 @@ export class TimeSelector {
         let hour = parseInt(this.hourInput.value);
 
         if(isNaN(year) || isNaN(day) || isNaN(hour)){
-            if(!this.autoValidate)
-                return false;
-            this.setToDefault();
+            return false;
         } else {
             this.time.displayYDHMS = {year, day, hour, minute: 0, second: 0};
             this.update();

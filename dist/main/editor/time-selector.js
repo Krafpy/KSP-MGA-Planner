@@ -1,8 +1,7 @@
 import { KSPTime } from "../time/time.js";
 export class TimeSelector {
-    constructor(namePrefix, config, autoValidate = false) {
+    constructor(namePrefix, config) {
         this.config = config;
-        this.autoValidate = autoValidate;
         this.yearInput = document.getElementById(`${namePrefix}-year`);
         this.dayInput = document.getElementById(`${namePrefix}-day`);
         this.hourInput = document.getElementById(`${namePrefix}-hour`);
@@ -29,9 +28,7 @@ export class TimeSelector {
         let day = parseInt(this.dayInput.value);
         let hour = parseInt(this.hourInput.value);
         if (isNaN(year) || isNaN(day) || isNaN(hour)) {
-            if (!this.autoValidate)
-                return false;
-            this.setToDefault();
+            return false;
         }
         else {
             this.time.displayYDHMS = { year, day, hour, minute: 0, second: 0 };
