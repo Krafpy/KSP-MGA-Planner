@@ -9,7 +9,8 @@ export abstract class SpriteManager {
             const promise = new Promise<boolean>((resolve, _) => {
                 textureLoader.load(path, (texture: THREE.Texture) => {
                     const material = new THREE.SpriteMaterial({
-                        map: texture
+                        map: texture,
+                        depthWrite: false,
                     });
                     this._spriteMaterials.set(name, material);
                     resolve(true);
