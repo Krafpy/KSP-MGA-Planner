@@ -19,20 +19,18 @@ orbit:
   planetSampPoints:   10000         # sample points for planets' orbits
   orbitLineWidth:     1.5           # width of the rendered orbit lines
   arcLineWidth:       2.25          # width of the rendered trajectory arc lines
-  epochOffset:        0             # offset for bodies' epochs (reference for epoch 0), in seconds
+  epochOffset:        -631152000    # offset for bodies' epochs (reference for epoch 0), in seconds
 
 camera:
-  startDist:          100           # distance from sun of start
-  maxDist:            1500          # maximum distance that can be zoomed out
+  startDist:          1000          # distance from sun of start
+  maxDist:            10000         # maximum distance that can be zoomed out
   minDistRadii:       1.5           # minimum distance to a body, in radii of the focused body
   dampingFactor:      0.5           # camera motion damping
   rotateSpeed:        0.5           # camera rotation speed
 
 time:
-  type:               base          # type of the time system: either base or real
-  # initialDate:        0             # the initial date, in seconds (real only)
-  hoursPerDay:        12            # number of hours in a day (Kerbal day) (base only)
-  daysPerYear:        365           # number of days per year (Kerbal year) (base only)
+  type:               real          # type of the time system: either base or real
+  initialDate:        0             # the initial date, in seconds, from January 1st 1970 (real only)
 
 flybySequence:
   radiusSamples:      10            # number of samples radius samples to test when evaluating a sequence feasability
@@ -54,14 +52,14 @@ trajectorySearch:
   dsmOffsetMin:       0.01          # the minimum offset of a DSM on an interplanetary leg
   dsmOffsetMax:       0.99          # the maximum offset of a DSM
   minLegDuration:     21600         # the minimum duration of a leg (s)
-  fbRadiusMaxScale:   4             # the maximum periapsis height of a flyby orbit, in terms of times radius of the body
+  fbRadiusMaxScale:   20            # the maximum periapsis height of a flyby orbit, in terms of times radius of the body
   popSizeDimScale:    750           # the population size is equal to this value times the dimension of the search space (number of compnents agent vector)
   maxGenerations:     300           # Maximum number of evolution iterations
 
 editor:
-  defaultOrigin:      3             # default origin body on start (index of Kerbin in the selector)
+  defaultOrigin:      2             # default origin body on start (index of Kerbin in the selector)
   defaultDest:        0             # default destination body on start (index of Moho in the selector)
-  defaultAltitude:    150           # default altitude from the default body (in km above surface)
+  defaultAltitude:    300           # default altitude from the default body (in km above surface)
 
 workers:
   progressStep:       250           # number of inputs processed per chunk before progress callback

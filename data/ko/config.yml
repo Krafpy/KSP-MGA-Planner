@@ -19,6 +19,7 @@ orbit:
   planetSampPoints:   10000         # sample points for planets' orbits
   orbitLineWidth:     1.5           # width of the rendered orbit lines
   arcLineWidth:       2.25          # width of the rendered trajectory arc lines
+  epochOffset:        0             # offset for bodies' epochs (reference for epoch 0), in seconds
 
 camera:
   startDist:          100           # distance from sun of start
@@ -28,8 +29,9 @@ camera:
   rotateSpeed:        0.5           # camera rotation speed
 
 time:
-  hoursPerDay:        6             # number of hours in a day (Kerbal day)
-  daysPerYear:        426           # number of days per year (Kerbal year)
+  type:               base          # type of the time system: either base or real
+  hoursPerDay:        6             # number of hours in a day (Kerbal day) (base only)
+  daysPerYear:        426           # number of days per year (Kerbal year) (base only)
 
 flybySequence:
   radiusSamples:      10            # number of samples radius samples to test when evaluating a sequence feasability

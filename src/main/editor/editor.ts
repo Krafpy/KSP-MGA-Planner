@@ -58,11 +58,13 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
     // Setting up solar system time control
     const systemTime = new TimeSelector("system", config);
     const updateSystemTime = () => {
-        systemTime.validate();
-        system.date = systemTime.dateSeconds;
-        controls.centerOnTarget();
+        if(systemTime.validate()){
+            system.date = systemTime.dateSeconds;
+            controls.centerOnTarget();
+        }
     };
     systemTime.input(updateSystemTime);
+    systemTime.setToDefault();
     updateSystemTime();
 
     // SOI toggle
@@ -165,8 +167,10 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
     
     {   
         // Time inputs
-        const timeRangeStart = new TimeSelector("start", config, true);
-        const timeRangeEnd   = new TimeSelector("end", config, true);
+        const timeRangeStart = new TimeSelector("start", config);
+        const timeRangeEnd   = new TimeSelector("end", config);
+        timeRangeStart.setToDefault();
+        timeRangeEnd.setToDefault();
 
         // Numerical inputs
         const depAltitude = new IntegerInput("start-altitude");
@@ -268,6 +272,10 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
                 const slen = sequence.length;
                 updateAltitudeRange(destAltitude, sequence.bodies[slen-1]);
 
+                if(!timeRangeStart.validate() || !timeRangeEnd.validate()){
+                    throw new Error("Invalid departure and arrival date values.");
+                }
+                
                 const startDate = timeRangeStart.dateSeconds;
                 const endDate = timeRangeEnd.dateSeconds;
                 if(endDate < startDate)

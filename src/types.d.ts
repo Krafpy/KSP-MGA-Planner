@@ -49,7 +49,8 @@ interface OrbitSettings {
     readonly planetSampPoints:  number;
     readonly satSampPoints:     number;
     readonly orbitLineWidth:    number;
-    readonly arcLineWidth:      number; 
+    readonly arcLineWidth:      number;
+    readonly epochOffset:       number;
 }
 
 interface TrajectoryDrawSettings {
@@ -66,10 +67,16 @@ interface CameraSettings {
     readonly rotateSpeed:       number;
 }
 
-interface TimeSettings {
+type BaseTimeSettings = {
+    readonly type:              "base";
     readonly hoursPerDay:       number;
     readonly daysPerYear:       number;
-}
+};
+
+type RealTimeSettings = {
+    readonly type:              "real";
+    readonly initialDate:       number;
+};
 
 interface FBSequenceSettings {
     readonly radiusSamples:     number;
@@ -112,7 +119,7 @@ interface Config {
     readonly solarSystem:       SystemDrawSettings;
     readonly orbit:             OrbitSettings;
     readonly camera:            CameraSettings;
-    readonly time:              TimeSettings;
+    readonly time:              BaseTimeSettings | RealTimeSettings;
     readonly flybySequence:     FBSequenceSettings;
     readonly trajectorySearch:  TrajectorySearchSettings
     readonly editor:            EditorSettings;
@@ -129,8 +136,14 @@ interface SequenceParameters {
     readonly maxBackSpacing:    number,
 }
 
-type ElapsedYDHMS = {years: number, days: number, hours: number, minutes: number, seconds: number};
-type DateYDH = {year: number, day: number, hour: number};
+type DateYDHMS = {year: number, day: number, hour: number, minute: number, second: number};
+
+interface IKSPTime {
+    public dateSeconds:  number;
+    public displayYDHMS:   DateYDH;
+    public readonly defaultDate: number;
+    public stringYDHMS(precision: "h" | "hm" | "hms", display: "emt" | "ut"): string;
+}
 
 type MessageToWorker = 
     | {label: "initialize", config: any}

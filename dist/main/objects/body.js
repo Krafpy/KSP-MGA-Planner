@@ -30,7 +30,7 @@ export class OrbitingBody extends CelestialBody {
         this.attractor = attractor;
         this.orbit = new Orbit(data.orbit, this.attractor, config);
         this.meanAnomaly0 = data.meanAnomaly0;
-        this.epoch = data.epoch;
+        this.epoch = data.epoch + config.epochOffset;
         this.orbiting = data.orbiting;
         const { stdGravParam } = this.attractor;
         const { semiMajorAxis } = this.orbit;

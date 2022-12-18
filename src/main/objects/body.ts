@@ -48,7 +48,7 @@ export class OrbitingBody extends CelestialBody implements IOrbitingBody {
         
         this.orbit        = new Orbit(data.orbit, this.attractor, config);
         this.meanAnomaly0 = data.meanAnomaly0;
-        this.epoch        = data.epoch;
+        this.epoch        = data.epoch + config.epochOffset;
         this.orbiting     = data.orbiting;
         
         // Calculate orbital velocity considering a circular orbit
