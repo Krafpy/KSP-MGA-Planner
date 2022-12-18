@@ -1,7 +1,7 @@
 # Multiple Gravity Assist Trajectory Planner for KSP
 
 An online tool providing automatic design of trajectories with multiple gravity assists for Kerbal Space Program.
-[**Forum post**](https://forum.kerbalspaceprogram.com/index.php?/topic/204391-online-calculator-for-trajectories-with-multiple-gravity-assists/).
+See the [**forum post**](https://forum.kerbalspaceprogram.com/index.php?/topic/204391-online-calculator-for-trajectories-with-multiple-gravity-assists/).
 
 ![Example trajectory](imgs/example_trajectory_2.png)
 
