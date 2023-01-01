@@ -299,6 +299,7 @@ type ManeuvreDetails = {
     progradeDV:  number,
     normalDV:    number,
     radialDV:    number,
+    totalDV:     number,
     ejectAngle?: number
 };
 

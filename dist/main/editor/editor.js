@@ -15,6 +15,7 @@ import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
 import { loadBodiesData, loadConfig } from "../utilities/data.js";
+import { trajectoryToText } from "../utilities/trajectory-text.js";
 export async function initEditorWithSystem(systems, systemIndex) {
     const canvas = document.getElementById("three-canvas");
     const width = canvas.clientWidth;
@@ -179,8 +180,8 @@ export async function initEditorWithSystem(systems, systemIndex) {
             if (trajectory)
                 trajectory.remove();
         };
-        const displayFoundTrajectory = () => {
-            trajectory = new Trajectory(solver.bestSteps, system, config);
+        const displayFoundTrajectory = (sequence) => {
+            trajectory = new Trajectory(solver, system, config);
             trajectory.draw(canvas);
             trajectory.fillResultControls(resultItems, systemTime, controls);
             systemTime.input(() => {
@@ -192,6 +193,7 @@ export async function initEditorWithSystem(systems, systemIndex) {
             stepSlider.enable();
             trajectory.updatePodPosition(systemTime);
             console.log(solver.bestDeltaV);
+            console.log(trajectoryToText(trajectory, sequence));
         };
         const findTrajectory = async () => {
             paramsErr.hide();
@@ -225,7 +227,7 @@ export async function initEditorWithSystem(systems, systemIndex) {
                 const perfStart = performance.now();
                 await solver.searchOptimalTrajectory(sequence, userSettings);
                 console.log(`Search time: ${performance.now() - perfStart} ms`);
-                displayFoundTrajectory();
+                displayFoundTrajectory(sequence);
             }
             catch (err) {
                 if (err instanceof Error && err.message != "TRAJECTORY FINDER CANCELLED")

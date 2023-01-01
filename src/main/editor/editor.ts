@@ -16,6 +16,7 @@ import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
 import { OrbitingBody } from "../objects/body.js";
 import { loadBodiesData, loadConfig } from "../utilities/data.js";
+import { trajectoryToText } from "../utilities/trajectory-text.js";
 
 
 export async function initEditorWithSystem(systems: SolarSystemData[], systemIndex: number){
@@ -240,8 +241,8 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             if(trajectory) trajectory.remove();
         }
 
-        const displayFoundTrajectory = () => {
-            trajectory = new Trajectory(solver.bestSteps, system, config);
+        const displayFoundTrajectory = (sequence: FlybySequence) => {
+            trajectory = new Trajectory(solver, system, config);
             trajectory.draw(canvas);
             trajectory.fillResultControls(resultItems, systemTime, controls);
 
@@ -256,6 +257,8 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             trajectory.updatePodPosition(systemTime);
 
             console.log(solver.bestDeltaV);
+
+            console.log(trajectoryToText(trajectory, sequence));
         };
 
         const findTrajectory = async () => {
@@ -298,7 +301,7 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
                 await solver.searchOptimalTrajectory(sequence, userSettings);
                 console.log(`Search time: ${performance.now() - perfStart} ms`);
                 
-                displayFoundTrajectory();
+                displayFoundTrajectory(sequence);
     
             } catch(err) {
                 if(err instanceof Error && err.message != "TRAJECTORY FINDER CANCELLED")

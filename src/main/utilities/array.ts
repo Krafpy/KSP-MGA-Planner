@@ -25,3 +25,13 @@ export function shuffleArray<T>(array: T[]){
         array[j] = tmp;
     }
 }
+
+export function joinStrings(arr: string[], sep: string){
+    if(arr.length == 0)
+        return "";
+    let str = arr[0];
+    for(let i = 1; i < arr.length; i++){
+        str += sep + arr[i];
+    }
+    return str;
+}

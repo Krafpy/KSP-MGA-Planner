@@ -1,5 +1,6 @@
-import { OrbitingBody } from "../objects/body";
-import { SolarSystem } from "../objects/system";
+import { OrbitingBody } from "../objects/body.js";
+import { SolarSystem } from "../objects/system.js";
+import { joinStrings } from "../utilities/array.js";
 
 export class FlybySequence {
     public readonly bodies!:    OrbitingBody[];
@@ -13,12 +14,13 @@ export class FlybySequence {
         }
         this.length = this.bodies.length;
 
-        const getSubstr = (i: number) => this.bodies[i].name.substring(0, 2);
-        let str = getSubstr(0);
-        for(let i = 1; i < this.length; i++){
-            str += "-" + getSubstr(i);
-        }
-        this.seqString = str;
+        const initials = this.bodies.map((body: OrbitingBody) => body.name.substring(0, 2));
+        this.seqString = joinStrings(initials, "-");
+    }
+
+    get seqStringFullNames(){
+        const names = this.bodies.map((body: OrbitingBody) => body.name);
+        return joinStrings(names, "-");
     }
 
     static fromString(str: string, system: SolarSystem){
