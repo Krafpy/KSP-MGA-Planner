@@ -39,7 +39,9 @@ export function trajectoryToText(traj, seq) {
                 label = `${arrivalBodyName} circularization`;
             }
             add(label, "", 1);
-            add("Date", KSPTime(details.dateMET, config.time).stringYDHMS("hms", "emt") + " MET", 2);
+            const dateMET = KSPTime(details.dateMET, config.time);
+            add("Date", dateMET.toUT(depDate).stringYDHMS("hms", "ut") + " UT", 2);
+            add("", dateMET.stringYDHMS("hms", "emt") + " MET", 2);
             if (details.ejectAngle !== undefined) {
                 add("Ejection angle", `${details.ejectAngle.toFixed(1)}°`, 2);
             }
@@ -53,9 +55,13 @@ export function trajectoryToText(traj, seq) {
             space();
             const details = traj.flybys[flybyIdx];
             const bodyName = system.bodyFromId(details.bodyId).name;
+            const enterMET = KSPTime(details.soiEnterDateMET, config.time);
+            const exitMET = KSPTime(details.soiExitDateMET, config.time);
             add(`Flyby around ${bodyName}`, "", 1);
-            add("SOI enter date", KSPTime(details.soiEnterDateMET, config.time).stringYDHMS("hms", "emt") + " MET", 2);
-            add("SOI exit date", KSPTime(details.soiExitDateMET, config.time).stringYDHMS("hms", "emt") + " MET", 2);
+            add("SOI enter date", enterMET.toUT(depDate).stringYDHMS("hms", "ut") + " UT", 2);
+            add("", enterMET.stringYDHMS("hms", "emt") + " MET", 2);
+            add("SOI exit date", exitMET.toUT(depDate).stringYDHMS("hms", "ut") + " UT", 2);
+            add("", exitMET.stringYDHMS("hms", "emt") + " MET", 2);
             add("Periapsis altitude", `${details.periAltitude.toFixed(0)} km`, 2);
             add("Inclination", `${details.inclinationDeg.toFixed(0)}°`, 2);
             flybyIdx++;
@@ -78,7 +84,7 @@ function pairsToString(pairs) {
         maxLen = Math.max(maxLen, line.length);
     }
     for (let i = 0; i < pairs.length; i++) {
-        if (pairs[i].label == "" || pairs[i].data == "")
+        if (pairs[i].label == "" && pairs[i].data == "")
             continue;
         const spaces = " ".repeat(maxLen - lines[i].length + 1);
         lines[i] += spaces + pairs[i].data;
