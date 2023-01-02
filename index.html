@@ -7,7 +7,7 @@
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" type="text/css" href="style.css">
     <!-- icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
     <title>KSP MGA Planner</title>
 </head>
 <body>
@@ -239,7 +239,12 @@
 
                 <div id="result-panel">
                     <div id="result-panel-header">
-                        <h2 class="calculation-panel-title">Calculated trajectory</h2>
+                        <div id="result-panel-header-left">
+                            <h2 class="calculation-panel-title">Calculated trajectory</h2>
+                            <button id="show-text-btn" class="submit-btn" disabled>
+                                <i class="fa-solid fa-circle-info"></i> Show detailed
+                            </button>
+                        </div>
                         <div id="steps-slider-control-group" class="control-group">
                             <label class="control-label" for="displayed-steps-slider">Displayed steps:</label>
                             <div id="steps-slider-controls" class="controls">

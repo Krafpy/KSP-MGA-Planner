@@ -426,6 +426,36 @@ input[type="range"]
     justify-content: space-between;
 }
 
+#result-panel-header-left
+{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+#show-text-btn
+{
+    margin-left: 10px;
+    background-image: linear-gradient(rgb(0, 93, 163), rgb(0, 60, 105));
+}
+
+#show-text-btn:hover 
+{
+    background-image: linear-gradient(rgb(0, 78, 138), rgb(0, 60, 105));
+}
+
+#show-text-btn:active
+{
+    background-image: none;
+    background-color: rgb(0, 60, 105);
+}
+
+#show-text-btn:disabled
+{
+    background-image: none;
+    background-color: rgb(46, 52, 56);
+}
+
 #steps-slider-control-group
 {
     margin-bottom: 0;
@@ -605,6 +635,7 @@ footer p
     padding: 0.3em;
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 .draggable-text-header .draggable-text-title
@@ -616,6 +647,7 @@ footer p
 .draggable-text-box textarea
 {
     /*resize: none;*/
+    padding: 10px;
     color: white;
     background-color: rgb(22, 23, 24);
     margin-bottom: 0;

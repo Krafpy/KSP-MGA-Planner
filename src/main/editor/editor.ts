@@ -9,7 +9,7 @@ import { BodySelector } from "./body-selector.js";
 import { EvolutionPlot } from "./plot.js";
 import { ProgressMessage } from "./progress-msg.js";
 import { SequenceSelector } from "./sequence-selector.js";
-import { SubmitButton, StopButton } from "./buttons.js";
+import { Button } from "./buttons.js";
 import { FlybySequence } from "../solvers/sequence.js";
 import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
@@ -163,8 +163,14 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         }
 
         // Sequence generator buttons
-        new SubmitButton("sequence-btn").click(() => generateSequences());
-        new StopButton("sequence-stop-btn").click(() => generator.cancel());
+        const seqGenBtn = new Button("sequence-btn");
+        seqGenBtn.click(async () => {
+            seqGenBtn.disable();
+            await generateSequences()
+            seqGenBtn.enable();
+        });
+        const seqStopBtn = new Button("sequence-stop-btn");
+        seqStopBtn.click(() => generator.cancel());
     }
     
     {   
@@ -206,6 +212,9 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         const detailsSelector = new Selector("details-selector");
         const stepSlider = new DiscreteRange("displayed-steps-slider");
 
+        const showTrajDetailsBtn = new Button("show-text-btn");
+        showTrajDetailsBtn.disable();
+
         detailsSelector.disable();
         stepSlider.disable();
 
@@ -239,9 +248,11 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             detailsSelector.clear();
             detailsSelector.disable();
             stepSlider.disable();
+            showTrajDetailsBtn.disable();
             if(trajectory) trajectory.remove();
         }
 
+        let trajectoryCounter = 0;
         const displayFoundTrajectory = (sequence: FlybySequence) => {
             trajectory = new Trajectory(solver, system, config);
             trajectory.draw(canvas);
@@ -261,6 +272,12 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
 
             const trajText = trajectoryToText(trajectory, sequence);
             console.log(trajText);
+
+            trajectoryCounter++;
+            showTrajDetailsBtn.click(() => {
+                DraggableTextbox.create(`Trajectory ${trajectoryCounter}`, trajText);
+            });
+            showTrajDetailsBtn.enable();
         };
 
         const findTrajectory = async () => {
@@ -317,8 +334,14 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         };
     
         // Trajectory solver buttons
-        new SubmitButton("search-btn").click(() => findTrajectory());
-        new StopButton("search-stop-btn").click(() => solver.cancel());
+        const searchStartBtn = new Button("search-btn");
+        searchStartBtn.click(async () => {
+            searchStartBtn.disable();
+            await findTrajectory();
+            searchStartBtn.enable();
+        });
+        const searchStopBtn = new Button("search-stop-btn");
+        searchStopBtn.click(() => solver.cancel());
 
         // Configure the system selector callback
         systemSelector.change((_, index) => {
