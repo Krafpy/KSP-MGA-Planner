@@ -43,6 +43,12 @@ export class RealKSPTime {
             return `T+ ${year}y - ${day}d - ${hmsStr}`;
         }
     }
+    toUT(from) {
+        if (typeof from == "number")
+            return new RealKSPTime(from + this._exactDate, this.config);
+        else
+            return new RealKSPTime(from.dateSeconds + this._exactDate, this.config);
+    }
     get dateSeconds() {
         return this._exactDate;
     }

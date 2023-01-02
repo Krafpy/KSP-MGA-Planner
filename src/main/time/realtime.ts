@@ -44,6 +44,13 @@ export class RealKSPTime implements IKSPTime {
         }
     }
 
+    public toUT(from: number | IKSPTime): IKSPTime {
+        if(typeof from == "number")
+            return new RealKSPTime(from + this._exactDate, this.config);
+        else
+            return new RealKSPTime(from.dateSeconds + this._exactDate, this.config);
+    }
+
     public get dateSeconds(){
         return this._exactDate;
     }

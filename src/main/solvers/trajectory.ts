@@ -380,8 +380,7 @@ export class Trajectory {
                     ejAngleLI.hidden  = true;
                 }
 
-                const date = depDate.dateSeconds + dateEMT.dateSeconds;
-                resultItems.dateSpan.onclick = onDateClick(date);
+                resultItems.dateSpan.onclick = onDateClick(dateEMT.toUT(depDate).dateSeconds);
 
                 resultItems.flybyDiv.hidden = true;
                 resultItems.maneuverDiv.hidden = false;
@@ -397,10 +396,8 @@ export class Trajectory {
                 resultItems.inclinationSpan.innerHTML = details.inclinationDeg.toFixed(0);
                 resultItems.flybyNumberSpan.innerHTML = (option.origin + 1).toString();
 
-                let enterDate = depDate.dateSeconds + startDateEMT.dateSeconds;
-                resultItems.startDateSpan.onclick = onDateClick(enterDate);
-                let exitDate = depDate.dateSeconds + endDateEMT.dateSeconds;
-                resultItems.endDateSpan.onclick = onDateClick(exitDate);
+                resultItems.startDateSpan.onclick = onDateClick(startDateEMT.toUT(depDate).dateSeconds);
+                resultItems.endDateSpan.onclick = onDateClick(endDateEMT.toUT(depDate).dateSeconds);
                 
                 resultItems.flybyDiv.hidden = false;
                 resultItems.maneuverDiv.hidden = true;
