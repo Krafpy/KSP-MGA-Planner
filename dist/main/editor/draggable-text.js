@@ -25,33 +25,30 @@ export class DraggableTextbox {
         };
         const copyBtn = div.getElementsByClassName("draggable-copy-btn")[0];
         copyBtn.onclick = () => navigator.clipboard.writeText(content);
-        let pos1, pos2, pos3, pos4;
-        const dragMouseDown = (e) => {
+        let x, y;
+        header.onmousedown = (e) => {
             e = e || window.event;
             e.preventDefault();
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            document.onmouseup = closeDragElement;
-            document.onmousemove = elementDrag;
+            x = e.clientX;
+            y = e.clientY;
+            document.onmouseup = () => {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            };
+            document.onmousemove = (e) => {
+                e = e || window.event;
+                e.preventDefault();
+                let dx = x - e.clientX;
+                let dy = y - e.clientY;
+                x = e.clientX;
+                y = e.clientY;
+                let left = div.offsetLeft - dx;
+                let top = div.offsetTop - dy;
+                div.style.top = top.toString() + "px";
+                div.style.left = left.toString() + "px";
+            };
             this.moveToFront(id);
         };
-        const elementDrag = (e) => {
-            e = e || window.event;
-            e.preventDefault();
-            pos1 = pos3 - e.clientX;
-            pos2 = pos4 - e.clientY;
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            let top = (div.offsetTop - pos2);
-            let left = (div.offsetLeft - pos1);
-            div.style.top = top.toString() + "px";
-            div.style.left = left.toString() + "px";
-        };
-        const closeDragElement = () => {
-            document.onmouseup = null;
-            document.onmousemove = null;
-        };
-        header.onmousedown = dragMouseDown;
         textarea.onclick = () => this.moveToFront(id);
         this.moveToFront(id);
         this.startZ++;

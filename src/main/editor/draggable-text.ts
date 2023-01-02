@@ -34,43 +34,36 @@ export class DraggableTextbox {
         const copyBtn = div.getElementsByClassName("draggable-copy-btn")[0] as HTMLButtonElement;
         copyBtn.onclick = () => navigator.clipboard.writeText(content);
 
-        // from: https://www.w3schools.com/howto/howto_js_draggable.asp
-        let pos1: number, pos2: number, pos3: number, pos4: number;
-        const dragMouseDown = (e: any) => {
+        let x: number, y: number;
+        header.onmousedown = (e: MouseEvent) => {
             e = e || window.event;
             e.preventDefault();
-            // get the mouse cursor position at startup:
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            document.onmouseup = closeDragElement;
-            // call a function whenever the cursor moves:
-            document.onmousemove = elementDrag;
+
+            x = e.clientX;
+            y = e.clientY;
+
+            document.onmouseup = () => {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            };
+
+            document.onmousemove = (e: MouseEvent) => {
+                e = e || window.event;
+                e.preventDefault();
+
+                let dx = x - e.clientX;
+                let dy = y - e.clientY;
+                x = e.clientX;
+                y = e.clientY;
+
+                let left = div.offsetLeft - dx;
+                let top = div.offsetTop - dy;
+                div.style.top = top.toString() + "px";
+                div.style.left = left.toString() + "px";
+            };
 
             this.moveToFront(id);
-        }
-    
-        const elementDrag = (e: any) => {
-            e = e || window.event;
-            e.preventDefault();
-            // calculate the new cursor position:
-            pos1 = pos3 - e.clientX;
-            pos2 = pos4 - e.clientY;
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            // set the element's new position:
-            let top = (div.offsetTop - pos2);
-            let left = (div.offsetLeft - pos1);
-            div.style.top = top.toString() + "px";
-            div.style.left = left.toString() + "px";
-        }
-    
-        const closeDragElement = () => {
-            // stop moving when mouse button is released:
-            document.onmouseup = null;
-            document.onmousemove = null;
-        }
-
-        header.onmousedown = dragMouseDown;
+        };
 
         textarea.onclick = () => this.moveToFront(id);
 
