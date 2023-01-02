@@ -667,15 +667,21 @@ footer p
     box-sizing: border-box;
 }
 
-.draggable-close-btn
+
+.draggable-close-btn, .draggable-copy-btn
 {
     color: white;
     border-radius: 5px;
     height: 28px;
     width: 28px;
     border: 1px solid rgb(54, 54, 54);
-    background-color: #3e1515;
     font-size: 16px;
+}
+
+/* Close button */
+.draggable-close-btn
+{
+    background-color: #3e1515;
 }
 
 .draggable-close-btn:hover
@@ -693,4 +699,23 @@ footer p
 .draggable-close-btn:disabled
 {
     cursor: default;
+}
+
+
+/* Copy to clipboard button */
+.draggable-copy-btn
+{
+    background-color: #344c67;
+}
+
+.draggable-copy-btn:hover
+{
+    cursor: pointer;
+    background-color: #4c6786;
+}
+
+.draggable-copy-btn:active
+{
+    cursor: pointer;
+    background-color: #22354d;
 }

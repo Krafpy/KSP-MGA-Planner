@@ -20,6 +20,8 @@ export class DraggableTextbox {
 
         const closeBtn = div.getElementsByClassName("draggable-close-btn")[0] as HTMLButtonElement;
         closeBtn.onclick = () => div.remove();
+        const copyBtn = div.getElementsByClassName("draggable-copy-btn")[0] as HTMLButtonElement;
+        copyBtn.onclick = () => navigator.clipboard.writeText(content);
 
         // from: https://www.w3schools.com/howto/howto_js_draggable.asp
         let pos1: number, pos2: number, pos3: number, pos4: number;

@@ -13,6 +13,8 @@ export class DraggableTextbox {
         textarea.value = content;
         const closeBtn = div.getElementsByClassName("draggable-close-btn")[0];
         closeBtn.onclick = () => div.remove();
+        const copyBtn = div.getElementsByClassName("draggable-copy-btn")[0];
+        copyBtn.onclick = () => navigator.clipboard.writeText(content);
         let pos1, pos2, pos3, pos4;
         const dragMouseDown = (e) => {
             e = e || window.event;

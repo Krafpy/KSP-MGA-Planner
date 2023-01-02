@@ -469,10 +469,14 @@
     </div>
 
     <!-- template -->
+    <!-- hidden style="display: none;" -->
     <div id="draggable-text-template" class="draggable-text-box" hidden style="display: none;">
         <div class="draggable-text-header">
-            <h3 class="draggable-text-title">Some title</h3>
-            <button class="draggable-close-btn"><i class="fa fa-close"></i></button>
+            <h3 class="draggable-text-title"></h3>
+            <div>
+                <button class="draggable-copy-btn"><i class="fa-regular fa-clipboard"></i></button>
+                <button class="draggable-close-btn"><i class="fa fa-close"></i></button>
+            </div>
         </div>
         <textarea name="draggable-textaera" cols="70" rows="30" readonly></textarea>
     </div>
