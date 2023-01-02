@@ -17,6 +17,7 @@ import { DiscreteRange } from "./range.js";
 import { OrbitingBody } from "../objects/body.js";
 import { loadBodiesData, loadConfig } from "../utilities/data.js";
 import { trajectoryToText } from "../utilities/trajectory-text.js";
+import { DraggableTextbox } from "./draggable-text.js";
 
 
 export async function initEditorWithSystem(systems: SolarSystemData[], systemIndex: number){
@@ -258,7 +259,8 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
 
             console.log(solver.bestDeltaV);
 
-            console.log(trajectoryToText(trajectory, sequence));
+            const trajText = trajectoryToText(trajectory, sequence);
+            console.log(trajText);
         };
 
         const findTrajectory = async () => {

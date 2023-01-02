@@ -571,3 +571,94 @@ footer p
     margin-bottom: 0;
     margin-top: 0;
 }
+
+
+/* Draggable text box */
+
+.draggable-text-box
+{
+    position: fixed;
+    z-index: 9;
+
+    border-style: solid;
+    border-width: 1px;
+    border-color: #414242;
+    border-radius: 5px;
+
+    background-color: #0d0e0e;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    top: 100px;
+    left: 100px;
+
+    box-shadow: 5px 5px 5px rgba(0,0,0,0.6);
+    -moz-box-shadow: 5px 5px 5px rgba(0,0,0,0.6);
+    -webkit-box-shadow: 5px 5px 5px rgba(0,0,0,0.6);
+    -o-box-shadow: 5px 5px 5px rgba(0,0,0,0.6);
+}
+
+.draggable-text-header
+{
+    padding: 0.3em;
+    display: flex;
+    justify-content: space-between;
+}
+
+.draggable-text-header .draggable-text-title
+{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.draggable-text-box textarea
+{
+    /*resize: none;*/
+    color: white;
+    background-color: rgb(22, 23, 24);
+    margin-bottom: 0;
+    min-width: 200px;
+    width: 100%;
+
+    border: none;
+    overflow: auto;
+    outline: none;
+
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.draggable-close-btn
+{
+    color: white;
+    border-radius: 5px;
+    height: 28px;
+    width: 28px;
+    border: 1px solid rgb(54, 54, 54);
+    background-color: #3e1515;
+    font-size: 16px;
+}
+
+.draggable-close-btn:hover
+{
+    cursor: pointer;
+    background-color: #512424;
+}
+
+.draggable-close-btn:active
+{
+    cursor: pointer;
+    background-color: #580e0e;
+}
+
+.draggable-close-btn:disabled
+{
+    cursor: default;
+}

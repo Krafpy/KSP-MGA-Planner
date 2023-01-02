@@ -193,7 +193,8 @@ export async function initEditorWithSystem(systems, systemIndex) {
             stepSlider.enable();
             trajectory.updatePodPosition(systemTime);
             console.log(solver.bestDeltaV);
-            console.log(trajectoryToText(trajectory, sequence));
+            const trajText = trajectoryToText(trajectory, sequence);
+            console.log(trajText);
         };
         const findTrajectory = async () => {
             paramsErr.hide();
