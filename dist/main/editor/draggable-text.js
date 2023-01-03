@@ -37,8 +37,8 @@ export class DraggableTextbox {
             };
             const clamp = (x, a, b) => x < a ? a : x > b ? b : x;
             document.onmouseup = () => {
-                left = clamp(left, 0, window.innerWidth - div.offsetWidth);
-                top = clamp(top, 0, window.innerHeight - div.offsetHeight);
+                left = clamp(left, 0, window.innerWidth - header.offsetWidth);
+                top = clamp(top, 0, window.innerHeight - header.offsetHeight);
                 setPos();
                 document.onmouseup = null;
                 document.onmousemove = null;
