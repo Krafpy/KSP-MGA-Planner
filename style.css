@@ -404,10 +404,42 @@ input[type="range"]
     margin-top: 0;
 }
 
-.result-details li strong
+#maneuvre-details li strong
+{
+    display: inline-block;
+    width: 110px;
+}
+
+#flyby-details li strong
 {
     display: inline-block;
     width: 127px;
+}
+
+#maneuver-dv-li
+{
+    display: flex;
+    flex-direction: row;
+}
+
+#maneuver-dv-table th
+{
+    width: 65px;
+}
+
+.prograde-label
+{
+    color: #afe54e;
+}
+
+.normal-label
+{
+    color: #d45de5;
+}
+
+.radial-label
+{
+    color: #66d5f6;
 }
 
 .clickable-date
