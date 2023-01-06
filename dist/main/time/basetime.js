@@ -27,6 +27,12 @@ export class BaseKSPTime {
             return `T+ ${year - 1}y - ${day - 1}d - ${hmsStr}`;
         }
     }
+    toUT(from) {
+        if (typeof from == "number")
+            return new BaseKSPTime(from + this._exactDate, this.config);
+        else
+            return new BaseKSPTime(from.dateSeconds + this._exactDate, this.config);
+    }
     get dateSeconds() {
         return this._exactDate;
     }

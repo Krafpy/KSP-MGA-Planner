@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
     <title>KSP MGA Planner</title>
 </head>
 <body>
@@ -237,7 +239,12 @@
 
                 <div id="result-panel">
                     <div id="result-panel-header">
-                        <h2 class="calculation-panel-title">Calculated trajectory</h2>
+                        <div id="result-panel-header-left">
+                            <h2 class="calculation-panel-title">Calculated trajectory</h2>
+                            <button id="show-text-btn" class="submit-btn" disabled>
+                                <i class="fa-solid fa-circle-info"></i> Steps
+                            </button>
+                        </div>
                         <div id="steps-slider-control-group" class="control-group">
                             <label class="control-label" for="displayed-steps-slider">Displayed steps:</label>
                             <div id="steps-slider-controls" class="controls">
@@ -459,6 +466,19 @@
             </p>
         </footer>
 
+    </div>
+
+    <!-- template -->
+    <!-- hidden style="display: none;" -->
+    <div id="draggable-text-template" class="draggable-text-box" hidden style="display: none;">
+        <div class="draggable-text-header">
+            <h3 class="draggable-text-title"></h3>
+            <div>
+                <button class="draggable-copy-btn"><i class="fa-regular fa-clipboard"></i></button>
+                <button class="draggable-close-btn"><i class="fa fa-close"></i></button>
+            </div>
+        </div>
+        <textarea name="draggable-textaera" cols="70" rows="30" readonly></textarea>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>

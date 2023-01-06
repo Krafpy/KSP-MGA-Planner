@@ -9,12 +9,14 @@ import { BodySelector } from "./body-selector.js";
 import { EvolutionPlot } from "./plot.js";
 import { ProgressMessage } from "./progress-msg.js";
 import { SequenceSelector } from "./sequence-selector.js";
-import { SubmitButton, StopButton } from "./buttons.js";
+import { Button } from "./buttons.js";
 import { FlybySequence } from "../solvers/sequence.js";
 import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
 import { loadBodiesData, loadConfig } from "../utilities/data.js";
+import { trajectoryToText } from "../utilities/trajectory-text.js";
+import { DraggableTextbox } from "./draggable-text.js";
 export async function initEditorWithSystem(systems, systemIndex) {
     const canvas = document.getElementById("three-canvas");
     const width = canvas.clientWidth;
@@ -120,8 +122,14 @@ export async function initEditorWithSystem(systems, systemIndex) {
                 systemSelector.enable();
             }
         };
-        new SubmitButton("sequence-btn").click(() => generateSequences());
-        new StopButton("sequence-stop-btn").click(() => generator.cancel());
+        const seqGenBtn = new Button("sequence-btn");
+        seqGenBtn.click(async () => {
+            seqGenBtn.disable();
+            await generateSequences();
+            seqGenBtn.enable();
+        });
+        const seqStopBtn = new Button("sequence-stop-btn");
+        seqStopBtn.click(() => generator.cancel());
     }
     {
         const timeRangeStart = new TimeSelector("start", config);
@@ -146,6 +154,8 @@ export async function initEditorWithSystem(systems, systemIndex) {
         let trajectory;
         const detailsSelector = new Selector("details-selector");
         const stepSlider = new DiscreteRange("displayed-steps-slider");
+        const showTrajDetailsBtn = new Button("show-text-btn");
+        showTrajDetailsBtn.disable();
         detailsSelector.disable();
         stepSlider.disable();
         const getSpan = (id) => document.getElementById(id);
@@ -176,11 +186,13 @@ export async function initEditorWithSystem(systems, systemIndex) {
             detailsSelector.clear();
             detailsSelector.disable();
             stepSlider.disable();
+            showTrajDetailsBtn.disable();
             if (trajectory)
                 trajectory.remove();
         };
-        const displayFoundTrajectory = () => {
-            trajectory = new Trajectory(solver.bestSteps, system, config);
+        let trajectoryCounter = 0;
+        const displayFoundTrajectory = (sequence) => {
+            trajectory = new Trajectory(solver, system, config);
             trajectory.draw(canvas);
             trajectory.fillResultControls(resultItems, systemTime, controls);
             systemTime.input(() => {
@@ -192,6 +204,13 @@ export async function initEditorWithSystem(systems, systemIndex) {
             stepSlider.enable();
             trajectory.updatePodPosition(systemTime);
             console.log(solver.bestDeltaV);
+            const trajText = trajectoryToText(trajectory, sequence);
+            console.log(trajText);
+            trajectoryCounter++;
+            showTrajDetailsBtn.click(() => {
+                DraggableTextbox.create(`Trajectory ${trajectoryCounter}`, trajText);
+            });
+            showTrajDetailsBtn.enable();
         };
         const findTrajectory = async () => {
             paramsErr.hide();
@@ -225,7 +244,7 @@ export async function initEditorWithSystem(systems, systemIndex) {
                 const perfStart = performance.now();
                 await solver.searchOptimalTrajectory(sequence, userSettings);
                 console.log(`Search time: ${performance.now() - perfStart} ms`);
-                displayFoundTrajectory();
+                displayFoundTrajectory(sequence);
             }
             catch (err) {
                 if (err instanceof Error && err.message != "TRAJECTORY FINDER CANCELLED")
@@ -236,8 +255,14 @@ export async function initEditorWithSystem(systems, systemIndex) {
                 systemSelector.enable();
             }
         };
-        new SubmitButton("search-btn").click(() => findTrajectory());
-        new StopButton("search-stop-btn").click(() => solver.cancel());
+        const searchStartBtn = new Button("search-btn");
+        searchStartBtn.click(async () => {
+            searchStartBtn.disable();
+            await findTrajectory();
+            searchStartBtn.enable();
+        });
+        const searchStopBtn = new Button("search-stop-btn");
+        searchStopBtn.click(() => solver.cancel());
         systemSelector.change((_, index) => {
             stopLoop();
             deltaVPlot.destroy();

@@ -1,3 +1,4 @@
+import { joinStrings } from "../utilities/array.js";
 export class FlybySequence {
     constructor(system, ids) {
         this.ids = ids;
@@ -6,12 +7,12 @@ export class FlybySequence {
             this.bodies.push(system.bodyFromId(id));
         }
         this.length = this.bodies.length;
-        const getSubstr = (i) => this.bodies[i].name.substring(0, 2);
-        let str = getSubstr(0);
-        for (let i = 1; i < this.length; i++) {
-            str += "-" + getSubstr(i);
-        }
-        this.seqString = str;
+        const initials = this.bodies.map((body) => body.name.substring(0, 2));
+        this.seqString = joinStrings(initials, "-");
+    }
+    get seqStringFullNames() {
+        const names = this.bodies.map((body) => body.name);
+        return joinStrings(names, "-");
     }
     static fromString(str, system) {
         str = str.trim();

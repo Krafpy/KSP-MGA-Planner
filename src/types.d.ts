@@ -143,6 +143,7 @@ interface IKSPTime {
     public displayYDHMS:   DateYDH;
     public readonly defaultDate: number;
     public stringYDHMS(precision: "h" | "hm" | "hms", display: "emt" | "ut"): string;
+    public toUT(from: IKSPTime | number): IKSPTime;
 }
 
 type MessageToWorker = 
@@ -299,6 +300,7 @@ type ManeuvreDetails = {
     progradeDV:  number,
     normalDV:    number,
     radialDV:    number,
+    totalDV:     number,
     ejectAngle?: number
 };
 

@@ -6,21 +6,24 @@ import { KSPTime } from "../time/time.js";
 import { CameraController } from "../objects/camera.js";
 import { SpriteManager } from "../utilities/sprites.js";
 import { OrbitingBody } from "../objects/body.js";
+import { TrajectorySolver } from "./trajectory-solver.js";
 
 export class Trajectory {
     private _orbitObjects:  THREE.Object3D[] = [];
     private _spriteObjects: THREE.Sprite[][] = [];
     private _podSpriteIndex: number = 0;
 
+    public readonly steps: TrajectoryStep[];
     public readonly orbits: Orbit[] = [];
 
-    private readonly _maneuvres: ManeuvreDetails[] = [];
-    private readonly _flybys: FlybyDetails[] = [];
+    public readonly maneuvres: ManeuvreDetails[] = [];
+    public readonly flybys: FlybyDetails[] = [];
 
     private  _displayedSteps: boolean[] = [];
     private _spritesUpdateFunId: number = -1;
 
-    constructor(public readonly steps: TrajectoryStep[], public readonly system: SolarSystem, public readonly config: Config) {
+    constructor(public readonly solver: TrajectorySolver, public readonly system: SolarSystem, public readonly config: Config) {
+        this.steps = solver.bestSteps;
         for(const {orbitElts, attractorId} of this.steps) {
             const attractor = this.system.bodyFromId(attractorId);
             const orbit = Orbit.fromOrbitalElements(orbitElts, attractor, config.orbit);
@@ -224,16 +227,17 @@ export class Trajectory {
                     ejectAngle = Math.acos(cosA) * 180 / Math.PI;
                     ejectAngle *= Math.sign(u.x*v.y - u.y*v.x); // counter clockwise direction of the angle
                 }
-
+                
                 const details = {
                     stepIndex:   i,
                     dateMET:     step.dateOfStart - departureDate,
                     progradeDV:  progradeDir.dot(deltaV),
                     normalDV:    normalDir.dot(deltaV),
                     radialDV:    radialDir.dot(deltaV),
+                    totalDV:     deltaV.length(),
                     ejectAngle:  ejectAngle
                 };
-                this._maneuvres.push(details);
+                this.maneuvres.push(details);
             }
         }
     }
@@ -243,7 +247,8 @@ export class Trajectory {
      */
     private _calculateFlybyDetails(){
         const departureDate = this.steps[0].dateOfStart;
-        for(const {flyby} of this.steps){
+        for(let i = 0; i < this.steps.length; i++){
+            const {flyby} = this.steps[i];
             if(flyby){
                 const body = this.system.bodyFromId(flyby.bodyId);
                 // non oriented inclination compared to x-z plane
@@ -256,7 +261,7 @@ export class Trajectory {
                     periAltitude:    (flyby.periRadius - body.radius) / 1000, // in km
                     inclinationDeg:  inc
                 }
-                this._flybys.push(details);
+                this.flybys.push(details);
             }
         }
     }
@@ -272,7 +277,7 @@ export class Trajectory {
         const arrDate = KSPTime(this.steps[this.steps.length-1].dateOfStart, this.config.time);
 
         // total delta-V
-        resultItems.totalDVSpan.innerHTML = this._totalDeltaV.toFixed(1);
+        resultItems.totalDVSpan.innerHTML = this.totalDeltaV.toFixed(1);
         // departure date
         resultItems.depDateSpan.innerHTML = depDate.stringYDHMS("hms", "ut");
         // arrival date
@@ -305,7 +310,7 @@ export class Trajectory {
         for(let i = 0; i < this.steps.length; i++){
             const {maneuvre, flyby} = this.steps[i];
             if(maneuvre){
-                const details = this._maneuvres[maneuvreIdx];
+                const details = this.maneuvres[maneuvreIdx];
                 const step = this.steps[details.stepIndex];
                 const context = (<ManeuvreInfo>step.maneuvre).context;
 
@@ -333,7 +338,7 @@ export class Trajectory {
 
             } else if(flyby){
                 // details the options in the selector, if it's a flyby
-                const details = this._flybys[flybyIdx];
+                const details = this.flybys[flybyIdx];
                 const bodyName = this.system.bodyFromId(details.bodyId).name;
                 const optionName = `${++optionNumber}: ${bodyName} flyby`;
 
@@ -358,7 +363,7 @@ export class Trajectory {
             const option = selectorOptions[index];
             
             if(option.type == "maneuver"){
-                const details = this._maneuvres[option.origin];
+                const details = this.maneuvres[option.origin];
                 const dateEMT = KSPTime(details.dateMET, this.config.time);
                 
                 resultItems.dateSpan.innerHTML = dateEMT.stringYDHMS("hm", "emt");
@@ -375,14 +380,13 @@ export class Trajectory {
                     ejAngleLI.hidden  = true;
                 }
 
-                const date = depDate.dateSeconds + dateEMT.dateSeconds;
-                resultItems.dateSpan.onclick = onDateClick(date);
+                resultItems.dateSpan.onclick = onDateClick(dateEMT.toUT(depDate).dateSeconds);
 
                 resultItems.flybyDiv.hidden = true;
                 resultItems.maneuverDiv.hidden = false;
 
             } else if(option.type == "flyby"){
-                const details = this._flybys[option.origin];
+                const details = this.flybys[option.origin];
                 const startDateEMT = KSPTime(details.soiEnterDateMET, this.config.time);
                 const endDateEMT = KSPTime(details.soiExitDateMET, this.config.time);
 
@@ -392,10 +396,8 @@ export class Trajectory {
                 resultItems.inclinationSpan.innerHTML = details.inclinationDeg.toFixed(0);
                 resultItems.flybyNumberSpan.innerHTML = (option.origin + 1).toString();
 
-                let enterDate = depDate.dateSeconds + startDateEMT.dateSeconds;
-                resultItems.startDateSpan.onclick = onDateClick(enterDate);
-                let exitDate = depDate.dateSeconds + endDateEMT.dateSeconds;
-                resultItems.endDateSpan.onclick = onDateClick(exitDate);
+                resultItems.startDateSpan.onclick = onDateClick(startDateEMT.toUT(depDate).dateSeconds);
+                resultItems.endDateSpan.onclick = onDateClick(endDateEMT.toUT(depDate).dateSeconds);
                 
                 resultItems.flybyDiv.hidden = false;
                 resultItems.maneuverDiv.hidden = true;
@@ -478,9 +480,9 @@ export class Trajectory {
     /**
      * Computes and returns the total delta-V of the trajectory
      */
-    private get _totalDeltaV(){
+    public get totalDeltaV(){
         let total = 0;
-        for(const details of this._maneuvres){
+        for(const details of this.maneuvres){
             const x = details.progradeDV;
             const y = details.normalDV;
             const z = details.radialDV;

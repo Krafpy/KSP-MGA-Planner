@@ -9,13 +9,15 @@ import { BodySelector } from "./body-selector.js";
 import { EvolutionPlot } from "./plot.js";
 import { ProgressMessage } from "./progress-msg.js";
 import { SequenceSelector } from "./sequence-selector.js";
-import { SubmitButton, StopButton } from "./buttons.js";
+import { Button } from "./buttons.js";
 import { FlybySequence } from "../solvers/sequence.js";
 import { Trajectory } from "../solvers/trajectory.js";
 import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
 import { OrbitingBody } from "../objects/body.js";
 import { loadBodiesData, loadConfig } from "../utilities/data.js";
+import { trajectoryToText } from "../utilities/trajectory-text.js";
+import { DraggableTextbox } from "./draggable-text.js";
 
 
 export async function initEditorWithSystem(systems: SolarSystemData[], systemIndex: number){
@@ -161,8 +163,14 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         }
 
         // Sequence generator buttons
-        new SubmitButton("sequence-btn").click(() => generateSequences());
-        new StopButton("sequence-stop-btn").click(() => generator.cancel());
+        const seqGenBtn = new Button("sequence-btn");
+        seqGenBtn.click(async () => {
+            seqGenBtn.disable();
+            await generateSequences()
+            seqGenBtn.enable();
+        });
+        const seqStopBtn = new Button("sequence-stop-btn");
+        seqStopBtn.click(() => generator.cancel());
     }
     
     {   
@@ -204,6 +212,9 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         const detailsSelector = new Selector("details-selector");
         const stepSlider = new DiscreteRange("displayed-steps-slider");
 
+        const showTrajDetailsBtn = new Button("show-text-btn");
+        showTrajDetailsBtn.disable();
+
         detailsSelector.disable();
         stepSlider.disable();
 
@@ -237,11 +248,13 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             detailsSelector.clear();
             detailsSelector.disable();
             stepSlider.disable();
+            showTrajDetailsBtn.disable();
             if(trajectory) trajectory.remove();
         }
 
-        const displayFoundTrajectory = () => {
-            trajectory = new Trajectory(solver.bestSteps, system, config);
+        let trajectoryCounter = 0;
+        const displayFoundTrajectory = (sequence: FlybySequence) => {
+            trajectory = new Trajectory(solver, system, config);
             trajectory.draw(canvas);
             trajectory.fillResultControls(resultItems, systemTime, controls);
 
@@ -256,6 +269,15 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             trajectory.updatePodPosition(systemTime);
 
             console.log(solver.bestDeltaV);
+
+            const trajText = trajectoryToText(trajectory, sequence);
+            console.log(trajText);
+
+            trajectoryCounter++;
+            showTrajDetailsBtn.click(() => {
+                DraggableTextbox.create(`Trajectory ${trajectoryCounter}`, trajText);
+            });
+            showTrajDetailsBtn.enable();
         };
 
         const findTrajectory = async () => {
@@ -298,7 +320,7 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
                 await solver.searchOptimalTrajectory(sequence, userSettings);
                 console.log(`Search time: ${performance.now() - perfStart} ms`);
                 
-                displayFoundTrajectory();
+                displayFoundTrajectory(sequence);
     
             } catch(err) {
                 if(err instanceof Error && err.message != "TRAJECTORY FINDER CANCELLED")
@@ -312,8 +334,14 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         };
     
         // Trajectory solver buttons
-        new SubmitButton("search-btn").click(() => findTrajectory());
-        new StopButton("search-stop-btn").click(() => solver.cancel());
+        const searchStartBtn = new Button("search-btn");
+        searchStartBtn.click(async () => {
+            searchStartBtn.disable();
+            await findTrajectory();
+            searchStartBtn.enable();
+        });
+        const searchStopBtn = new Button("search-stop-btn");
+        searchStopBtn.click(() => solver.cancel());
 
         // Configure the system selector callback
         systemSelector.change((_, index) => {
