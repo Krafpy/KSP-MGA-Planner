@@ -108,4 +108,10 @@ export class Orbit {
     radius(trueAnomaly) {
         return this.orbitalParam / (1 + this.eccentricity * Math.cos(trueAnomaly));
     }
+    stateAtDate(meanAnomaly0, epoch, date) {
+        const nu = this.solveTrueAnomalyAtDate(meanAnomaly0, epoch, date);
+        const pos = this.positionFromTrueAnomaly(nu);
+        const vel = this.velocityFromTrueAnomaly(nu);
+        return { pos, vel };
+    }
 }

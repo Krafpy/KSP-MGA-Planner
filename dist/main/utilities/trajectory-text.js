@@ -91,3 +91,49 @@ function pairsToString(pairs) {
     }
     return joinStrings(lines, "\n");
 }
+export function trajectoryToCSVData(traj) {
+    const { config, steps, orbits } = traj;
+    const n = steps.length;
+    const entries = [];
+    const m = steps[n - 1].flyby !== undefined ? n - 1 : n - 2;
+    for (let i = 2; i < m; i++) {
+        const orbit = orbits[i];
+        const step = steps[i];
+        const { maneuvre, flyby, dateOfStart, startM } = step;
+        if (maneuvre && maneuvre.context.type == "dsm") {
+            const startState = orbit.stateAtDate(startM, 0, 0);
+            entries.push({
+                type: "dsm",
+                bodyId: step.attractorId,
+                timeUT: KSPTime(dateOfStart, config.time).dateSeconds,
+                pos: startState.pos,
+                vel: startState.vel
+            });
+        }
+        else if (!maneuvre && !flyby) {
+            const startState = orbit.stateAtDate(startM, 0, 0);
+            entries.push({
+                type: "flyby",
+                bodyId: steps[i - 1].attractorId,
+                timeUT: KSPTime(dateOfStart, config.time).dateSeconds,
+                pos: startState.pos,
+                vel: startState.vel
+            });
+        }
+    }
+    entries[0].type = "escape";
+    const arrivalDate = steps[m - 1].dateOfStart + steps[m - 1].duration;
+    const arrivalState = orbits[m - 1].stateAtDate(steps[m - 1].startM, 0, arrivalDate);
+    entries.push({
+        type: "arrival",
+        bodyId: steps[n - 1].attractorId,
+        timeUT: KSPTime(arrivalDate, config.time).dateSeconds,
+        pos: arrivalState.pos,
+        vel: arrivalState.vel
+    });
+    const lines = ["type,bodyId,timeUT,posX,posY,posZ,velX,velY,velZ"];
+    for (const { type, bodyId, timeUT, pos, vel } of entries) {
+        lines.push(`${type},${bodyId},${timeUT},${pos.x},${pos.y},${pos.z},${vel.x},${vel.y},${vel.z}`);
+    }
+    return joinStrings(lines, "\n");
+}
