@@ -404,12 +404,64 @@ input[type="range"]
     margin-top: 0;
 }
 
-.result-details li strong
+#maneuvre-details li strong
+{
+    display: inline-block;
+    width: 110px;
+}
+
+#flyby-details li strong
 {
     display: inline-block;
     width: 127px;
 }
 
+#maneuver-dv-li
+{
+    display: flex;
+    flex-direction: row;
+}
+
+/* Maneuver delta-V table */
+
+#maneuver-dv-table
+{
+    border-collapse: collapse;
+}
+
+#maneuver-dv-table th
+{
+    width: 65px;
+    border-width: 0;
+    padding: 0;
+
+    text-align: center;
+}
+
+#maneuver-dv-table td
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+    text-align: center;
+}
+
+.prograde-label
+{
+    color: #afe54e;
+}
+
+.normal-label
+{
+    color: #d45de5;
+}
+
+.radial-label
+{
+    color: #66d5f6;
+}
+
+/* Clickable dates */
 .clickable-date
 {
     color: rgb(86, 169, 224);
