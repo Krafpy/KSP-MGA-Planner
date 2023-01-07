@@ -422,9 +422,28 @@ input[type="range"]
     flex-direction: row;
 }
 
+/* Maneuver delta-V table */
+
+#maneuver-dv-table
+{
+    border-collapse: collapse;
+}
+
 #maneuver-dv-table th
 {
     width: 65px;
+    border-width: 0;
+    padding: 0;
+
+    text-align: center;
+}
+
+#maneuver-dv-table td
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+    text-align: center;
 }
 
 .prograde-label
@@ -442,6 +461,7 @@ input[type="range"]
     color: #66d5f6;
 }
 
+/* Clickable dates */
 .clickable-date
 {
     color: rgb(86, 169, 224);
