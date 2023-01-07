@@ -25,7 +25,14 @@ export class DraggableTextbox {
         };
         const copyBtn = div.getElementsByClassName("draggable-copy-btn")[0];
         copyBtn.onclick = () => navigator.clipboard.writeText(content);
+        let mouseOverBtn = false;
+        closeBtn.onmouseover = () => mouseOverBtn = true;
+        copyBtn.onmouseover = () => mouseOverBtn = true;
+        closeBtn.onmouseleave = () => mouseOverBtn = false;
+        copyBtn.onmouseleave = () => mouseOverBtn = false;
         header.onmousedown = (e) => {
+            if (mouseOverBtn)
+                return;
             e = e || window.event;
             e.preventDefault();
             let x = e.clientX;
@@ -37,6 +44,8 @@ export class DraggableTextbox {
             };
             const clamp = (x, a, b) => x < a ? a : x > b ? b : x;
             document.onmouseup = () => {
+                if (mouseOverBtn)
+                    return;
                 left = clamp(left, 0, window.innerWidth - header.offsetWidth);
                 top = clamp(top, 0, window.innerHeight - header.offsetHeight);
                 setPos();
@@ -44,6 +53,8 @@ export class DraggableTextbox {
                 document.onmousemove = null;
             };
             document.onmousemove = (e) => {
+                if (mouseOverBtn)
+                    return;
                 e = e || window.event;
                 e.preventDefault();
                 let dx = x - e.clientX;
