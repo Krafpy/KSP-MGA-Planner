@@ -357,6 +357,7 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             resultItems.endDateSpan.innerHTML = "--";
             resultItems.startDateSpan.innerHTML = "--";
             resultItems.dateSpan.innerHTML = "--";
+            resultItems.progradeDVSpan.innerHTML = "--";
             resultItems.normalDVSpan.innerHTML = "--";
             resultItems.radialDVSpan.innerHTML = "--";
             resultItems.ejAngleSpan.innerHTML = "--";
