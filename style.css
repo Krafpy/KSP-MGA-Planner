@@ -491,9 +491,21 @@ input[type="range"]
     background-image: linear-gradient(rgb(0, 93, 163), rgb(0, 60, 105));
 }
 
+#download-csv-btn
+{
+    margin-left: 5px;
+    background-image: linear-gradient(rgb(0, 137, 57), rgb(0, 87, 46));
+}
+
+
 #show-text-btn:hover 
 {
     background-image: linear-gradient(rgb(0, 78, 138), rgb(0, 60, 105));
+}
+
+#download-csv-btn:hover
+{
+    background-image: linear-gradient(rgb(0, 118, 49), rgb(0, 87, 46));
 }
 
 #show-text-btn:active
@@ -502,7 +514,13 @@ input[type="range"]
     background-color: rgb(0, 60, 105);
 }
 
-#show-text-btn:disabled
+#download-csv-btn:active
+{
+    background-image: none;
+    background-color: rgb(0, 87, 46);
+}
+
+#show-text-btn:disabled, #download-csv-btn:disabled
 {
     background-image: none;
     background-color: rgb(46, 52, 56);

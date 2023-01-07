@@ -16,7 +16,7 @@ import { Selector } from "./selector.js";
 import { DiscreteRange } from "./range.js";
 import { OrbitingBody } from "../objects/body.js";
 import { loadBodiesData, loadConfig } from "../utilities/data.js";
-import { trajectoryToText } from "../utilities/trajectory-text.js";
+import { trajectoryToCSVData, trajectoryToText } from "../utilities/trajectory-text.js";
 import { DraggableTextbox } from "./draggable-text.js";
 
 
@@ -214,6 +214,8 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
 
         const showTrajDetailsBtn = new Button("show-text-btn");
         showTrajDetailsBtn.disable();
+        const downloadTrajDataBtn = new Button("download-csv-btn");
+        downloadTrajDataBtn.disable();
 
         detailsSelector.disable();
         stepSlider.disable();
@@ -249,6 +251,7 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             detailsSelector.disable();
             stepSlider.disable();
             showTrajDetailsBtn.disable();
+            downloadTrajDataBtn.disable();
             if(trajectory) trajectory.remove();
         }
 
@@ -278,6 +281,18 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
                 DraggableTextbox.create(`Trajectory ${trajectoryCounter}`, trajText);
             });
             showTrajDetailsBtn.enable();
+
+            const trajCSV = trajectoryToCSVData(trajectory);
+            downloadTrajDataBtn.click(() => {
+                let element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(trajCSV));
+                element.setAttribute('download', `trajectory-${trajectoryCounter}.csv`);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            });
+            downloadTrajDataBtn.enable();
         };
 
         const findTrajectory = async () => {

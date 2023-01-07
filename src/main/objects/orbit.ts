@@ -165,4 +165,18 @@ export class Orbit implements IOrbit {
     public radius(trueAnomaly: number) {
         return this.orbitalParam / (1 + this.eccentricity * Math.cos(trueAnomaly));
     }
+
+    /**
+     * Computes the position and velocity on the orbit at a specific date.
+     * @param meanAnomaly0 The reference mean anomaly.
+     * @param epoch The date at which the reference mean anomaly corresponds to.
+     * @param date The date at which compute the position.
+     * @returns The position and velocity on the orbit at the specified date.
+     */
+    public stateAtDate(meanAnomaly0: number, epoch: number, date: number){
+        const nu = this.solveTrueAnomalyAtDate(meanAnomaly0, epoch, date);
+        const pos = this.positionFromTrueAnomaly(nu);
+        const vel = this.velocityFromTrueAnomaly(nu);
+        return {pos, vel};
+    }
 }
