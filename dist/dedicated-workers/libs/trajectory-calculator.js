@@ -110,6 +110,11 @@ class TrajectoryCalculator {
         }
         return total;
     }
+    get totalDuration() {
+        const start = this.steps[0].dateOfStart;
+        const end = this._lastStep.dateOfStart;
+        return end - start;
+    }
     _computeLegDuration(infos) {
         const exitedBody = this.system[infos.exitedBodyId];
         const { durationParam } = infos;

@@ -136,6 +136,9 @@ export async function initEditorWithSystem(systems, systemIndex) {
         const timeRangeEnd = new TimeSelector("end", config);
         timeRangeStart.setToDefault();
         timeRangeEnd.setToDefault();
+        const maxDuration = new IntegerInput("max-duration");
+        maxDuration.setMinMax(1, Infinity);
+        maxDuration.value = config.editor.defaultMaxDuration;
         const depAltitude = new IntegerInput("start-altitude");
         const destAltitude = new IntegerInput("end-altitude");
         const updateAltitudeRange = (input, body) => {
@@ -247,13 +250,26 @@ export async function initEditorWithSystem(systems, systemIndex) {
                     throw new Error("Departure date range end must be greater than the start date.");
                 const depAltitudeVal = depAltitude.value * 1000;
                 const destAltitudeVal = destAltitude.value * 1000;
+                if (!maxDuration.validate()) {
+                    throw new Error("Invalid duration limit.");
+                }
+                let maxDurationSeconds;
+                if (config.time.type == "base") {
+                    const { hoursPerDay } = config.time;
+                    const secondsPerDay = hoursPerDay * 3600;
+                    maxDurationSeconds = maxDuration.value * secondsPerDay;
+                }
+                else {
+                    maxDurationSeconds = maxDuration.value * 24 * 3600;
+                }
                 resetFoundTrajectory();
                 const userSettings = {
                     startDate: startDate,
                     endDate: endDate,
                     depAltitude: depAltitudeVal,
                     destAltitude: destAltitudeVal,
-                    noInsertion: noInsertionBox.checked
+                    noInsertion: noInsertionBox.checked,
+                    maxDuration: maxDurationSeconds
                 };
                 const perfStart = performance.now();
                 await solver.searchOptimalTrajectory(sequence, userSettings);
