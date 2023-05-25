@@ -176,6 +176,14 @@
                             km (above surface level)
                         </div>
                     </div>
+                    <div class="control-group">
+                        <label class="control-label" for="max-duration">Max duration:</label>
+                        <div class="controls">
+                            <input class="number-input" name="max-duration" id="max-duration" type="number" value="0" min="1">
+                            days
+                            <input name="use-max-duration" id="use-max-duration" type="checkbox">
+                        </div>
+                    </div>
                     <div id="insertion-checkbox-container">
                         <div class="controls">
                             <input name="insertion-checkbox" id="insertion-checkbox" type="checkbox">
@@ -420,6 +428,15 @@
                         <li>
                             <strong>Departure and destination altitude:</strong> the altitude of the parking orbit
                             around the departure and destination body.
+                        </li>
+                        <li>
+                            <strong>Max duration:</strong> if checked, forces the trajectory solver to try not to exceed the
+                            specified maximum duration (in number of days). Note that it may give a trajectory that exceeds the
+                            limit if it cannot find shorter ones.
+                        </li>
+                        <li>
+                            <strong>No insertion burn:</strong> if checked, ignores circularization at the destination body and
+                            instead do a flyby at arrival.
                         </li>
                     </ul>
                     <p>

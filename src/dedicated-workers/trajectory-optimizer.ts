@@ -80,10 +80,15 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                     periVelCost = circDV;
                 }
                 
+                // Add a big cost value if the duration exceeds the duration limit.
+                const duration = trajectory.totalDuration;
+                const durationOverflow = Math.max(0, duration - this._settings.maxDuration);
+                const durationCost = durationOverflow*totDV;
+
                 // Attempt to force a minimal inclination of the
                 // circular orbit around the destination body
                 // FIX : doesn't work so well...
-                return totDV + totDV*lastInc*0.1 + periVelCost;
+                return totDV + totDV*lastInc*0.1 + periVelCost + durationCost;
             };
 
             const trajConfig = this._config.trajectorySearch;

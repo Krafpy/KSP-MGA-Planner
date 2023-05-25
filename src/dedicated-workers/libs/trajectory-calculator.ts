@@ -161,6 +161,15 @@ class TrajectoryCalculator {
     }
 
     /**
+     * Returns the duration of the whole trajectory, in seconds.
+     */
+    public get totalDuration(){
+        const start = this.steps[0].dateOfStart;
+        const end = this._lastStep.dateOfStart;
+        return end - start;
+    }
+
+    /**
      * Completes the provided leg infos by calculating the leg duration from the already given
      * parameters
      * @param infos The leg infos to complete

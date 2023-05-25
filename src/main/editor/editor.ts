@@ -192,6 +192,18 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         depAltitude.value = config.editor.defaultAltitude;
         destAltitude.value = config.editor.defaultAltitude;
 
+        // Max duration input
+        const maxDuration = new IntegerInput("max-duration");
+        maxDuration.setMinMax(1, Infinity);
+        maxDuration.value = config.editor.defaultMaxDuration;
+
+        const useMaxDuration = document.getElementById("use-max-duration") as HTMLInputElement;
+        const updateUseMaxDuration = () => {
+            maxDuration.element.disabled = !useMaxDuration.checked;
+        };
+        useMaxDuration.onchange = updateUseMaxDuration;
+        updateUseMaxDuration();
+
         // No insertion burn checkbox
         const noInsertionBox = document.getElementById("insertion-checkbox") as HTMLInputElement;
         noInsertionBox.checked = false;
@@ -320,6 +332,22 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
 
                 const depAltitudeVal = depAltitude.value * 1000;
                 const destAltitudeVal = destAltitude.value * 1000;
+
+                if(!maxDuration.validate()) {
+                    throw new Error("Invalid duration limit.");
+                }
+
+                let maxDurationSeconds = Infinity;
+                if(useMaxDuration.checked){
+                    if(config.time.type == "base") {
+                        const {hoursPerDay} = config.time;
+                        const secondsPerDay = hoursPerDay * 3600;
+                        maxDurationSeconds = maxDuration.value * secondsPerDay;
+                    } else {
+                        maxDurationSeconds = maxDuration.value * 24*3600;
+                    }
+                }
+                console.log(maxDurationSeconds);
                 
                 resetFoundTrajectory();
 
@@ -328,7 +356,8 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
                     endDate:      endDate,
                     depAltitude:  depAltitudeVal,
                     destAltitude: destAltitudeVal,
-                    noInsertion:  noInsertionBox.checked
+                    noInsertion:  noInsertionBox.checked,
+                    maxDuration:  maxDurationSeconds
                 };
 
                 const perfStart = performance.now();

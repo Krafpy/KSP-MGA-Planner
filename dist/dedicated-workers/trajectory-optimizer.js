@@ -45,7 +45,10 @@ class TrajectoryOptimizer extends WorkerEnvironment {
                     const circDV = periVel - Physics3D.circularVelocity(finalBody, periapsis);
                     periVelCost = circDV;
                 }
-                return totDV + totDV * lastInc * 0.1 + periVelCost;
+                const duration = trajectory.totalDuration;
+                const durationOverflow = Math.max(0, duration - this._settings.maxDuration);
+                const durationCost = durationOverflow * totDV;
+                return totDV + totDV * lastInc * 0.1 + periVelCost + durationCost;
             };
             const trajConfig = this._config.trajectorySearch;
             const { diffWeight } = trajConfig;

@@ -144,6 +144,15 @@ export async function initEditorWithSystem(systems, systemIndex) {
         };
         depAltitude.value = config.editor.defaultAltitude;
         destAltitude.value = config.editor.defaultAltitude;
+        const maxDuration = new IntegerInput("max-duration");
+        maxDuration.setMinMax(1, Infinity);
+        maxDuration.value = config.editor.defaultMaxDuration;
+        const useMaxDuration = document.getElementById("use-max-duration");
+        const updateUseMaxDuration = () => {
+            maxDuration.element.disabled = !useMaxDuration.checked;
+        };
+        useMaxDuration.onchange = updateUseMaxDuration;
+        updateUseMaxDuration();
         const noInsertionBox = document.getElementById("insertion-checkbox");
         noInsertionBox.checked = false;
         const customSequence = document.getElementById("custom-sequence");
@@ -247,13 +256,29 @@ export async function initEditorWithSystem(systems, systemIndex) {
                     throw new Error("Departure date range end must be greater than the start date.");
                 const depAltitudeVal = depAltitude.value * 1000;
                 const destAltitudeVal = destAltitude.value * 1000;
+                if (!maxDuration.validate()) {
+                    throw new Error("Invalid duration limit.");
+                }
+                let maxDurationSeconds = Infinity;
+                if (useMaxDuration.checked) {
+                    if (config.time.type == "base") {
+                        const { hoursPerDay } = config.time;
+                        const secondsPerDay = hoursPerDay * 3600;
+                        maxDurationSeconds = maxDuration.value * secondsPerDay;
+                    }
+                    else {
+                        maxDurationSeconds = maxDuration.value * 24 * 3600;
+                    }
+                }
+                console.log(maxDurationSeconds);
                 resetFoundTrajectory();
                 const userSettings = {
                     startDate: startDate,
                     endDate: endDate,
                     depAltitude: depAltitudeVal,
                     destAltitude: destAltitudeVal,
-                    noInsertion: noInsertionBox.checked
+                    noInsertion: noInsertionBox.checked,
+                    maxDuration: maxDurationSeconds
                 };
                 const perfStart = performance.now();
                 await solver.searchOptimalTrajectory(sequence, userSettings);

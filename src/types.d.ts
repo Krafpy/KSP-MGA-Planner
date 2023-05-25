@@ -92,6 +92,7 @@ interface EditorSettings {
     readonly defaultOrigin:     number;
     readonly defaultDest:       number;
     readonly defaultAltitude:   number;
+    readonly defaultMaxDuration: number;
 }
 
 interface WorkersSettings {
@@ -317,7 +318,8 @@ type TrajectoryUserSettings = {
     endDate:      number,
     depAltitude:  number,
     destAltitude: number,
-    noInsertion:  boolean
+    noInsertion:  boolean,
+    maxDuration: number
 };
 
 type ResultPannelItems = {
