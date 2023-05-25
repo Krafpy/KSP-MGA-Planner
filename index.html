@@ -429,6 +429,15 @@
                             <strong>Departure and destination altitude:</strong> the altitude of the parking orbit
                             around the departure and destination body.
                         </li>
+                        <li>
+                            <strong>Max duration:</strong> if checked, forces the trajectory solver to try not to exceed the
+                            specified maximum duration (in number of days). Note that it may give a trajectory that exceeds the
+                            limit if it cannot find shorter ones.
+                        </li>
+                        <li>
+                            <strong>No insertion burn:</strong> if checked, ignores circularization at the destination body and
+                            instead do a flyby at arrival.
+                        </li>
                     </ul>
                     <p>
                         The trajectory search step will then <em>try</em> to find <em>a possible</em> optimal trajectory given the sequence and the
