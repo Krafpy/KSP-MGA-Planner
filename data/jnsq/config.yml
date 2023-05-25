@@ -62,6 +62,7 @@ editor:
   defaultOrigin:      3             # default origin body on start (index of Kerbin in the selector)
   defaultDest:        0             # default destination body on start (index of Moho in the selector)
   defaultAltitude:    150           # default altitude from the default body (in km above surface)
+  defaultMaxDuration: 500           # default duration limit for a trajectory (in number of days)
 
 workers:
   progressStep:       250           # number of inputs processed per chunk before progress callback
