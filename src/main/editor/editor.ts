@@ -180,11 +180,6 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         timeRangeStart.setToDefault();
         timeRangeEnd.setToDefault();
 
-        // Max duration input
-        const maxDuration = new IntegerInput("max-duration");
-        maxDuration.setMinMax(1, Infinity);
-        maxDuration.value = config.editor.defaultMaxDuration;
-
         // Numerical inputs
         const depAltitude = new IntegerInput("start-altitude");
         const destAltitude = new IntegerInput("end-altitude");
@@ -196,6 +191,18 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
 
         depAltitude.value = config.editor.defaultAltitude;
         destAltitude.value = config.editor.defaultAltitude;
+
+        // Max duration input
+        const maxDuration = new IntegerInput("max-duration");
+        maxDuration.setMinMax(1, Infinity);
+        maxDuration.value = config.editor.defaultMaxDuration;
+
+        const useMaxDuration = document.getElementById("use-max-duration") as HTMLInputElement;
+        const updateUseMaxDuration = () => {
+            maxDuration.element.disabled = !useMaxDuration.checked;
+        };
+        useMaxDuration.onchange = updateUseMaxDuration;
+        updateUseMaxDuration();
 
         // No insertion burn checkbox
         const noInsertionBox = document.getElementById("insertion-checkbox") as HTMLInputElement;
@@ -330,14 +337,17 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
                     throw new Error("Invalid duration limit.");
                 }
 
-                let maxDurationSeconds: number;
-                if(config.time.type == "base") {
-                    const {hoursPerDay} = config.time;
-                    const secondsPerDay = hoursPerDay * 3600;
-                    maxDurationSeconds = maxDuration.value * secondsPerDay;
-                } else {
-                    maxDurationSeconds = maxDuration.value * 24*3600;
+                let maxDurationSeconds = Infinity;
+                if(useMaxDuration.checked){
+                    if(config.time.type == "base") {
+                        const {hoursPerDay} = config.time;
+                        const secondsPerDay = hoursPerDay * 3600;
+                        maxDurationSeconds = maxDuration.value * secondsPerDay;
+                    } else {
+                        maxDurationSeconds = maxDuration.value * 24*3600;
+                    }
                 }
+                console.log(maxDurationSeconds);
                 
                 resetFoundTrajectory();
 
