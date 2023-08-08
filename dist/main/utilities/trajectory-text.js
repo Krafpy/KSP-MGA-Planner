@@ -1,6 +1,6 @@
 import { KSPTime } from "../time/time.js";
 import { joinStrings } from "./array.js";
-export function trajectoryToText(traj, seq) {
+export function trajectoryToText(traj, seq, dateMode) {
     const { steps, system, config } = traj;
     const pairs = [];
     const add = (label, data, indent) => {
@@ -8,10 +8,10 @@ export function trajectoryToText(traj, seq) {
     };
     const space = () => add("", "", 0);
     add("Sequence", seq.seqStringFullNames, 0);
-    const depDate = KSPTime(steps[0].dateOfStart, config.time);
-    const arrDate = KSPTime(steps[steps.length - 1].dateOfStart, config.time);
-    add("Departure", depDate.stringYDHMS("hms", "ut"), 0);
-    add("Arrival", arrDate.stringYDHMS("hms", "ut"), 0);
+    const depDate = KSPTime(steps[0].dateOfStart, config.time, dateMode);
+    const arrDate = KSPTime(steps[steps.length - 1].dateOfStart, config.time, dateMode);
+    add("Departure", depDate.stringYDHMS("hms", "ut") + " UT", 0);
+    add("Arrival", arrDate.stringYDHMS("hms", "ut") + " UT", 0);
     add("Total ΔV", `${traj.totalDeltaV.toFixed(1)} m/s`, 0);
     space();
     add("Steps", "", 0);
@@ -39,7 +39,7 @@ export function trajectoryToText(traj, seq) {
                 label = `${arrivalBodyName} circularization`;
             }
             add(label, "", 1);
-            const dateMET = KSPTime(details.dateMET, config.time);
+            const dateMET = KSPTime(details.dateMET, config.time, dateMode);
             add("Date", dateMET.toUT(depDate).stringYDHMS("hms", "ut") + " UT", 2);
             add("", dateMET.stringYDHMS("hms", "emt") + " MET", 2);
             if (details.ejectAngle !== undefined) {
@@ -55,8 +55,8 @@ export function trajectoryToText(traj, seq) {
             space();
             const details = traj.flybys[flybyIdx];
             const bodyName = system.bodyFromId(details.bodyId).name;
-            const enterMET = KSPTime(details.soiEnterDateMET, config.time);
-            const exitMET = KSPTime(details.soiExitDateMET, config.time);
+            const enterMET = KSPTime(details.soiEnterDateMET, config.time, dateMode);
+            const exitMET = KSPTime(details.soiExitDateMET, config.time, dateMode);
             add(`Flyby around ${bodyName}`, "", 1);
             add("SOI enter date", enterMET.toUT(depDate).stringYDHMS("hms", "ut") + " UT", 2);
             add("", enterMET.stringYDHMS("hms", "emt") + " MET", 2);
@@ -91,7 +91,7 @@ function pairsToString(pairs) {
     }
     return joinStrings(lines, "\n");
 }
-export function trajectoryToCSVData(traj) {
+export function trajectoryToCSVData(traj, dateMode) {
     const { config, steps, orbits } = traj;
     const n = steps.length;
     const entries = [];
@@ -105,7 +105,7 @@ export function trajectoryToCSVData(traj) {
             entries.push({
                 type: "dsm",
                 bodyId: step.attractorId,
-                timeUT: KSPTime(dateOfStart, config.time).dateSeconds,
+                timeUT: KSPTime(dateOfStart, config.time, dateMode).dateSeconds,
                 pos: startState.pos,
                 vel: startState.vel
             });
@@ -115,7 +115,7 @@ export function trajectoryToCSVData(traj) {
             entries.push({
                 type: "flyby",
                 bodyId: steps[i - 1].attractorId,
-                timeUT: KSPTime(dateOfStart, config.time).dateSeconds,
+                timeUT: KSPTime(dateOfStart, config.time, dateMode).dateSeconds,
                 pos: startState.pos,
                 vel: startState.vel
             });
@@ -127,7 +127,7 @@ export function trajectoryToCSVData(traj) {
     entries.push({
         type: "arrival",
         bodyId: steps[n - 1].attractorId,
-        timeUT: KSPTime(arrivalDate, config.time).dateSeconds,
+        timeUT: KSPTime(arrivalDate, config.time, dateMode).dateSeconds,
         pos: arrivalState.pos,
         vel: arrivalState.vel
     });

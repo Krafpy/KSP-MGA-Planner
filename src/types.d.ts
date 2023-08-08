@@ -140,8 +140,9 @@ interface SequenceParameters {
 type DateYDHMS = {year: number, day: number, hour: number, minute: number, second: number};
 
 interface IKSPTime {
-    public dateSeconds:  number;
-    public displayYDHMS:   DateYDH;
+    public dateSeconds: number;
+    public displayYDHMS: DateYDH;
+    public utDisplayMode: "elapsed" | "offset";
     public readonly defaultDate: number;
     public stringYDHMS(precision: "h" | "hm" | "hms", display: "emt" | "ut"): string;
     public toUT(from: IKSPTime | number): IKSPTime;

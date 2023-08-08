@@ -1,6 +1,8 @@
 export class RealKSPTime implements IKSPTime {
     private _exactDate: number = 0; // time elapsed since Jan 1st 1970 (positive or negative), in seconds
 
+    public readonly utDisplayMode = "offset";
+
     constructor(date: number | DateYDHMS, public readonly config: RealTimeSettings){
         if(typeof date == "number") {
             this.dateSeconds = date;

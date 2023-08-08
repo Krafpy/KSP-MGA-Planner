@@ -186,8 +186,8 @@ export class Trajectory {
         }
     }
     fillResultControls(resultItems, systemTime, controls) {
-        const depDate = KSPTime(this.steps[0].dateOfStart, this.config.time);
-        const arrDate = KSPTime(this.steps[this.steps.length - 1].dateOfStart, this.config.time);
+        const depDate = KSPTime(this.steps[0].dateOfStart, this.config.time, systemTime.time.utDisplayMode);
+        const arrDate = KSPTime(this.steps[this.steps.length - 1].dateOfStart, this.config.time, systemTime.time.utDisplayMode);
         resultItems.totalDVSpan.innerHTML = this.totalDeltaV.toFixed(1);
         resultItems.depDateSpan.innerHTML = depDate.stringYDHMS("hms", "ut");
         resultItems.arrDateSpan.innerHTML = arrDate.stringYDHMS("hms", "ut");
@@ -255,7 +255,7 @@ export class Trajectory {
             const option = selectorOptions[index];
             if (option.type == "maneuver") {
                 const details = this.maneuvres[option.origin];
-                const dateEMT = KSPTime(details.dateMET, this.config.time);
+                const dateEMT = KSPTime(details.dateMET, this.config.time, systemTime.time.utDisplayMode);
                 resultItems.dateSpan.innerHTML = dateEMT.stringYDHMS("hm", "emt");
                 resultItems.progradeDVSpan.innerHTML = details.progradeDV.toFixed(1);
                 resultItems.normalDVSpan.innerHTML = details.normalDV.toFixed(1);
@@ -275,8 +275,8 @@ export class Trajectory {
             }
             else if (option.type == "flyby") {
                 const details = this.flybys[option.origin];
-                const startDateEMT = KSPTime(details.soiEnterDateMET, this.config.time);
-                const endDateEMT = KSPTime(details.soiExitDateMET, this.config.time);
+                const startDateEMT = KSPTime(details.soiEnterDateMET, this.config.time, systemTime.time.utDisplayMode);
+                const endDateEMT = KSPTime(details.soiExitDateMET, this.config.time, systemTime.time.utDisplayMode);
                 resultItems.startDateSpan.innerHTML = startDateEMT.stringYDHMS("hm", "emt");
                 resultItems.endDateSpan.innerHTML = endDateEMT.stringYDHMS("hm", "emt");
                 resultItems.periAltitudeSpan.innerHTML = details.periAltitude.toFixed(0);
@@ -288,6 +288,7 @@ export class Trajectory {
                 resultItems.maneuverDiv.hidden = true;
             }
         });
+        return { depDate, arrDate };
     }
     _displayStepsUpTo(index) {
         for (let i = 0; i < this.steps.length; i++) {

@@ -9,7 +9,7 @@ export class TimeSelector {
     readonly hourInput!: HTMLInputElement;
     readonly selector!:  HTMLDivElement;
     
-    constructor(namePrefix: string, public readonly config: Config) {
+    constructor(namePrefix: string, public readonly config: Config, dateMode: "elapsed" | "offset") {
         this.yearInput = document.getElementById(`${namePrefix}-year`) as HTMLInputElement;
         this.dayInput  = document.getElementById(`${namePrefix}-day`)  as HTMLInputElement;
         this.hourInput = document.getElementById(`${namePrefix}-hour`) as HTMLInputElement;
@@ -17,7 +17,7 @@ export class TimeSelector {
         this.selector = document.getElementById(`${namePrefix}-time`) as HTMLDivElement;
 
         this.selector.oninput = () => this.validate();
-        this.time = KSPTime(0, this.config.time);
+        this.time = KSPTime(0, this.config.time, dateMode);
         this.validate();
     }
 

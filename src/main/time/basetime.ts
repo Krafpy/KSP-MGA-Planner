@@ -1,12 +1,15 @@
 export class BaseKSPTime implements IKSPTime {
     private _exactDate: number = 0;
 
-    constructor(date: number | DateYDHMS, public readonly config: BaseTimeSettings){
+    public utDisplayMode: "elapsed" | "offset" = "offset";
+
+    constructor(date: number | DateYDHMS, public readonly config: BaseTimeSettings, dateMode: "elapsed" | "offset"){
         if(typeof date == "number") {
             this.dateSeconds = date;
         } else {
             this.displayYDHMS = date;
         }
+        this.utDisplayMode = dateMode;
     }
 
     public stringYDHMS(precision: "h" | "hm" | "hms", display: "emt" | "ut"): string {
@@ -23,17 +26,25 @@ export class BaseKSPTime implements IKSPTime {
         }
 
         if(display == "ut"){
-            return `Year ${year} - Day ${day} - ${hmsStr}`;
+            if(this.utDisplayMode == "offset"){
+                return `Year ${year} - Day ${day} - ${hmsStr}`;
+            } else {
+                return `T+ ${year}y - ${day}d - ${hmsStr}`;
+            }
         } else {
-            return `T+ ${year-1}y - ${day-1}d - ${hmsStr}`;
+            if(this.utDisplayMode == "offset"){
+                return `T+ ${year-1}y - ${day-1}d - ${hmsStr}`;
+            } else {
+                return `T+ ${year}y - ${day}d - ${hmsStr}`;
+            }
         }
     }
 
     public toUT(from: number | IKSPTime): IKSPTime {
         if(typeof from == "number")
-            return new BaseKSPTime(from + this._exactDate, this.config);
+            return new BaseKSPTime(from + this._exactDate, this.config, this.utDisplayMode);
         else
-            return new BaseKSPTime(from.dateSeconds + this._exactDate, this.config);
+            return new BaseKSPTime(from.dateSeconds + this._exactDate, this.config, this.utDisplayMode);
     }
 
     public get dateSeconds(){
@@ -51,14 +62,23 @@ export class BaseKSPTime implements IKSPTime {
         const hour = Math.floor((t % this._secondsPerDay) / 3600);
         const minute = Math.floor((t % 3600) / 60);
         const second = (t % 60);
-        return {year:years+1, day:days+1, hour, minute, second};
+        if(this.utDisplayMode == "offset"){
+            return {year:years+1, day:days+1, hour, minute, second};
+        } else {
+            return {year:years, day:days, hour, minute, second};
+        }
     }
 
     public set displayYDHMS(date: DateYDHMS) {
         let {year, day, hour, minute, second} = date;
 
-        let t = this._secondsPerYear * (year-1);
-        t += this._secondsPerDay * (day-1);
+        if(this.utDisplayMode == "offset"){
+            year -= 1;
+            day -= 1;
+        }
+
+        let t = this._secondsPerYear * year;
+        t += this._secondsPerDay * day;
         t += 3600 * hour;
         t += 60 * minute;
         t += second;

@@ -42,7 +42,9 @@ export async function initEditorWithSystem(systems, systemIndex) {
         renderer.render(scene, camera);
     };
     requestAnimationFrame(loop);
-    const systemTime = new TimeSelector("system", config);
+    const datesAsElapsedCheckbox = document.getElementById("date-as-elapsed-checkbox");
+    const initialDateDisplayMode = datesAsElapsedCheckbox.checked ? "elapsed" : "offset";
+    const systemTime = new TimeSelector("system", config, initialDateDisplayMode);
     const updateSystemTime = () => {
         if (systemTime.validate()) {
             system.date = systemTime.dateSeconds;
@@ -132,10 +134,22 @@ export async function initEditorWithSystem(systems, systemIndex) {
         seqStopBtn.click(() => generator.cancel());
     }
     {
-        const timeRangeStart = new TimeSelector("start", config);
-        const timeRangeEnd = new TimeSelector("end", config);
+        const timeRangeStart = new TimeSelector("start", config, initialDateDisplayMode);
+        const timeRangeEnd = new TimeSelector("end", config, initialDateDisplayMode);
         timeRangeStart.setToDefault();
         timeRangeEnd.setToDefault();
+        const updateTimeSelectorsUTMode = (mode) => {
+            systemTime.time.utDisplayMode = mode;
+            systemTime.update();
+            timeRangeStart.time.utDisplayMode = mode;
+            timeRangeStart.update();
+            timeRangeEnd.time.utDisplayMode = mode;
+            timeRangeEnd.update();
+        };
+        datesAsElapsedCheckbox.onchange = () => {
+            const mode = datesAsElapsedCheckbox.checked ? "elapsed" : "offset";
+            updateTimeSelectorsUTMode(mode);
+        };
         const depAltitude = new IntegerInput("start-altitude");
         const destAltitude = new IntegerInput("end-altitude");
         const updateAltitudeRange = (input, body) => {
@@ -206,7 +220,15 @@ export async function initEditorWithSystem(systems, systemIndex) {
         const displayFoundTrajectory = (sequence) => {
             trajectory = new Trajectory(solver, system, config);
             trajectory.draw(canvas);
-            trajectory.fillResultControls(resultItems, systemTime, controls);
+            const { depDate, arrDate } = trajectory.fillResultControls(resultItems, systemTime, controls);
+            datesAsElapsedCheckbox.onchange = () => {
+                const mode = datesAsElapsedCheckbox.checked ? "elapsed" : "offset";
+                updateTimeSelectorsUTMode(mode);
+                depDate.utDisplayMode = mode;
+                arrDate.utDisplayMode = mode;
+                resultItems.depDateSpan.innerHTML = depDate.stringYDHMS("hms", "ut");
+                resultItems.arrDateSpan.innerHTML = arrDate.stringYDHMS("hms", "ut");
+            };
             systemTime.input(() => {
                 updateSystemTime();
                 trajectory.updatePodPosition(systemTime);
@@ -216,14 +238,15 @@ export async function initEditorWithSystem(systems, systemIndex) {
             stepSlider.enable();
             trajectory.updatePodPosition(systemTime);
             console.log(solver.bestDeltaV);
-            const trajText = trajectoryToText(trajectory, sequence);
+            const currentDateDisplayMode = datesAsElapsedCheckbox.checked ? "elapsed" : "offset";
+            const trajText = trajectoryToText(trajectory, sequence, currentDateDisplayMode);
             console.log(trajText);
             trajectoryCounter++;
             showTrajDetailsBtn.click(() => {
                 DraggableTextbox.create(`Trajectory ${trajectoryCounter}`, trajText);
             });
             showTrajDetailsBtn.enable();
-            const trajCSV = trajectoryToCSVData(trajectory);
+            const trajCSV = trajectoryToCSVData(trajectory, currentDateDisplayMode);
             downloadTrajDataBtn.click(() => {
                 let element = document.createElement('a');
                 element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(trajCSV));
@@ -334,6 +357,7 @@ export async function initEditorWithSystem(systems, systemIndex) {
             scene.remove();
             renderer.dispose();
             controls.dispose();
+            datesAsElapsedCheckbox.onchange = null;
             initEditorWithSystem(systems, index);
         });
     }

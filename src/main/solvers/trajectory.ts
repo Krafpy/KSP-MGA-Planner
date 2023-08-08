@@ -273,8 +273,8 @@ export class Trajectory {
      * @param controls The camera controller
      */
     public fillResultControls(resultItems: ResultPannelItems, systemTime: TimeSelector, controls: CameraController){
-        const depDate = KSPTime(this.steps[0].dateOfStart, this.config.time);
-        const arrDate = KSPTime(this.steps[this.steps.length-1].dateOfStart, this.config.time);
+        const depDate = KSPTime(this.steps[0].dateOfStart, this.config.time, systemTime.time.utDisplayMode);
+        const arrDate = KSPTime(this.steps[this.steps.length-1].dateOfStart, this.config.time, systemTime.time.utDisplayMode);
 
         // total delta-V
         resultItems.totalDVSpan.innerHTML = this.totalDeltaV.toFixed(1);
@@ -364,7 +364,7 @@ export class Trajectory {
             
             if(option.type == "maneuver"){
                 const details = this.maneuvres[option.origin];
-                const dateEMT = KSPTime(details.dateMET, this.config.time);
+                const dateEMT = KSPTime(details.dateMET, this.config.time, systemTime.time.utDisplayMode);
                 
                 resultItems.dateSpan.innerHTML = dateEMT.stringYDHMS("hm", "emt");
                 resultItems.progradeDVSpan.innerHTML = details.progradeDV.toFixed(1);
@@ -387,8 +387,8 @@ export class Trajectory {
 
             } else if(option.type == "flyby"){
                 const details = this.flybys[option.origin];
-                const startDateEMT = KSPTime(details.soiEnterDateMET, this.config.time);
-                const endDateEMT = KSPTime(details.soiExitDateMET, this.config.time);
+                const startDateEMT = KSPTime(details.soiEnterDateMET, this.config.time, systemTime.time.utDisplayMode);
+                const endDateEMT = KSPTime(details.soiExitDateMET, this.config.time, systemTime.time.utDisplayMode);
 
                 resultItems.startDateSpan.innerHTML = startDateEMT.stringYDHMS("hm", "emt");
                 resultItems.endDateSpan.innerHTML = endDateEMT.stringYDHMS("hm", "emt");
@@ -407,6 +407,8 @@ export class Trajectory {
         /*for(const step of this.steps){
             console.log(step);
         }*/
+
+        return {depDate, arrDate};
     }
 
     /**

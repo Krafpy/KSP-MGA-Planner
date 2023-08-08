@@ -2,6 +2,7 @@ export class RealKSPTime {
     constructor(date, config) {
         this.config = config;
         this._exactDate = 0;
+        this.utDisplayMode = "offset";
         if (typeof date == "number") {
             this.dateSeconds = date;
         }

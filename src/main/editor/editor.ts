@@ -57,8 +57,12 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
     }
     requestAnimationFrame(loop);
 
+    // Date display mode toggle:
+    const datesAsElapsedCheckbox = document.getElementById("date-as-elapsed-checkbox") as HTMLInputElement;
+    const initialDateDisplayMode = datesAsElapsedCheckbox.checked ? "elapsed" : "offset";
+
     // Setting up solar system time control
-    const systemTime = new TimeSelector("system", config);
+    const systemTime = new TimeSelector("system", config, initialDateDisplayMode);
     const updateSystemTime = () => {
         if(systemTime.validate()){
             system.date = systemTime.dateSeconds;
@@ -175,10 +179,25 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
     
     {   
         // Time inputs
-        const timeRangeStart = new TimeSelector("start", config);
-        const timeRangeEnd   = new TimeSelector("end", config);
+        const timeRangeStart = new TimeSelector("start", config, initialDateDisplayMode);
+        const timeRangeEnd   = new TimeSelector("end", config, initialDateDisplayMode);
         timeRangeStart.setToDefault();
         timeRangeEnd.setToDefault();
+
+        // configure time selectors format updates
+        const updateTimeSelectorsUTMode = (mode: "elapsed" | "offset") => {
+            systemTime.time.utDisplayMode = mode;
+            systemTime.update();
+
+            timeRangeStart.time.utDisplayMode = mode;
+            timeRangeStart.update()
+            timeRangeEnd.time.utDisplayMode = mode;
+            timeRangeEnd.update();
+        }
+        datesAsElapsedCheckbox.onchange = () => {
+            const mode = datesAsElapsedCheckbox.checked ? "elapsed" : "offset";
+            updateTimeSelectorsUTMode(mode);
+        }
 
         // Numerical inputs
         const depAltitude = new IntegerInput("start-altitude");
@@ -271,7 +290,17 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
         const displayFoundTrajectory = (sequence: FlybySequence) => {
             trajectory = new Trajectory(solver, system, config);
             trajectory.draw(canvas);
-            trajectory.fillResultControls(resultItems, systemTime, controls);
+            const {depDate, arrDate} = trajectory.fillResultControls(resultItems, systemTime, controls);
+            
+            // Change the displayed arrival and departure dates as well
+            datesAsElapsedCheckbox.onchange = () => {
+                const mode = datesAsElapsedCheckbox.checked ? "elapsed" : "offset";
+                updateTimeSelectorsUTMode(mode);
+                depDate.utDisplayMode = mode;
+                arrDate.utDisplayMode = mode;
+                resultItems.depDateSpan.innerHTML = depDate.stringYDHMS("hms", "ut");
+                resultItems.arrDateSpan.innerHTML = arrDate.stringYDHMS("hms", "ut");
+            }
 
             systemTime.input(() => {
                 updateSystemTime();
@@ -284,8 +313,9 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             trajectory.updatePodPosition(systemTime);
 
             console.log(solver.bestDeltaV);
-
-            const trajText = trajectoryToText(trajectory, sequence);
+            
+            const currentDateDisplayMode = datesAsElapsedCheckbox.checked ? "elapsed" : "offset";
+            const trajText = trajectoryToText(trajectory, sequence, currentDateDisplayMode);
             console.log(trajText);
 
             trajectoryCounter++;
@@ -294,7 +324,7 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             });
             showTrajDetailsBtn.enable();
 
-            const trajCSV = trajectoryToCSVData(trajectory);
+            const trajCSV = trajectoryToCSVData(trajectory, currentDateDisplayMode);
             downloadTrajDataBtn.click(() => {
                 let element = document.createElement('a');
                 element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(trajCSV));
@@ -424,6 +454,8 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             scene.remove();
             renderer.dispose();
             controls.dispose();
+
+            datesAsElapsedCheckbox.onchange = null;
     
             initEditorWithSystem(systems, index);
         });

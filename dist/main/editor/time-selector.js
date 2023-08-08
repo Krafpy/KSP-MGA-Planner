@@ -1,13 +1,13 @@
 import { KSPTime } from "../time/time.js";
 export class TimeSelector {
-    constructor(namePrefix, config) {
+    constructor(namePrefix, config, dateMode) {
         this.config = config;
         this.yearInput = document.getElementById(`${namePrefix}-year`);
         this.dayInput = document.getElementById(`${namePrefix}-day`);
         this.hourInput = document.getElementById(`${namePrefix}-hour`);
         this.selector = document.getElementById(`${namePrefix}-time`);
         this.selector.oninput = () => this.validate();
-        this.time = KSPTime(0, this.config.time);
+        this.time = KSPTime(0, this.config.time, dateMode);
         this.validate();
     }
     get dateSeconds() {
