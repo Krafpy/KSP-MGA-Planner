@@ -1,6 +1,6 @@
 # File keeping track of the list of solar systems in this data folder
 
-- name: Stock
+- name: Stock (KSP1)
   folderName: stock
 
 - name: JNSQ
@@ -14,6 +14,9 @@
 
 - name: Real Solar System
   folderName: rss
+
+- name: Stock (KSP2)
+  folderName: stock2
 
 # Template:
 # - name: New Solar System

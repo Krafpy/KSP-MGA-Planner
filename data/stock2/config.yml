@@ -1,0 +1,73 @@
+# Configuration file for the application
+
+rendering:
+  scale:              1.0e-9        # scale of the objects compared to real values
+  fov:                75            # field of view of the camera
+  nearPlane:          0.0000001     # near plane distance
+  farPlane:           1000          # far plane distance
+
+solarSystem:
+  planetFarSize:      0.05          # size of planet sprites
+  satFarSize:         0.04          # size of satellites sprites
+  satDispRadii:       10            # minimum display distance of satellites (in radii of the scaled semi major axis)
+  spriteDispSOIMul:   18            # minimum display distance of sprites (in multiple of the SOI of the body to which they are attached)
+  mouseFocusDst:      25            # minimum distance to between body on screen and mouse to set focus (in pixels)
+  soiOpacity:         0.3           # the opacity of SOI spheres
+
+orbit:
+  satSampPoints:      1000          # sample points for satellites' orbits
+  planetSampPoints:   10000         # sample points for planets' orbits
+  orbitLineWidth:     1.5           # width of the rendered orbit lines
+  arcLineWidth:       2.25          # width of the rendered trajectory arc lines
+  epochOffset:        0             # offset for bodies' epochs (reference for epoch 0), in seconds
+
+camera:
+  startDist:          100           # distance from sun of start
+  maxDist:            300           # maximum distance that can be zoomed out
+  minDistRadii:       1.5           # minimum distance to a body, in radii of the focused body
+  dampingFactor:      0.5           # camera motion damping
+  rotateSpeed:        0.5           # camera rotation speed
+
+time:
+  type:               base          # type of the time system: either base or real
+  # initialDate:        0             # the initial date, in seconds (real only)
+  hoursPerDay:        6             # number of hours in a day (Kerbal day) (base only)
+  daysPerYear:        426           # number of days per year (Kerbal year) (base only)
+
+flybySequence:
+  radiusSamples:      10            # number of samples radius samples to test when evaluating a sequence feasability
+  initVelMaxScale:    3             # upper bound of ejection velocity range, as factor of direct hohmann transfert to the next body
+  initVelSamples:     20            # number of samples for start body ejection between direct hohmann transfert and initVelMaxScale
+  maxPropositions:    15            # maximum number of sequences propositions after sequence generation
+  maxEvalStatuses:    100000        # maximum number status considered when evaluating a sequence before timeout
+  maxEvalSequences:   100000        # maximum number of sequences to evaluate
+  splitLimit:         2500          # maximum input chunk size per worker in the worker pool, exceeded if all workers are already used
+
+trajectorySearch:
+  splitLimit:         1000          # maximum input chunk size per worker in the worker pool, exceeded if all workers are already used
+  minCrossProba:      0.9           # The minimum crossover probability (CR) of the DE algorithm
+  maxCrossProba:      0.99          # The maximum crossover probability (CR) of the DE algorithm
+  crossProbaIncr:     8             # The exponential speed factor by which CR increases from its minium to maximum
+  diffWeight:         0.3           # differential weight (F) of the DE algorithm
+  depDVScaleMin:      1.01          # the minimum ejection velocity, in terms of scale of the minimum velocity required to escape the body
+  depDVScaleMax:      3             # the maximum ejection velocity
+  dsmOffsetMin:       0.01          # the minimum offset of a DSM on an interplanetary leg
+  dsmOffsetMax:       0.99          # the maximum offset of a DSM
+  minLegDuration:     21600         # the minimum duration of a leg (s)
+  fbRadiusMaxScale:   4             # the maximum periapsis height of a flyby orbit, in terms of times radius of the body
+  popSizeDimScale:    750           # the population size is equal to this value times the dimension of the search space (number of compnents agent vector)
+  maxGenerations:     300           # Maximum number of evolution iterations
+
+editor:
+  defaultOrigin:      3             # default origin body on start (index of Kerbin in the selector)
+  defaultDest:        0             # default destination body on start (index of Moho in the selector)
+  defaultAltitude:    100           # default altitude from the default body (in km above surface)
+  defaultMaxDuration: 500           # default duration limit for a trajectory (in number of days)
+
+workers:
+  progressStep:       250           # number of inputs processed per chunk before progress callback
+
+trajectoryDraw:
+  samplePoints:       2500          # number sample points for each tarjectory arc draw
+  spritesSize:        0.08          # size of the sprites for maneuvers, encounters, escapes
+  podSpriteSize:      0.06          # size of the pod sprite
