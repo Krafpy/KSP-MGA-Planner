@@ -71,11 +71,13 @@ type BaseTimeSettings = {
     readonly type:              "base";
     readonly hoursPerDay:       number;
     readonly daysPerYear:       number;
+    readonly ksp2DateMode:      boolean | undefined;
 };
 
 type RealTimeSettings = {
     readonly type:              "real";
     readonly initialDate:       number;
+    readonly ksp2DateMode:      boolean | undefined;
 };
 
 interface FBSequenceSettings {

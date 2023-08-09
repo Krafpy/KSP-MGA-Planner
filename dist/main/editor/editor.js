@@ -43,6 +43,7 @@ export async function initEditorWithSystem(systems, systemIndex) {
     };
     requestAnimationFrame(loop);
     const datesAsElapsedCheckbox = document.getElementById("date-as-elapsed-checkbox");
+    datesAsElapsedCheckbox.checked = config.time.ksp2DateMode || false;
     const initialDateDisplayMode = datesAsElapsedCheckbox.checked ? "elapsed" : "offset";
     const systemTime = new TimeSelector("system", config, initialDateDisplayMode);
     const updateSystemTime = () => {

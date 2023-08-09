@@ -59,6 +59,7 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
 
     // Date display mode toggle:
     const datesAsElapsedCheckbox = document.getElementById("date-as-elapsed-checkbox") as HTMLInputElement;
+    datesAsElapsedCheckbox.checked = config.time.ksp2DateMode || false;
     const initialDateDisplayMode = datesAsElapsedCheckbox.checked ? "elapsed" : "offset";
 
     // Setting up solar system time control

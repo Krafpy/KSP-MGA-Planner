@@ -33,6 +33,7 @@ time:
   # initialDate:        0             # the initial date, in seconds (real only)
   hoursPerDay:        6             # number of hours in a day (Kerbal day) (base only)
   daysPerYear:        426           # number of days per year (Kerbal year) (base only)
+  ksp2DateMode:       true          # [optional] autocheck the box to display the dates as elapsed time from UT (used by KSP2)
 
 flybySequence:
   radiusSamples:      10            # number of samples radius samples to test when evaluating a sequence feasability
