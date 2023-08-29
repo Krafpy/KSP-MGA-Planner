@@ -282,7 +282,7 @@
     inclination:      0.1
     argOfPeriapsis:   285
     ascNodeLongitude: 150
-  meanAnomaly0:       4.71238898038469                      
+  meanAnomaly0:       4.71238898038469
   epoch:              0
   orbiting:           12
   color:              0xd2aaaa
@@ -300,7 +300,7 @@
     inclination:      15
     argOfPeriapsis:   25
     ascNodeLongitude: 10
-  meanAnomaly0:       4.71238898038468                      
+  meanAnomaly0:       4.71238898038468
   epoch:              0
   orbiting:           12
   color:              0x5d503f
