@@ -1,4 +1,5 @@
 # Data extracted from JNSQ configuration files: https://github.com/Galileo88/JNSQ/tree/master/GameData/JNSQ/JNSQ_Bodies
+# 
 
 - !!map
   id:                 0
@@ -92,7 +93,7 @@
   stdGravParam:       227514279999.99994
   soi:                1828438.9065572524
   orbit:
-    semiMajorAxis:    12000000
+    semiMajorAxis:    90960000
     eccentricity:     0.005
     inclination:      0.5
     argOfPeriapsis:   165
@@ -110,7 +111,7 @@
   stdGravParam:       12552512000
   soi:                2247428.3745065867
   orbit:
-    semiMajorAxis:    47000000
+    semiMajorAxis:    146970000
     eccentricity:     0.03
     inclination:      6
     argOfPeriapsis:   315
@@ -281,7 +282,7 @@
     inclination:      0.1
     argOfPeriapsis:   285
     ascNodeLongitude: 150
-  meanAnomaly0:       4.71238898038469
+  meanAnomaly0:       4.71238898038469                      
   epoch:              0
   orbiting:           12
   color:              0xd2aaaa
@@ -299,7 +300,7 @@
     inclination:      15
     argOfPeriapsis:   25
     ascNodeLongitude: 10
-  meanAnomaly0:       0.9
+  meanAnomaly0:       4.71238898038468                      
   epoch:              0
   orbiting:           12
   color:              0x5d503f
