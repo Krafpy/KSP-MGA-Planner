@@ -12,16 +12,19 @@ namespace Physics3D
         const ascNodeDir = rotate3(right, up, orbit.ascNodeLongitude);
         const normal = rotate3(up, ascNodeDir, orbit.inclination);
         const periapsisDir = rotate3(ascNodeDir, normal, orbit.argOfPeriapsis);
-    
+
+        if(orbit.orbitalParam === undefined) {
+            throw new Error("Undefined orbital parameter.");
+        }
+        
         return {
             semiMajorAxis:    orbit.semiMajorAxis,
             eccentricity:     orbit.eccentricity,
-            periapsiDir:      periapsisDir,
+            periapsisDir:     periapsisDir,
             inclination:      orbit.inclination,
             argOfPeriapsis:   orbit.argOfPeriapsis,
             ascNodeLongitude: orbit.ascNodeLongitude,
             ascNodeDir:       ascNodeDir,
-            // @ts-ignore
             orbitalParam:     orbit.orbitalParam
         };
     }
