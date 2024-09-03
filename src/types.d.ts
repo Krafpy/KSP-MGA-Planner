@@ -80,6 +80,14 @@ type RealTimeSettings = {
     readonly ksp2DateMode:      boolean | undefined;
 };
 
+type KronometerSettings = {
+    readonly type:              "kronometer";
+    readonly initialDate:       number;
+    readonly solarDayLength:    number;
+    readonly orbitalPeriod:     number;
+    readonly ksp2DateMode:      boolean | undefined;
+};
+
 interface FBSequenceSettings {
     readonly radiusSamples:     number;
     readonly initVelMaxScale:   number;
@@ -131,7 +139,7 @@ interface Config {
 }
 
 interface SequenceParameters {
-    readonly departureId:       number, 
+    readonly departureId:       number,
     readonly destinationId:     number,
     readonly maxSwingBys:       number,
     readonly maxResonant:       number,
@@ -150,7 +158,7 @@ interface IKSPTime {
     public toUT(from: IKSPTime | number): IKSPTime;
 }
 
-type MessageToWorker = 
+type MessageToWorker =
     | {label: "initialize", config: any}
     | {label: "run", input?: any}
     | {label: "continue", input?: any}
@@ -158,7 +166,7 @@ type MessageToWorker =
     | {label: "pass", data: any}
 ;
 
-type MessageFromWorker =     
+type MessageFromWorker =
     | {label: "initialized"}
     | {label: "progress", progress: number, data?: any}
     | {label: "complete", result: any}
@@ -170,8 +178,8 @@ type MessageFromWorker =
 type ProgressCallback = (progress: number, data?: any) => any;
 
 type GeneratingSequence = {
-    sequence: number[], 
-    resonant: number, 
+    sequence: number[],
+    resonant: number,
     backLegs: number,
     maxBackSpacing: number;
 };
@@ -229,7 +237,7 @@ type OrbitalElements3D = {
 type ArcEndsAngles = {begin: number, end: number};
 
 type TrajectoryStep = {
-    orbitElts:   OrbitalElements3D, 
+    orbitElts:   OrbitalElements3D,
     attractorId: number,
     angles:      ArcEndsAngles,
     drawAngles:  ArcEndsAngles,
@@ -256,7 +264,7 @@ type FlybyInfo = {
 };
 
 
-type ManeuvreContext = 
+type ManeuvreContext =
     | {type: "ejection"}
     | {type: "dsm", originId: number, targetId: number}
     | {type: "circularization"}
