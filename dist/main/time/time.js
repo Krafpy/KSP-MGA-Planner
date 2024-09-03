@@ -1,6 +1,6 @@
 import { RealKSPTime } from "./realtime.js";
 import { BaseKSPTime } from "./basetime.js";
-import { KronometerTime } from "./KronometerTime.js";
+import { KronometerTime } from "./kronometertime.js";
 export function KSPTime(date, config, dateMode) {
     switch (config.type) {
         case "base":
