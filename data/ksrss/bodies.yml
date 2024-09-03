@@ -1,0 +1,664 @@
+- !!map
+  id:                 0
+  name:               Sun
+  radius:             174085500
+  mass:               1.2427561695790107e+29
+  stdGravParam:       8294527502621190000
+  soi:                .inf
+  color:              0xffff00
+
+- !!map
+  id:                 1
+  name:               Mercury
+  radius:             609925
+  mass:               2.063117105913729e+22
+  stdGravParam:       1376986250000
+  soi:                28102247.688606102
+  orbit:
+    semiMajorAxis:    14477243411.472
+    eccentricity:     0.2033547204116125
+    inclination:      7.020894544262584
+    argOfPeriapsis:   26.87734922097711
+    ascNodeLongitude: 48.6509390838666
+  meanAnomaly0:       5.580372162669762
+  epoch:              0
+  orbiting:           0
+  color:              0x515059
+
+- !!map
+  id:                 2
+  name:               Venus
+  radius:             1512250
+  atmosphereAlt:      86000
+  mass:               3.042066134276254e+23
+  stdGravParam:       20303662000000
+  soi:                154070213.43673772
+  orbit:
+    semiMajorAxis:    27052387197.6167
+    eccentricity:     0.009358687502771969
+    inclination:      3.394232940100089
+    argOfPeriapsis:   46.37282910903239
+    ascNodeLongitude: 76.90359605163887
+  meanAnomaly0:       5.580569883019108
+  epoch:              0
+  orbiting:           0
+  color:              0xb26128
+
+- !!map
+  id:                 3
+  name:               Earth
+  radius:             1592750
+  atmosphereAlt:      80000
+  mass:               3.7326052492030474e+23
+  stdGravParam:       24912527214755.9
+  soi:                231162300.61525476
+  orbit:
+    semiMajorAxis:    37399565287.6105
+    eccentricity:     0.01781154480208012
+    inclination:      0.00332414560350639
+    argOfPeriapsis:   156.3881093946221
+    ascNodeLongitude: 311.7891048874449
+  meanAnomaly0:       6.154817537337295
+  epoch:              0
+  orbiting:           0
+  color:              0x4662
+
+- !!map
+  id:                 4
+  name:               Moon
+  radius:             434275
+  mass:               4.5911182316533124e+21
+  stdGravParam:       306425004135.237
+  soi:                16541789.664238596
+  orbit:
+    semiMajorAxis:    96077109.4426765
+    eccentricity:     0.05328149353682574
+    inclination:      28.36267790798491
+    argOfPeriapsis:   199.7640930160823
+    ascNodeLongitude: 2.296616161126016
+  meanAnomaly0:       3.8868698006324554
+  epoch:              0
+  orbiting:           3
+  color:              0xffffff
+
+- !!map
+  id:                 5
+  name:               Ryugu
+  radius:             435
+  mass:               55606231252715.64
+  stdGravParam:       3711.3266925
+  soi:                32289.982290306652
+  orbit:
+    semiMajorAxis:    44542315868.8013
+    eccentricity:     0.1942618550394634
+    inclination:      5.876682850608844
+    argOfPeriapsis:   209.7446615424048
+    ascNodeLongitude: 252.2430496615096
+  meanAnomaly0:       128.1101408239382
+  epoch:              0
+  orbiting:           0
+  color:              0xffffff
+
+- !!map
+  id:                 6
+  name:               Eros
+  radius:             4210
+  mass:               15625373021740110
+  stdGravParam:       1042884.27159
+  soi:                377084.94633983343
+  orbit:
+    semiMajorAxis:    54533253491.598
+    eccentricity:     0.22278188946206
+    inclination:      10.82782330218545
+    argOfPeriapsis:   178.9269951795186
+    ascNodeLongitude: 304.2870401191066
+  meanAnomaly0:       110.7776526746434
+  epoch:              0
+  orbiting:           0
+  color:              0x6f5248
+
+- !!map
+  id:                 7
+  name:               Mars
+  radius:             843950
+  atmosphereAlt:      73000
+  mass:               4.010567926664504e+22
+  stdGravParam:       2676773351293.69
+  soi:                144313517.71812373
+  orbit:
+    semiMajorAxis:    56987424990.494
+    eccentricity:     0.09314888581484417
+    inclination:      1.849927423305627
+    argOfPeriapsis:   285.3002933768046
+    ascNodeLongitude: 49.69802620099254
+  meanAnomaly0:       2.9726844215984443
+  epoch:              0
+  orbiting:           0
+  color:              0xa06230
+
+- !!map
+  id:                 8
+  name:               Phobos
+  radius:             1812.5
+  mass:               663697510122264.5
+  stdGravParam:       44297.1629180903
+  soi:                1809.5840325264423
+  orbit:
+    semiMajorAxis:    2344623.05227208
+    eccentricity:     0.01539938155583979
+    inclination:      1.093
+    argOfPeriapsis:   357.7759243021914
+    ascNodeLongitude: 46.48212553464923
+  meanAnomaly0:       0.12540401573484683
+  epoch:              0
+  orbiting:           7
+  color:              0x8e7362
+
+- !!map
+  id:                 9
+  name:               Deimos
+  radius:             1364
+  mass:               90042866369135.19
+  stdGravParam:       6009.73103007519
+  soi:                2035.7781022288343
+  orbit:
+    semiMajorAxis:    5864528.00439845
+    eccentricity:     0.00032946807986617
+    inclination:      0.93
+    argOfPeriapsis:   263.8963868784089
+    ascNodeLongitude: 47.51893570799763
+  meanAnomaly0:       5.646210530657005
+  epoch:              0
+  orbiting:           7
+  color:              0x755e4f
+
+- !!map
+  id:                 10
+  name:               Vesta
+  radius:             43783.33
+  mass:               16189193032696314000
+  stdGravParam:       1080515310.58125
+  soi:                9819201.504776426
+  orbit:
+    semiMajorAxis:    88336555950.7895
+    eccentricity:     0.09006440364822228
+    inclination:      7.134501510020114
+    argOfPeriapsis:   147.6341892267416
+    ascNodeLongitude: 104.4187846656265
+  meanAnomaly0:       1.0967109090901666
+  epoch:              0
+  orbiting:           0
+  color:              0xffffff
+
+- !!map
+  id:                 11
+  name:               Ceres
+  radius:             118250
+  mass:               58650813568464120000
+  stdGravParam:       3914531250
+  soi:                19240726.432636645
+  orbit:
+    semiMajorAxis:    103434690578.293
+    eccentricity:     0.07845358917584373
+    inclination:      10.59802395005837
+    argOfPeriapsis:   68.29904628060096
+    ascNodeLongitude: 81.36903071871447
+  meanAnomaly0:       1.0755562075855307
+  epoch:              0
+  orbiting:           0
+  color:              0x7f7f7f
+
+- !!map
+  id:                 12
+  name:               ChuryumovGerasimenko
+  radius:             1800
+  mass:               9978000000000
+  stdGravParam:       665.961654
+  soi:                47225.97588016195
+  orbit:
+    semiMajorAxis:    129514356558.525
+    eccentricity:     0.6423513708237569
+    inclination:      7.056239822741505
+    argOfPeriapsis:   12.61270786033957
+    ascNodeLongitude: 50.0167176216564
+  meanAnomaly0:       1.1758149821993609
+  epoch:              1038484783.908
+  orbiting:           0
+  color:              0xffffff
+
+- !!map
+  id:                 13
+  name:               Jupiter
+  radius:             17343250
+  atmosphereAlt:      732000
+  mass:               1.1863279194241344e+26
+  stdGravParam:       7917908432612500
+  soi:                12049044031.071775
+  orbit:
+    semiMajorAxis:    194547234664.939
+    eccentricity:     0.0488142501712162
+    inclination:      1.305819291275594
+    argOfPeriapsis:   273.0614492411634
+    ascNodeLongitude: 100.3783289028023
+  meanAnomaly0:       5.298408493977084
+  epoch:              0
+  orbiting:           0
+  color:              0xbe9666
+
+- !!map
+  id:                 14
+  name:               Io
+  radius:             452825
+  mass:               5.581031000826304e+21
+  stdGravParam:       372494752088.15
+  soi:                1960086.1509171582
+  orbit:
+    semiMajorAxis:    105504573.630924
+    eccentricity:     0.003545858426216978
+    inclination:      0.05
+    argOfPeriapsis:   231.2703460977786
+    ascNodeLongitude: 358.046643167846
+  meanAnomaly0:       3.4091064061869685
+  epoch:              0
+  orbiting:           13
+  color:              0xa4a05c
+
+- !!map
+  id:                 15
+  name:               Europa
+  radius:             387700
+  mass:               2.999133593525628e+21
+  stdGravParam:       200171173432.681
+  soi:                2431885.2849218296
+  orbit:
+    semiMajorAxis:    167813409.385429
+    eccentricity:     0.009511727119926178
+    inclination:      0.47
+    argOfPeriapsis:   53.13210737539627
+    ascNodeLongitude: 358.9360081847504
+  meanAnomaly0:       4.821737415499958
+  epoch:              0
+  orbiting:           13
+  color:              0xc5c6ac
+
+- !!map
+  id:                 16
+  name:               Ganymede
+  radius:             656025
+  mass:               9.259242966803772e+21
+  stdGravParam:       617989653333.384
+  soi:                6089844.188919863
+  orbit:
+    semiMajorAxis:    267705867.22363
+    eccentricity:     0.001190086418361844
+    inclination:      0.2
+    argOfPeriapsis:   139.2992571342065
+    ascNodeLongitude: 358.0125219248113
+  meanAnomaly0:       4.060950472376478
+  epoch:              0
+  orbiting:           13
+  color:              0x947f64
+
+- !!map
+  id:                 17
+  name:               Callisto
+  radius:             602325
+  mass:               6.722886071757772e+21
+  stdGravParam:       448705585087.329
+  soi:                9425796.3502632
+  orbit:
+    semiMajorAxis:    470953091.64338
+    eccentricity:     0.007973319796896609
+    inclination:      0.192
+    argOfPeriapsis:   320.7359683492656
+    ascNodeLongitude: 358.5022563372704
+  meanAnomaly0:       0.27604372240404196
+  epoch:              0
+  orbiting:           13
+  color:              0x675642
+
+- !!map
+  id:                 18
+  name:               Saturn
+  radius:             14304000
+  atmosphereAlt:      1118000
+  mass:               3.551983681683113e+25
+  stdGravParam:       2370700468665760
+  soi:                13618828240.673384
+  orbit:
+    semiMajorAxis:    356209689653.315
+    eccentricity:     0.05424221197652705
+    inclination:      2.487376708567551
+    argOfPeriapsis:   338.7271583357293
+    ascNodeLongitude: 113.8411241598629
+  meanAnomaly0:       1.1535283173437991
+  epoch:              0
+  orbiting:           0
+  color:              0xe9d7b4
+
+- !!map
+  id:                 19
+  name:               Mimas
+  radius:             49550
+  mass:               2344369446983204400
+  stdGravParam:       156470250
+  soi:                62416.10600571147
+  orbit:
+    semiMajorAxis:    46502321.4805122
+    eccentricity:     0.01776275223147744
+    inclination:      1.574
+    argOfPeriapsis:   222.2172789396715
+    ascNodeLongitude: 139.7604722490289
+  meanAnomaly0:       2.1919760798055545
+  epoch:              0
+  orbiting:           18
+  color:              0xffffff
+
+- !!map
+  id:                 20
+  name:               Enceladus
+  radius:             63025
+  mass:               6753006088490554000
+  stdGravParam:       450715885.364125
+  soi:                122146.68563541255
+  orbit:
+    semiMajorAxis:    59603424.870968
+    eccentricity:     0.006227897999957464
+    inclination:      0.009
+    argOfPeriapsis:   115.5615886062458
+    ascNodeLongitude: 128.4244161601446
+  meanAnomaly0:       6.049837363294359
+  epoch:              0
+  orbiting:           18
+  color:              0xffffff
+
+- !!map
+  id:                 21
+  name:               Tethys
+  radius:             132775
+  mass:               38591198539931230000
+  stdGravParam:       2575692364.15063
+  soi:                303479.86107260233
+  orbit:
+    semiMajorAxis:    73743365.5951105
+    eccentricity:     0.001064868868083566
+    inclination:      1.12
+    argOfPeriapsis:   215.9196892523803
+    ascNodeLongitude: 119.2518388332899
+  meanAnomaly0:       6.105565273654561
+  epoch:              0
+  orbiting:           18
+  color:              0xffffff
+
+- !!map
+  id:                 22
+  name:               Dione
+  radius:             140350
+  mass:               68468197495729906000
+  stdGravParam:       4569772905.4575
+  soi:                488694.4648385407
+  orbit:
+    semiMajorAxis:    94412662.8754272
+    eccentricity:     0.001679230905502774
+    inclination:      0.019
+    argOfPeriapsis:   123.671715604926
+    ascNodeLongitude: 128.5606071129818
+  meanAnomaly0:       2.9308839134421727
+  epoch:              0
+  orbiting:           18
+  color:              0xffffff
+
+- !!map
+  id:                 23
+  name:               Rhea
+  radius:             190950
+  mass:               144156001709448940000
+  stdGravParam:       9621404022.09375
+  soi:                918904.8291756393
+  orbit:
+    semiMajorAxis:    131803161.4268
+    eccentricity:     0.001168269515756326
+    inclination:      0.345
+    argOfPeriapsis:   172.7367089889645
+    ascNodeLongitude: 130.3670574820431
+  meanAnomaly0:       0.23542531935505198
+  epoch:              0
+  orbiting:           18
+  color:              0xffffff
+
+- !!map
+  id:                 24
+  name:               Titan
+  radius:             643325
+  atmosphereAlt:      81000
+  mass:               8.407378279878595e+21
+  stdGravParam:       561133648533.937
+  soi:                10831162.367788855
+  orbit:
+    semiMajorAxis:    305491559.627855
+    eccentricity:     0.02891936561555365
+    inclination:      0.34854
+    argOfPeriapsis:   182.0886765021483
+    ascNodeLongitude: 126.4945233702913
+  meanAnomaly0:       1.311809948776336
+  epoch:              0
+  orbiting:           18
+  color:              0xb27f3f
+
+- !!map
+  id:                 25
+  name:               Iapetus
+  radius:             183625
+  mass:               112850868914436730000
+  stdGravParam:       7532005543.95625
+  soi:                5626306.919135839
+  orbit:
+    semiMajorAxis:    890040648.255743
+    eccentricity:     0.0288028628196961
+    inclination:      15.47
+    argOfPeriapsis:   314.3819081366686
+    ascNodeLongitude: 50.29392880240187
+  meanAnomaly0:       2.4359269334587883
+  epoch:              0
+  orbiting:           18
+  color:              0xffffff
+
+- !!map
+  id:                 26
+  name:               Halley
+  radius:             4000
+  mass:               220000000000000
+  stdGravParam:       14683.46
+  soi:                843219.0807182685
+  orbit:
+    semiMajorAxis:    671004950336.837
+    eccentricity:     0.9673583550332406
+    inclination:      162.2154553725337
+    argOfPeriapsis:   112.0348759078759
+    ascNodeLongitude: 58.9329118962775
+  meanAnomaly0:       3.2902369167132752
+  epoch:              0
+  orbiting:           0
+  color:              0xffffff
+
+- !!map
+  id:                 27
+  name:               Uranus
+  radius:             6175500
+  atmosphereAlt:      891000
+  mass:               5.425617033133618e+24
+  stdGravParam:       362121957642437
+  soi:                12923128556.255531
+  orbit:
+    semiMajorAxis:    716708213290.993
+    eccentricity:     0.04734074764887236
+    inclination:      0.7736150677926379
+    argOfPeriapsis:   96.67388393087062
+    ascNodeLongitude: 74.01706616784516
+  meanAnomaly0:       5.031859603542498
+  epoch:              0
+  orbiting:           0
+  color:              0x6093c6
+
+- !!map
+  id:                 28
+  name:               Miranda
+  radius:             58925
+  mass:               4044915664594130000
+  stdGravParam:       269969806.202006
+  soi:                114938.77971966886
+  orbit:
+    semiMajorAxis:    32470011.9085438
+    eccentricity:     0.00118741261963413
+    inclination:      4.232
+    argOfPeriapsis:   326.7575256535064
+    ascNodeLongitude: 169.064212054828
+  meanAnomaly0:       4.4156939860723
+  epoch:              0
+  orbiting:           27
+  color:              0xffffff
+
+- !!map
+  id:                 29
+  name:               Ariel
+  radius:             144725
+  mass:               78157488723259970000
+  stdGravParam:       5216465269.85654
+  soi:                552402.2490971631
+  orbit:
+    semiMajorAxis:    47736091.1194055
+    eccentricity:     0.00190951361476287
+    inclination:      0.26
+    argOfPeriapsis:   169.996640499191
+    ascNodeLongitude: 166.5671084714081
+  meanAnomaly0:       0.810944190678705
+  epoch:              0
+  orbiting:           27
+  color:              0xffffff
+
+- !!map
+  id:                 30
+  name:               Umbriel
+  radius:             146175
+  mass:               79683806677192500000
+  stdGravParam:       5318336309.05586
+  soi:                775492.4009668754
+  orbit:
+    semiMajorAxis:    66498090.031914
+    eccentricity:     0.0038334454580725
+    inclination:      0.128
+    argOfPeriapsis:   207.7259222157362
+    ascNodeLongitude: 166.5601075193709
+  meanAnomaly0:       1.995350222525624
+  epoch:              0
+  orbiting:           27
+  color:              0xffffff
+
+- !!map
+  id:                 31
+  name:               Titania
+  radius:             197225
+  mass:               212516387836667530000
+  stdGravParam:       14183981273.3827
+  soi:                1883194.833729544
+  orbit:
+    semiMajorAxis:    109073170.741926
+    eccentricity:     0.002486916
+    inclination:      0.34
+    argOfPeriapsis:   165.7455424030838
+    ascNodeLongitude: 166.6555214910122
+  meanAnomaly0:       3.711534845860309
+  epoch:              0
+  orbiting:           27
+  color:              0xffffff
+
+- !!map
+  id:                 32
+  name:               Oberon
+  radius:             190350
+  mass:               192270566064570100000
+  stdGravParam:       12832714390.8476
+  soi:                2419458.6235050596
+  orbit:
+    semiMajorAxis:    145858832.085151
+    eccentricity:     0.00110558297330948
+    inclination:      0.058
+    argOfPeriapsis:   274.4599570542317
+    ascNodeLongitude: 166.6887328903476
+  meanAnomaly0:       4.651563202426656
+  epoch:              0
+  orbiting:           27
+  color:              0xffffff
+
+- !!map
+  id:                 33
+  name:               Neptune
+  radius:             6021250
+  atmosphereAlt:      688000
+  mass:               6.400577122731658e+24
+  stdGravParam:       427193718902479
+  soi:                21659089632.544155
+  orbit:
+    semiMajorAxis:    1124363958202.93
+    eccentricity:     0.008564584851545534
+    inclination:      1.770410252598332
+    argOfPeriapsis:   274.4923642307832
+    ascNodeLongitude: 131.8321153312058
+  meanAnomaly0:       2.6058973944456714
+  epoch:              0
+  orbiting:           0
+  color:              0x305490
+
+- !!map
+  id:                 34
+  name:               Triton
+  radius:             338350
+  mass:               1.3368425721845648e+21
+  stdGravParam:       89224883795.3144
+  soi:                2991079.6305851107
+  orbit:
+    semiMajorAxis:    88691810.885166
+    eccentricity:     0.0001688014359763687
+    inclination:      156.885
+    argOfPeriapsis:   220.4523286895169
+    ascNodeLongitude: 197.1953239788069
+  meanAnomaly0:       6.25973135910971
+  epoch:              0
+  orbiting:           33
+  color:              0xffffff
+
+- !!map
+  id:                 35
+  name:               Pluto
+  radius:             296750
+  mass:               814330545676020100000
+  stdGravParam:       54350863610.0546
+  soi:                778646380.2928891
+  orbit:
+    semiMajorAxis:    1461417656019.55
+    eccentricity:     0.2462457947997467
+    inclination:      17.30784805894436
+    argOfPeriapsis:   114.9992233936556
+    ascNodeLongitude: 110.6134914716127
+  meanAnomaly0:       5.2469887636338
+  epoch:              0
+  orbiting:           0
+  color:              0xac9078
+
+- !!map
+  id:                 36
+  name:               Charon
+  radius:             150875
+  mass:               99148963992654680000
+  stdGravParam:       6617499303.76175
+  soi:                2110117.879224356
+  orbit:
+    semiMajorAxis:    4899048.45885098
+    eccentricity:     0.00005082225659448947
+    inclination:      0.08
+    argOfPeriapsis:   188.4738646852448
+    ascNodeLongitude: 222.405373557001
+  meanAnomaly0:       0.5393048609025978
+  epoch:              0
+  orbiting:           35
+  color:              0xc5b1a4
