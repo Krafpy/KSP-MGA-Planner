@@ -264,10 +264,13 @@ export async function initEditorWithSystem(systems, systemIndex) {
             systemSelector.disable();
             try {
                 let sequence;
-                if (customSequence.value != "")
+                if (customSequence.value != "") {
                     sequence = FlybySequence.fromString(customSequence.value, system);
-                else
+                    console.debug(sequence.seqStringFullNames);
+                }
+                else {
                     sequence = sequenceSelector.sequence;
+                }
                 updateAltitudeRange(depAltitude, sequence.bodies[0]);
                 const slen = sequence.length;
                 updateAltitudeRange(destAltitude, sequence.bodies[slen - 1]);
@@ -294,7 +297,7 @@ export async function initEditorWithSystem(systems, systemIndex) {
                         maxDurationSeconds = maxDuration.value * 24 * 3600;
                     }
                 }
-                console.log(maxDurationSeconds);
+                console.debug(maxDurationSeconds);
                 resetFoundTrajectory();
                 const userSettings = {
                     startDate: startDate,
