@@ -343,10 +343,12 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
             systemSelector.disable();
             try {
                 let sequence: FlybySequence;
-                if(customSequence.value != "")
+                if(customSequence.value != "") {
                     sequence = FlybySequence.fromString(customSequence.value, system);
-                else
+                    console.debug(sequence.seqStringFullNames);
+                } else {
                     sequence = sequenceSelector.sequence;
+                }
 
                 updateAltitudeRange(depAltitude, sequence.bodies[0]);
                 const slen = sequence.length;
@@ -378,7 +380,7 @@ export async function initEditorWithSystem(systems: SolarSystemData[], systemInd
                         maxDurationSeconds = maxDuration.value * 24*3600;
                     }
                 }
-                console.log(maxDurationSeconds);
+                console.debug(maxDurationSeconds);
                 
                 resetFoundTrajectory();
 
